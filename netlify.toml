@@ -1,0 +1,26 @@
+# Netlify configuration for the Unmute clinical intake demo.
+#
+# The demo needs the MediaPipe runtime in demo/vendor, which is gitignored
+# because it is 39 MB of build output. The build step regenerates it, so a
+# Git-connected deploy works without committing binaries.
+
+[build]
+  base    = "demo"
+  command = "npm install && npm run setup && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Belt and braces: _headers in the published directory already sets these,
+# but declaring them here makes the intent visible in the repo.
+[[headers]]
+  for = "/vendor/wasm/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+    X-Content-Type-Options = "nosniff"

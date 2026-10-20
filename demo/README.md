@@ -61,6 +61,28 @@ replaces interpreters would never ask.
 
 ---
 
+## Deploy to Netlify
+
+A plain drag-and-drop of `index.html` will **not** work — the app needs the 39 MB
+MediaPipe runtime in `vendor/`, which is gitignored. Use one of these instead:
+
+**Option A — drag and drop (fastest)**
+```bash
+npm install && npm run setup && npm run build
+cd dist && zip -r ../../unmute-demo-netlify.zip .
+```
+Then drag that zip onto <https://app.netlify.com/drop>.
+
+**Option B — connect the Git repo**
+`netlify.toml` at the repo root sets base to `demo`, runs
+`npm install && npm run setup && npm run build`, and publishes `dist`.
+Netlify rebuilds `vendor/` on every deploy, so no binaries go into Git.
+
+Once deployed, the site is a top-level page — **the camera works there**, unlike
+inside the Arena preview iframe.
+
+---
+
 ## Tests
 
 ```bash
