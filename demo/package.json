@@ -1,0 +1,16 @@
+{
+  "name": "unmute-clinical-intake-demo",
+  "version": "0.1.0",
+  "description": "On-device clinical intake demo for Deaf patients",
+  "scripts": {
+    "start": "node server.mjs",
+    "setup": "./setup.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^1.1.1"
+  },
+  "type": "module"
+}
