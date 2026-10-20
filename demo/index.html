@@ -24,6 +24,8 @@
     <span class="pill pill-safe" id="privacyPill">
       <span class="dot"></span> On-device · nothing leaves this laptop
     </span>
+    <a class="ghost-btn" id="topOpenTab" href="#" target="_blank" rel="noopener" hidden
+       title="Camera needs this page in its own tab">Open in new tab</a>
     <button class="ghost-btn" id="restartBtn" title="Start a new intake">New intake</button>
   </div>
 </header>
@@ -47,9 +49,18 @@
       <canvas id="overlay"></canvas>
 
       <div class="camera-state" id="cameraState">
-        <div class="spinner"></div>
-        <p id="cameraStateText">Starting camera…</p>
-        <button class="ghost-btn small" id="tapModeBtn" hidden>Continue without camera</button>
+        <div class="spinner" id="camSpinner"></div>
+        <p class="cam-title" id="camTitle">Starting camera…</p>
+        <p id="cameraStateText">Checking permissions…</p>
+
+        <div class="cam-diag" id="camDiag" hidden></div>
+
+        <div class="cam-actions" id="camActions" hidden>
+          <a class="primary-btn" id="openTabBtn" href="#" target="_blank" rel="noopener">Open in a new tab</a>
+          <button class="ghost-btn" id="retryCamBtn" type="button">Try camera again</button>
+        </div>
+
+        <button class="ghost-btn small" id="tapModeBtn" type="button" hidden>Continue without camera</button>
       </div>
 
       <div class="live-tag" id="liveTag" hidden>

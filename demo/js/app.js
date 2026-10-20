@@ -14,6 +14,12 @@ const ctx = overlay.getContext("2d");
 
 const cameraState = $("cameraState");
 const cameraStateText = $("cameraStateText");
+const camTitle = $("camTitle");
+const camSpinner = $("camSpinner");
+const camDiag = $("camDiag");
+const camActions = $("camActions");
+const openTabBtn = $("openTabBtn");
+const retryCamBtn = $("retryCamBtn");
 const tapModeBtn = $("tapModeBtn");
 const liveTag = $("liveTag");
 
@@ -45,6 +51,7 @@ const state = {
   lastVideoTime: -1,
   handsVisible: false,
   revealedAll: false,
+  tapMode: false,
   running: false,
 };
 
@@ -61,7 +68,8 @@ function renderQuestion() {
   questionPromptEl.textContent = q.prompt;
   questionHintEl.textContent = q.clinicianHint;
   stepBadge.textContent = state.index < QUESTIONS.length ? `${state.index + 1} of ${QUESTIONS.length}` : "Complete";
-  state.revealedAll = false;
+  // In tap mode every question must stay answerable by hand.
+  state.revealedAll = state.tapMode;
   state.smoother.reset();
   lastRenderKey = null;
   renderCandidates([]);
@@ -232,18 +240,59 @@ function loop() {
 /* Start-up                                                            */
 /* ------------------------------------------------------------------ */
 
+const inIframe = (() => {
+  try { return window.self !== window.top; } catch { return true; }
+})();
+
+// If we are embedded, a top-level tab is the only place the camera can work.
+const topOpenTab = $("topOpenTab");
+if (inIframe) {
+  topOpenTab.href = window.location.href;
+  topOpenTab.hidden = false;
+}
+
+function resetCameraState() {
+  camSpinner.hidden = false;
+  camTitle.hidden = false;
+  camTitle.textContent = "Starting camera…";
+  cameraStateText.hidden = false;
+  cameraStateText.textContent = "Checking permissions…";
+  camDiag.hidden = true;
+  camDiag.innerHTML = "";
+  camActions.hidden = true;
+  tapModeBtn.hidden = true;
+  openTabBtn.href = window.location.href;
+}
+
 async function boot() {
   renderQuestion();
   renderRecord();
+  resetCameraState();
+  await initCamera();
+}
 
-  // Camera and model are optional: the demo runs in tap mode without them.
+async function initCamera() {
+  resetCameraState();
+
+  // Camera is unavailable in some embedding contexts. Say so before we try,
+  // rather than letting a NotAllowedError look like a broken app.
+  if (!navigator.mediaDevices?.getUserMedia) {
+    return enterTapMode(
+      "This browser does not expose a camera API to the page.",
+      { name: "NoMediaDevices", message: "navigator.mediaDevices.getUserMedia is unavailable" }
+    );
+  }
+
   try {
-    cameraStateText.textContent = "Requesting camera…";
+    camTitle.textContent = "Requesting camera…";
+    cameraStateText.textContent = "Your browser will ask for permission.";
     state.stream = await startCamera(video);
     sizeCanvasToVideo();
     video.addEventListener("loadedmetadata", sizeCanvasToVideo);
 
-    cameraStateText.textContent = "Loading hand model…";
+    camTitle.textContent = "Loading hand model…";
+    cameraStateText.textContent = "About 7 MB, cached after the first load.";
+
     state.landmarker = await createLandmarker((msg) => {
       cameraStateText.textContent = msg;
       modelStatus.textContent = msg;
@@ -255,22 +304,75 @@ async function boot() {
     state.running = true;
     requestAnimationFrame(loop);
   } catch (err) {
-    console.warn(err);
-    enterTapMode(err?.message || "Camera unavailable");
+    console.warn("Camera/model initialisation failed:", err);
+    enterTapMode(err?.message || "Camera unavailable", err);
   }
 }
 
-function enterTapMode(reason) {
+const ERROR_HELP = {
+  NotAllowedError: {
+    title: "Camera permission was blocked",
+    body: inIframe
+      ? "This page is running inside an embedded preview, and embedded frames are blocked from using the camera. Open it in its own tab and the permission prompt will appear normally."
+      : "The browser blocked camera access. Check the camera icon in the address bar, allow access for this site, then try again.",
+  },
+  NotFoundError: {
+    title: "No camera found",
+    body: "The browser could not find a camera on this device. You can still run the whole demonstration with the buttons below.",
+  },
+  NotReadableError: {
+    title: "Camera is busy",
+    body: "Another application is using the camera. Close it (video calls are the usual culprit) and try again.",
+  },
+  SecurityError: {
+    title: "Camera needs a secure connection",
+    body: "Browsers only allow camera access over HTTPS or on localhost. This page is being served over an insecure origin.",
+  },
+  NoMediaDevices: {
+    title: "No camera API in this browser",
+    body: "The page cannot reach a camera at all. Everything still works with the buttons below.",
+  },
+};
+
+function enterTapMode(reason, err) {
   state.running = false;
   cameraState.hidden = false;
-  cameraState.innerHTML = `
-    <p style="font-weight:600;color:#e8f4f2">Tap mode</p>
-    <p>${reason}</p>
-    <p>The demonstration continues: press the keys below, or tap an option once it appears.</p>
-  `;
   liveTag.hidden = true;
   modelStatus.textContent = "Tap mode · no camera";
+
+  const help = ERROR_HELP[err?.name] || {
+    title: "Camera unavailable",
+    body: reason,
+  };
+
+  camSpinner.hidden = true;
+  camTitle.hidden = false;
+  camTitle.textContent = help.title;
+  cameraStateText.hidden = false;
+  cameraStateText.textContent = help.body;
+
+  const rows = [
+    ["Secure connection", window.isSecureContext ? "yes" : "no"],
+    ["Embedded frame", inIframe ? "yes" : "no"],
+    ["Camera API", navigator.mediaDevices?.getUserMedia ? "available" : "missing"],
+    ["Error", err?.name || "—"],
+  ];
+  camDiag.innerHTML = rows
+    .map(([k, v]) => `<div><span>${k}</span><strong>${v}</strong></div>`)
+    .join("");
+  camDiag.hidden = false;
+
+  // Only offer "open in a new tab" when that is actually the likely fix.
+  const needsOwnTab = inIframe && (err?.name === "NotAllowedError" || err?.name === "SecurityError");
+  openTabBtn.hidden = !needsOwnTab;
+  camActions.hidden = false;
+
+  tapModeBtn.hidden = false;
+
+  // Make the tap path a first-class way through the demo, not a dead end.
+  state.tapMode = true;
   state.revealedAll = true;
+  lastRenderKey = null;
   renderCandidates([]);
 }
 
@@ -307,6 +409,7 @@ function showSummary() {
 function restart() {
   state.index = 0;
   state.answers = {};
+  state.revealedAll = state.tapMode;
   state.smoother.reset();
   summaryOverlay.hidden = true;
   renderQuestion();
@@ -327,7 +430,16 @@ $("privacyPill").addEventListener("click", () => {
   );
 });
 
-tapModeBtn.addEventListener("click", () => enterTapMode("Camera skipped."));
+tapModeBtn.addEventListener("click", () => {
+  enterTapMode("Camera skipped — using buttons.", { name: "Skipped" });
+});
+retryCamBtn.addEventListener("click", () => {
+  state.tapMode = false;
+  state.revealedAll = false;
+  lastRenderKey = null;
+  renderCandidates([]);
+  initCamera();
+});
 
 document.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;

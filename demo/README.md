@@ -8,6 +8,20 @@ Built to be shown on a laptop in a hospital corridor.
 
 ---
 
+## Camera access — read this first
+
+Browsers only allow the camera in a **top-level tab**, not inside an embedded preview.
+If you see *"Camera permission was blocked"*, that is the reason — the app will say so
+and offer a button.
+
+**Click "Open in new tab"** and the camera prompt appears normally.
+
+Everything also works without a camera: **tap mode** shows every answer as a button, and
+the keyboard shortcuts (`1`–`5`, `Y`, `N`, `U`) drive the whole intake. Useful as a
+fallback if a hospital machine has no webcam.
+
+---
+
 ## Run it
 
 ```bash
@@ -44,6 +58,18 @@ replaces interpreters would never ask.
 - Yes: thumb up · No: thumb down · Not sure: open palm
 
 **Demo keys** (always work, even with no camera): `1`–`5`, `Y`, `N`, `U`, `R` to restart.
+
+---
+
+## Tests
+
+```bash
+npm test
+```
+
+29 checks across three files: classifier behaviour on synthetic hand landmarks,
+the full tap-mode walkthrough in a real DOM, and the embedded-frame permission
+path that blocks the camera in previews.
 
 ---
 

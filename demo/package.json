@@ -4,7 +4,8 @@
   "description": "On-device clinical intake demo for Deaf patients",
   "scripts": {
     "start": "node server.mjs",
-    "setup": "./setup.sh"
+    "setup": "./setup.sh",
+    "test": "node test/classifier.test.mjs && node test/tap-mode.test.mjs && node test/embedded.test.mjs"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +13,8 @@
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.1.1"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "jsdom": "^30.1.3"
+  }
 }
