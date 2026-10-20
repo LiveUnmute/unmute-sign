@@ -13,11 +13,16 @@
 | **01** | [Strategy & Evidence](01_STRATEGY_AND_EVIDENCE.md) | What the pivot changes, which evidence dies, what replaces it. Seven decisions, each stated with its consequence. |
 | **02** | [Pitch Narrative](02_PITCH_NARRATIVE.md) | The argument in three lengths — 30 seconds, 3 minutes, 8 minutes — plus the five questions you will be asked and honest answers to them. |
 | **03** | [Deck Outline](03_DECK_OUTLINE.md) | 15 main slides + 6 appendix slides. Headline, content, speaker note, and a status flag per slide. |
+| **04** | [MVP Spec](04_MVP_SPEC.md) | What actually gets built: constrained interview, confirmation loop, keypoint pipeline, corpus plan, four build gates. |
 
-### Google Docs (in `01 Unmute / 06 Pitch & Brand`)
+### Google Docs
 
 - [Unmute — Deck Outline (ASL-first, Oct 2026)](https://docs.google.com/document/d/1hHBPTVuQ-3hhjwWDG6BhiiK-XwUWVCtfjWCBDPb9Flk/edit)
 - [Unmute — Pitch Narrative (ASL-first, Oct 2026)](https://docs.google.com/document/d/1EbWyJfnJLbYxY9k0XBcb1wUSNgKTgwjqQTY0px2eGO0/edit)
+
+In `01 Unmute / 02 Product & Technical`:
+
+- [Unmute — MVP Product & Technical Spec (Oct 2026)](https://docs.google.com/document/d/1ASQJV5USVrFDVwQNQ23hJOpn0zLo8S9s3rHjnhIAIIM/edit)
 
 ---
 
