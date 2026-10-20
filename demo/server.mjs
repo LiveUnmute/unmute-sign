@@ -47,8 +47,9 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, {
       "Content-Type": MIME[extname(file)] || "application/octet-stream",
       "Content-Length": body.length,
-      // The WASM is large; let the browser cache it for the day.
-      "Cache-Control": extname(file) === ".wasm" ? "public, max-age=86400" : "no-cache",
+      // The WASM is large and never changes for a given version, so cache it.
+      // Everything else must revalidate, or a fix can appear to do nothing.
+      "Cache-Control": extname(file) === ".wasm" ? "public, max-age=86400" : "no-store, must-revalidate",
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "credentialless",
     });

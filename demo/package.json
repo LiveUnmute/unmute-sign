@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.mjs",
     "setup": "./setup.sh",
-    "test": "node test/classifier.test.mjs && node test/tap-mode.test.mjs && node test/embedded.test.mjs"
+    "test": "node test/classifier.test.mjs && node test/tap-mode.test.mjs && node test/embedded.test.mjs && node test/layout.test.mjs"
   },
   "keywords": [],
   "author": "",

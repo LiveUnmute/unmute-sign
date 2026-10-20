@@ -12,6 +12,7 @@ const video = $("video");
 const overlay = $("overlay");
 const ctx = overlay.getContext("2d");
 
+const patientPanel = $("patientPanel");
 const cameraState = $("cameraState");
 const cameraStateText = $("cameraStateText");
 const camTitle = $("camTitle");
@@ -21,6 +22,7 @@ const camActions = $("camActions");
 const openTabBtn = $("openTabBtn");
 const retryCamBtn = $("retryCamBtn");
 const tapModeBtn = $("tapModeBtn");
+const diagBtn = $("diagBtn");
 const liveTag = $("liveTag");
 
 const questionPromptEl = $("questionPrompt");
@@ -252,6 +254,7 @@ if (inIframe) {
 }
 
 function resetCameraState() {
+  patientPanel.classList.remove("tap-mode");
   camSpinner.hidden = false;
   camTitle.hidden = false;
   camTitle.textContent = "Starting camera…";
@@ -260,6 +263,9 @@ function resetCameraState() {
   camDiag.hidden = true;
   camDiag.innerHTML = "";
   camActions.hidden = true;
+  diagBtn.hidden = true;
+  diagBtn.setAttribute("aria-expanded", "false");
+  patientPanel.classList.remove("show-diag");
   tapModeBtn.hidden = true;
   openTabBtn.href = window.location.href;
 }
@@ -345,6 +351,7 @@ function enterTapMode(reason, err) {
     body: reason,
   };
 
+  patientPanel.classList.add("tap-mode");
   camSpinner.hidden = true;
   camTitle.hidden = false;
   camTitle.textContent = help.title;
@@ -368,6 +375,7 @@ function enterTapMode(reason, err) {
   camActions.hidden = false;
 
   tapModeBtn.hidden = false;
+  diagBtn.hidden = false;
 
   // Make the tap path a first-class way through the demo, not a dead end.
   state.tapMode = true;
@@ -432,6 +440,11 @@ $("privacyPill").addEventListener("click", () => {
 
 tapModeBtn.addEventListener("click", () => {
   enterTapMode("Camera skipped — using buttons.", { name: "Skipped" });
+});
+diagBtn.addEventListener("click", () => {
+  const on = patientPanel.classList.toggle("show-diag");
+  diagBtn.setAttribute("aria-expanded", String(on));
+  diagBtn.textContent = on ? "Hide" : "Why?";
 });
 retryCamBtn.addEventListener("click", () => {
   state.tapMode = false;
