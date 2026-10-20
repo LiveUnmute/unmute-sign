@@ -14,7 +14,7 @@ Status flags: `SOURCED` · `YOUR CLAIM` · `TO BE BUILT` · `DO NOT USE`
 
 **Headline**
 > ## Unmute
-> ### Covering the minutes before the interpreter arrives.
+> ### Most Deaf patients never get an interpreter. Unmute is what's there instead.
 
 **Content**
 - Name, one line, one image — a hospital corridor, not a hand. The product is about a gap in care, not about sign language as decoration.
@@ -28,23 +28,35 @@ Open with the sentence, not your name. "Fifty to one" is the first thing out of 
 
 ---
 
-## Slide 2 — The gap
+## Slide 2 — What actually happens
 
 **Headline**
-> **The law requires an interpreter. The supply makes that impossible on demand.**
+> **Under one in ten Deaf patient encounters involves a professional interpreter.**
 
-**Content** — one line of text, one visual. The visual is a timeline:
+**Content** — one bar chart, five bars, source line in 9pt. No other text.
 
 ```
-patient arrives ────────────── interpreter arrives
-        │                              │
-        └──── this is our product ─────┘
+How emergency physicians actually communicate with Deaf patients
+(n = 166)
+
+A family member interprets  ████████████████████████████████  63.9%
+The patient writes on paper ████████                          16.9%
+A friend interprets         ███                                6.0%
+A hospital interpreter      ██▌                                4.8%
+Video link to interpreter   █▌                                 3.6%
+                                                          — Cureus, 2022
 ```
 
 **Speaker note**
-This is the whole company on one slide. If someone only sees this and slide 9, they understand the business. Everything after this is evidence.
+This is the most important slide in the deck and the one that does the work the old "0 interpreters needed" line was reaching for, without the legal exposure.
 
-**Status** `YOUR CLAIM` — but it is a claim about a gap in *care delivery*, not about capability, so it is safe to make before you've built anything.
+Say it plainly: "The alternative in use today is a family member. Sixty-four per cent. That is not a gap in the system — that is the system."
+
+Be ready for "that's one study, one country, 166 physicians." Answer: it isn't a claim about the exact percentage; it's a claim about the order of magnitude, and it replicates across health systems — a 2002 UK study found interpreters present at 7% of emergency consultations.
+
+**Status** `SOURCED` — Cureus / Akeely et al., 2022, n=166 emergency physicians. Also 74.1% of those departments had no policy for Deaf patients, and 90.4% of staff knew no sign language — use those as the second slide's sub-line or on the speaker note.
+
+**Do not** replace this with a timeline showing an interpreter arriving. An earlier draft did exactly that and it was wrong: it implied an interpreter is coming, when the data says the opposite.
 
 ---
 
@@ -68,10 +80,10 @@ Give the smaller number, not the bigger one. Around a million deaf and hard-of-h
 
 ---
 
-## Slide 4 — The interval
+## Slide 4 — What it costs
 
 **Headline**
-> **In that interval, care is improvised.**
+> **In the vacuum, care is improvised — and sometimes it goes wrong.**
 
 **Content** — three fragments, quoted, with attribution in small type:
 
@@ -138,25 +150,22 @@ The counter-intuitive move is to make the product *smaller*. Most founders in th
 **Headline**
 > **Three flows. One direction. Measured, not promised.**
 
-**Content** — two columns.
+**Content** — three columns. This one slide does the work of a product slide and a scope slide, and it is the slide that makes the replacement claim safe.
 
-**In the room (v1)**
-- Sign → text, on the patient's device
-- Sign → speech, for the clinician
-- Clinician → patient via recorded human signing, fixed clinical phrase set
-- Works on the hardware already in the room
-
-**Deliberately not in v1**
-- Generating signing avatars
-- Text → sign synthesis
-- Multilingual
-- EHR integration
-- Offline mode
+| **v1 ships** | **Not in v1** | **A qualified interpreter is still engaged** |
+|---|---|---|
+| Sign → text, on the patient's device | Generative signing avatars | Consent for procedures |
+| Sign → speech, for the clinician | Text → sign synthesis | Diagnosis disclosure |
+| Clinician → patient via recorded human signing, fixed clinical phrase set | Multilingual | Mental health assessment |
+| Runs on the hardware already in the room | EHR integration | Complex discharge planning |
+| | Offline mode | End-of-life discussions |
 
 **Speaker note**
-Say the "not in v1" column out loud. It is the most persuasive part of the slide, because every experienced listener is currently assuming you'll promise all of it.
+Say both right-hand columns out loud. They are the most persuasive part of the slide, because every experienced listener is currently assuming you'll promise all of it.
 
-When asked why no avatar: a generative avatar producing signed English is a liability in a clinical setting, and the research problem is different and harder. We sequence it.
+On the third column: "We're not claiming to satisfy the requirement for a qualified interpreter, and we never will. There's a list of conversations where a human being has to be in the room, and we say so on the slide. That's why hospital counsel can approve us."
+
+On avatars: a generative avatar producing signed English is a liability in a clinical setting, and the research problem is different and harder. We sequence it.
 
 **Status** `TO BE BUILT`. There is no model. Say so — this slide is a specification, and it should be labelled as one.
 
@@ -232,24 +241,28 @@ Say plainly: "These prices are a hypothesis. We're testing them in ten conversat
 ## Slide 11 — Why the buyer says yes
 
 **Headline**
-> **One avoided delay pays for the year.**
+> **The current alternative is free. That is the objection to answer.**
 
-**Content** — the buyer's arithmetic, with your own assumptions visible:
+**Content** — name the objection, then answer it.
 
-```
-Cost of an interpreted encounter
-  commonly quoted VRI range  ×  encounter length   =  $A–$B
-Cost of Unmute, Ward tier, 12 months               =  ~$2,400
-Encounters per month in a mid-size ED              =  ?
-```
+> **"A family member does it for free."**
 
-> **The comparison is not "cheaper than interpreters."**
-> It is: coverage for the encounters that never had one, plus a documented communication attempt where previously there was none.
+| | Current practice | Unmute |
+|---|---|---|
+| Cost | $0 | ~$199/month, up to 10 practitioners |
+| Compliance posture | Discouraged by the NAD — no impartiality, no medical vocabulary, no capacity for distress | Purpose-built, documented, auditable |
+| Record of the encounter | None | Communication log |
+| Risk if it goes wrong | The hospital chose the free option knowingly | — |
+
+> **The buyer's choice is not "Unmute vs. $0."**
+> It is "Unmute vs. a practice their own professional guidance tells them to avoid."
 
 **Speaker note**
-Do not do the arithmetic on stage with numbers you haven't verified. Get three real VRI quotes before this slide is used externally, and put your own facility count in the third line. The structure is the argument; the digits are placeholders.
+This is the objection that kills the deal if you don't raise it yourself, because every hospital administrator is thinking it: *we already do this for nothing.* Name it out loud, then use the NAD's own guidance as the answer — their professional body says a family member should not interpret, because they lack impartiality, don't know the terminology, and are often in distress themselves.
 
-**Status** `TO BE BUILT` — the VRI cost figures must come from real quotes, not from a deck you saw.
+Then the second half of the answer: nobody is asking them to swap out a service they are paying for. They are being offered coverage for encounters that currently have none, plus a record that says a communication attempt was made. That record is what a compliance officer actually needs.
+
+**Status** `TO BE BUILT` — the price is a hypothesis. If you want a cost comparison against video interpreting, get three real VRI quotes; do not use a figure from another deck.
 
 ---
 

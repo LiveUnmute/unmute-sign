@@ -23,8 +23,8 @@
 
 ## The five changes that matter
 
-1. **The pitch is now "the interval", not "the interpreter."** You are not replacing qualified interpreters — you are covering the documented gap before one arrives. This is true, legally safer in the US, and converts interpreter agencies from opponents into referral channels.
-2. **The Nigerian evidence is out of the main deck.** The 8%/7% GDRI figures described Deaf Nigerians and cannot carry a US, dollar-denominated story. Replaced with AAFP, RID, ADA, and peer-reviewed clinical literature — all sourced in `01`.
+1. **The product is the alternative, not a stopgap.** In a survey of 166 emergency physicians, under 10% used any professional interpretation — 63.9% used a family member, 16.9% a notepad. Unmute is what is actually present in the encounter, sold as **"no interpreter on site"** rather than the legally unsafe "0 interpreters needed."
+2. **The Nigerian evidence is out of the main deck.** The 8%/7% GDRI figures described Deaf Nigerians and cannot carry a US, dollar-denominated story. Replaced with AAFP, the Registry of Interpreters for the Deaf, ADA guidance, and a 166-physician emergency medicine study — all sourced in `01`.
 3. **Three tiers, not two.** The brief's 10 / 50+ structure left an 11–50 practitioner hole. A ~$599 Department tier fills it, and that segment is where bottom-up selling actually works.
 4. **v1 is one direction.** Sign → text/speech only. Text → sign needs a generative avatar with correct non-manual ASL grammar; that is a different research problem and a liability if shipped badly.
 5. **The team gap is stated, not hidden.** A hearing solo founder building for a community he is not part of is the hardest objection in the pitch. The answer is structural — Deaf co-founder with authority, clinical advisor, ASL linguistics advisor, paid design panel — and it is now slide 14 instead of a footnote.
@@ -36,10 +36,11 @@
 | # | Requirement | Why it blocks |
 |---|---|---|
 | 1 | **A published accuracy number** on held-out clinical ASL | Every other claim is rhetoric without it. This is milestone one. |
-| 2 | **Three real VRI quotes** | Slide 11's buyer arithmetic is currently placeholder. Do not use it externally until the digits are real. |
-| 3 | **A bottom-up market model** | There is no TAM slide, deliberately. A US investor will ask. Build it from facility counts, not from a global Deaf-population figure. |
-| 4 | **US healthcare counsel review** | The ADA positioning language on appendix slide A3 must be checked before it is shown to a hospital. |
-| 5 | **A named Deaf co-founder or a stated recruitment plan** | The legitimacy objection is the first question and the last thing people remember. |
+| 2 | **A tested price** | The $199 / $599 tiers are a hypothesis. Ten pricing conversations before they go on a slide — the objection to beat is "a family member does this for free." |
+| 3 | **Three real VRI quotes** | Only if you want the cost comparison. Slide 11 now argues from liability rather than price, which needs no external figure. |
+| 4 | **A bottom-up market model** | There is no TAM slide, deliberately. A US investor will ask. Build it from facility counts, not from a global Deaf-population figure. |
+| 5 | **US healthcare counsel review** | The ADA positioning language on appendix slide A3 must be checked before it is shown to a hospital. |
+| 6 | **A named Deaf co-founder or a stated recruitment plan** | The legitimacy objection is the first question and the last thing people remember. |
 
 ---
 

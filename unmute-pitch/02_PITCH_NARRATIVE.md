@@ -11,19 +11,27 @@ Three lengths below: 30 seconds, 3 minutes, 8 minutes. Same story each time, cut
 
 ## The one-line version
 
-> **Unmute covers the minutes before a sign language interpreter arrives.**
+> **Most Deaf patients never get an interpreter. Unmute is what's there instead.**
 
-If a listener remembers nothing else, they should remember that sentence. It contains the customer (a hospital), the constraint (interpreters are scarce and scheduled), the moment (the interval before one appears), and the scope (a bounded window, not all of Deaf life).
+If a listener remembers nothing else, they should remember that sentence. It contains the customer (a hospital), the constraint (interpreters are not just scarce — they are usually absent altogether), and the product's role (the alternative that is actually present).
+
+A variant for when you want it blunter:
+
+> **The interpreter isn't late. The interpreter was never booked.**
+
+Do not use *"covers the gap before the interpreter arrives"* — it was the earlier draft and it was wrong. It implies an interpreter is coming. In most encounters none is, and the slide that follows will prove it.
 
 ---
 
 ## 30 seconds — for a chance encounter
 
-> American hospitals are legally required to give Deaf patients a qualified sign language interpreter. There are about ten thousand of them, for roughly half a million Deaf people who use ASL. So the interpreter is often not there — and care happens anyway, in handwritten notes, in gestures, in guesses.
+> American hospitals are legally required to give Deaf patients a qualified sign language interpreter. There are about ten thousand of them, for roughly half a million Deaf people who use ASL.
 >
-> Unmute covers that gap. We're not replacing interpreters; we're covering the minutes before one arrives. We start with the two hundred clinical phrases that carry the most risk, and we build the clinical ASL dataset that makes it possible — the one thing here nobody can scrape.
+> So in practice, it doesn't happen. When researchers surveyed a hundred and sixty-six emergency physicians about how they actually communicate with Deaf patients, fewer than one in ten used a professional interpreter. Sixty-four per cent used a family member. Seventeen per cent wrote on paper.
 >
-> We have the data pipeline and a precisely defined problem. What we don't have yet is a working model and a number. That's what we're building next.
+> That's the real alternative today. Unmute is the one that works. We start with the two hundred clinical phrases that carry the most risk, and build the clinical ASL dataset that makes it possible — the one asset here nobody can scrape.
+>
+> What we don't have yet is a trained model and a number. That's what we're building next.
 
 **Why it works:** it opens with a contradiction the listener did not know existed, resolves it into a product in one sentence, and ends by naming its own gap — which is disarming, and which is the only way a pre-product founder earns trust in thirty seconds.
 
@@ -41,11 +49,15 @@ If a listener remembers nothing else, they should remember that sentence. It con
 
 ### Beat 2 — What actually happens (0:40–1:20)
 
-> Here's the part that doesn't make it into the compliance report. Care happens anyway.
+> Here is what that looks like in practice. A survey of a hundred and sixty-six emergency physicians asked how they actually communicate with Deaf patients.
 >
-> A triage nurse has four minutes and a queue. She writes on a form. Someone calls the patient's cousin. The patient points at their chest, holds up three fingers, and everyone in the room agrees to believe that three means what they think it means.
+> Sixty-four per cent: a family member interprets. Seventeen per cent: the patient writes on paper. Six per cent: a friend. Four point eight per cent: an official hospital interpreter. Three point six per cent: a video link.
 >
-> That interval — between the patient arriving and a qualified interpreter being in the room — is not a gap in the system. It is where a great deal of care is actually delivered. And it is the only part of this problem that nobody has built for.
+> Read that again. **Under ten per cent.** And in the same study, seventy-four per cent of those departments had no policy for Deaf patients at all, while ninety per cent of the staff knew no sign language.
+>
+> So this is not a gap in the system. **This is the system.** The interpreter isn't late. The interpreter was never booked, and in most of those hospitals there was never anyone to book.
+
+*This beat is the spine of the pitch. It is also the answer to "why now, why you, why this" — because the alternative in use today is a patient's cousin, and nobody is building for that.*
 
 ### Beat 3 — Why AI hasn't fixed it (1:20–2:00)
 
@@ -69,7 +81,7 @@ If a listener remembers nothing else, they should remember that sentence. It con
 
 ### Beat 6 — The business and the ask (3:10–3:40)
 
-> We sell a subscription. A ward pays around two hundred dollars a month for ten practitioners; departments and hospital systems pay more. That's less than a single video-interpreted encounter, and it covers the encounters that never got one.
+> We sell a subscription. A ward pays around two hundred dollars a month for ten practitioners; departments and hospital systems pay more. That's less than a single video-interpreted encounter — and it covers the encounters that never got one, which, as you've just seen, is most of them.
 >
 > Where we are: the problem is defined, the data pipeline exists, and I've spent a year inside it. What doesn't exist yet is a trained model and a pilot. That's what this round buys — eighteen months, three milestones, and a number we're willing to publish.
 
@@ -95,19 +107,25 @@ Do not open with a death. Open with the arithmetic.
 
 *Trap: do not say "70 million Deaf people worldwide lack healthcare." It is unsourced, it conflates population with access, and one informed listener will end your credibility with it.*
 
-### 2. Name the legal floor — this is your category definition
+### 2. Name the legal floor — and then show how far below it practice sits
 
-> The ADA is explicit. Hospitals must provide effective communication. Staff with limited sign language may interpret *only briefly, in an emergency, until a qualified interpreter arrives*. That sentence is the entire product thesis. It is the law admitting that there is an interval, and that during that interval, untrained people will try.
+> The ADA is explicit. Hospitals must provide effective communication. Staff with limited sign language may interpret *only briefly, in an emergency, until a qualified interpreter arrives*.
 >
-> Nobody has built the tool for that interval. Everyone has built for the appointment — the scheduled consultation with the interpreter booked. The interval is where the harm is.
+> That's the standard. Here's the practice. When researchers asked a hundred and sixty-six emergency physicians how they actually communicate with Deaf patients, under ten per cent used any professional interpretation — four point eight per cent a hospital interpreter, three point six per cent a video link. Sixty-four per cent used a family member. Seventeen per cent wrote on paper.
+>
+> So the gap between the legal standard and the ordinary standard of care is enormous, and it is being filled by a patient's relatives.
+>
+> Every tool in this space has been built for the appointment — the scheduled consultation with the interpreter booked. Almost nobody has built for the encounter where no interpreter exists at all. That is the majority of encounters, and that is the product.
 
-### 3. Describe the interval concretely
+### 3. Show what fills the vacuum
 
 > Triage. Assessment. Consent. Discharge instructions.
 >
-> Peer-reviewed work published this year found interpreter access in emergency care to be "uncertain, delayed or absent at key points — including assessment and consent." A separate review records waits of up to eight hours where requests were declined. A US patient safety authority documents a triage delayed awaiting an interpreter, and a Deaf patient restrained for a scan, unable to understand what was happening, tearing their own skin trying to get free.
+> Peer-reviewed work published this year describes interpreter access in emergency care as "uncertain, delayed or absent at key points — including assessment and consent," with responsibility shifted onto the Deaf patient to compensate through lip-reading, writing, gestures, or family. A separate review records waits of up to eight hours where requests were declined. A US patient safety authority documents a triage delayed awaiting an interpreter, and a Deaf patient restrained for a scan, unable to understand what was happening, tearing their own skin trying to get free.
 >
-> That is the interval. It is not a scheduling inconvenience. It is where consent becomes fiction.
+> The old deck put this on a slide as the "pre-interpreter interval." That framing undersells it. This isn't an interval before the system works. For most patients, this **is** the system.
+>
+> Unmute is the first tool built for the encounter as it actually happens, rather than the encounter as the policy describes it.
 
 ### 4. The technical argument — why this is hard, and why that's good
 
@@ -149,7 +167,11 @@ Do not open with a death. Open with the arithmetic.
 
 > Subscription, per team. A ward — up to ten practitioners — around two hundred dollars a month. A department, up to fifty, around six hundred. Above that, enterprise, with the security review and the BAA and the procurement cycle.
 >
-> The comparison the buyer makes is not against our competitors. It's against a video-interpreted encounter, which costs more for twenty minutes than we charge for a month. But I want to be precise: we don't replace those encounters. We cover the ones that never had one. The value is compliance evidence, avoided delay, and a documented communication attempt where previously there was none.
+> The obvious objection is that the current alternative is free — a family member, forty per cent of the time, and a notepad. So why pay?
+>
+> Because the National Association of the Deaf says in writing that family members should not be interpreting: no impartiality, no medical vocabulary, no capacity to handle a distressed conversation. A hospital knows it is choosing the free option, and a compliance officer knows it too. We're not asking anyone to swap a service they pay for. We're offering coverage for encounters that currently have none — plus a record that a communication attempt was made.
+>
+> That record is quietly the most valuable thing we sell.
 
 *Say the honest version of the price. If you have not tested it, say "this is what we're testing."*
 
@@ -190,7 +212,7 @@ Do not open with a death. Open with the arithmetic.
 > They'll do general sign translation, and they already are. They won't build a consented clinical ASL corpus, because it's expensive, unglamorous, and requires hospital relationships. That's precisely the part they're structurally bad at, and it's the part the product depends on.
 
 **3. "Hospitals already have video remote interpreting."**
-> They do, and it's better than nothing. It's also scheduled, requires equipment, and fails when the connection does. We're not competing with VRI for the scheduled appointment. We're covering triage at 2am when nobody has booked anything.
+> They do, and it's better than nothing. It's also the answer for 3.6% of emergency encounters. It's scheduled, it needs equipment brought to the bedside, and it fails when the connection does. Triage at 2am is not a scheduled appointment. That's the market we're in.
 
 **4. "What's your accuracy?"**
 > Unknown, and I'm not going to invent one. The first milestone is a number on held-out clinical data. Publishing it — including the failure cases — is the point.
@@ -202,7 +224,7 @@ Do not open with a death. Open with the arithmetic.
 
 ## Three things to never say
 
-1. **"We replace interpreters."** It is untrue, legally reckless in the US, and it converts your best allies into opponents.
+1. **"We replace interpreters" — and "0 interpreters needed."** Not because the spirit is wrong — the shortage is the whole reason the product exists — but because both phrasings tell a hospital its legal obligation is discharged, and tell the Deaf community you intend to substitute for qualified professionals. Say **"no interpreter on site."** Same product, and this version survives contact with hospital counsel.
 2. **"70 million Deaf people lack healthcare."** Unsourced, and it conflates two different numbers.
 3. **"Supports NSL, ASL and more."** Under this pivot, ASL is the claim. NSL is not a current capability and listing it invites a question you cannot survive.
 
