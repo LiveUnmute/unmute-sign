@@ -16,8 +16,8 @@
 
 ### Google Docs (in `01 Unmute / 06 Pitch & Brand`)
 
-- [Unmute — Deck Outline (ASL-first, Oct 2026)](https://docs.google.com/document/d/1yj6ec8CLOYv0bkyR-XLPS1QGqSa-2nXvSDcEzvimFQM/edit)
-- [Unmute — Pitch Narrative (ASL-first, Oct 2026)](https://docs.google.com/document/d/1l2hfkaydhkTNW0y6fdxCQ_2LqbKUH4LjkbTnvustIKY/edit)
+- [Unmute — Deck Outline (ASL-first, Oct 2026)](https://docs.google.com/document/d/1hHBPTVuQ-3hhjwWDG6BhiiK-XwUWVCtfjWCBDPb9Flk/edit)
+- [Unmute — Pitch Narrative (ASL-first, Oct 2026)](https://docs.google.com/document/d/1EbWyJfnJLbYxY9k0XBcb1wUSNgKTgwjqQTY0px2eGO0/edit)
 
 ---
 
