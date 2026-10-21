@@ -5,7 +5,7 @@
   "description": "Unmute marketing site",
   "scripts": {
     "serve": "node server.mjs",
-    "test": "node test/text-split.test.mjs && node test/mobile-layout.test.mjs && node test/mobile-menu.test.mjs"
+    "test": "node test/text-split.test.mjs && node test/mobile-layout.test.mjs && node test/mobile-menu.test.mjs && node test/full-bleed.test.mjs"
   },
   "devDependencies": {
     "jsdom": "^30.1.3"

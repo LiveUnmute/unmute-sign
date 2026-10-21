@@ -37,13 +37,45 @@
   --font-body: 'Pretendard', sans-serif;
 }
 
+/* --- FULL BLEED / NO GUTTERS ---
+   Any reserved scrollbar groove shows the body colour down the side of the
+   page, which reads as a margin next to the dark sections. Remove the groove
+   and clip horizontal overflow without creating a scroll container. */
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  background-color: var(--c-bg);
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* legacy Edge */
+}
+html::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
 body {
   background-color: var(--c-bg);
   color: var(--c-dark);
   font-family: var(--font-body);
   margin: 0;
-  overflow-x: hidden;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  /* clip, not hidden: hidden forces overflow-y to auto, which makes body the
+     scroll container and breaks position: sticky and Lenis */
+  overflow-x: clip;
   opacity: 0;
+}
+
+/* Backgrounds must always reach the viewport edges */
+.wrapper,
+.stack-section,
+#pricing,
+#contact,
+.footer-sticky {
+  width: 100%;
+  max-width: none;
 }
 
 .wrapper {
