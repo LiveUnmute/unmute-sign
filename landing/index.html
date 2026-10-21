@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unmute | Sign-Language Communication for Healthcare</title>
+<meta name="description" content="Unmute is an AI-powered sign-language communication platform that bridges the gap between Deaf patients and healthcare professionals. Two-way translation, starting with ASL and routine healthcare interactions.">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="apple-touch-icon" href="assets/img/favicon.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- GSAP / Lenis / Iconify -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+<style>
+/* --- CORE --- */
+:root {
+  --c-bg: #E3E1DC;
+  --c-dark: #121212;
+  --c-accent: #006AFE;      /* Unmute blue */
+  --c-accent-deep: #0056cc;
+  --font-display: 'Syncopate', sans-serif;
+  --font-body: 'Pretendard', sans-serif;
+}
+
+body {
+  background-color: var(--c-bg);
+  color: var(--c-dark);
+  font-family: var(--font-body);
+  margin: 0;
+  overflow-x: hidden;
+  opacity: 0;
+}
+
+.wrapper {
+  position: relative;
+  z-index: 10;
+  background-color: var(--c-bg);
+  margin-bottom: 100vh;
+  box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+}
+
+.word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1rem;
+}
+.word-inner {
+  display: inline-block;
+  transform: translateY(110%);
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+.loader-text {
+  font-family: var(--font-display);
+  font-size: 4vw;
+  font-weight: 600;
+  letter-spacing: -0.05rem;
+}
+.loader-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 0.25rem;
+  background: #fff;
+  width: 0%;
+}
+
+.stack-section {
+  padding: 10vh 0;
+  background: var(--c-dark);
+  color: #E3E1DC;
+  position: relative;
+}
+.stack-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: 10vh;
+}
+.card-item {
+  position: sticky;
+  top: 10vh;
+  height: 80vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5vh;
+}
+.card-inner {
+  width: 90%;
+  height: 100%;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+}
+.card-content {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #1a1a1a;
+  z-index: 2;
+}
+.card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.5s ease;
+}
+
+@media (max-width: 768px) {
+  .card-inner { grid-template-columns: 1fr; }
+  .card-item { top: 5vh; height: 85vh; }
+  .card-img-wrap { height: 40%; order: -1; }
+  .card-content { padding: 2rem; }
+}
+
+.footer-sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+  background: #111;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.display { font-family: var(--font-display); }
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* --- logo sizing helpers --- */
+.nav-logo { height: 26px; width: auto; display: block; }
+.footer-logo { height: 34px; width: auto; margin: 0 auto 2rem; }
+
+/* Hero gets a soft scrim so the display type stays legible on any crop */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.15) 100%);
+}
+</style>
+</head>
+<body class="antialiased">
+
+<div class="noise-overlay"></div>
+
+<!-- PRELOADER -->
+<div class="loader">
+  <div class="loader-text">UNMUTE</div>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="fixed top-0 w-full p-8 flex justify-between items-center z-50 mix-blend-difference text-white">
+  <a href="#" class="flex items-center gap-3" aria-label="Unmute home">
+    <img src="assets/img/unmute-logo-white.png" alt="Unmute" class="nav-logo">
+  </a>
+  <div class="hidden md:flex gap-10 text-xs uppercase tracking-widest font-medium items-center">
+    <a href="#services" class="hover:text-gray-400 transition-colors">Platform</a>
+    <a href="#how" class="hover:text-gray-400 transition-colors">How It Works</a>
+    <a href="#pricing" class="hover:text-gray-400 transition-colors">For Hospitals</a>
+    <a href="#contact" class="hover:text-gray-400 transition-colors">Contact</a>
+  </div>
+  <div class="md:hidden text-xs tracking-widest flex items-center gap-2 cursor-pointer">
+    MENU <iconify-icon icon="solar:hamburger-menu-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+  </div>
+</nav>
+
+<!-- WRAPPER -->
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section class="h-screen relative flex items-center justify-center overflow-hidden">
+    <img src="assets/img/hero.jpg" class="absolute inset-0 w-full h-full object-cover hero-img" alt="A Deaf patient communicating with a nurse using Unmute">
+    <div class="hero-scrim"></div>
+    <div class="relative z-10 text-center text-white px-6">
+      <h1 class="display text-[7vw] leading-none hero-text overflow-hidden tracking-tighter">
+        <span class="block translate-y-full uppercase">Every Voice</span>
+      </h1>
+      <h1 class="display text-[7vw] leading-none hero-text overflow-hidden tracking-tighter">
+        <span class="block translate-y-full uppercase">Deserves</span>
+      </h1>
+      <h1 class="display text-[7vw] leading-none hero-text overflow-hidden tracking-tighter">
+        <span class="block translate-y-full uppercase text-[var(--c-accent)]">To Be Heard</span>
+      </h1>
+      <p class="mt-8 text-xs md:text-sm uppercase tracking-[0.5em] font-medium opacity-0 hero-fade">Sign-Language Communication for Healthcare</p>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="py-32 px-6 md:px-20 grid md:grid-cols-2 gap-16 max-w-[1800px] mx-auto bg-[var(--c-bg)]">
+    <div>
+      <h2 class="display text-3xl md:text-5xl leading-tight split-animate font-semibold tracking-tight">
+        Bridging the Gap Between
+        <span class="text-[var(--c-accent)]">Deaf Patients and Healthcare.</span>
+      </h2>
+    </div>
+    <div class="text-lg md:text-xl font-light leading-relaxed text-gray-700">
+      <p class="mb-8 split-animate">Unmute is an AI-powered sign-language communication platform that enables two-way communication between Deaf patients and healthcare professionals. It translates supported sign language into text or speech, and converts clinicians' spoken or written messages into visual sign-language output — so routine care can happen directly, in the room.</p>
+      <div class="h-px w-full bg-black/10 my-8"></div>
+      <div class="flex flex-wrap gap-x-12 gap-y-6 text-xs uppercase tracking-widest font-semibold text-gray-500">
+        <div class="flex items-center gap-2">
+          <iconify-icon icon="solar:hand-shake-linear" stroke-width="1.5" class="text-lg"></iconify-icon>
+          Two-Way Translation
+        </div>
+        <div class="flex items-center gap-2">
+          <iconify-icon icon="solar:hospital-linear" stroke-width="1.5" class="text-lg"></iconify-icon>
+          Built for Hospitals
+        </div>
+        <div class="flex items-center gap-2">
+          <iconify-icon icon="solar:global-linear" stroke-width="1.5" class="text-lg"></iconify-icon>
+          Starting with ASL
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARD STACK SECTION -->
+  <section id="services" class="stack-section">
+    <div class="text-center mb-20 px-6">
+      <div class="text-xs uppercase tracking-widest mb-4 opacity-50 font-semibold">What Unmute Does</div>
+      <h2 class="display text-4xl md:text-7xl tracking-tighter uppercase font-semibold">The Platform</h2>
+    </div>
+
+    <div class="stack-container">
+
+      <!-- Card 1 -->
+      <div class="card-item">
+        <div class="card-inner">
+          <div class="card-content">
+            <div>
+              <div class="text-4xl md:text-5xl display mb-2 text-[var(--c-bg)] opacity-20">01</div>
+              <h3 class="text-2xl md:text-3xl font-semibold tracking-tight">Sign to Speech &amp; Text</h3>
+              <p class="text-xs mt-4 opacity-60 uppercase tracking-widest font-medium">The Patient Speaks</p>
+            </div>
+            <div class="text-gray-400 font-light text-sm md:text-base leading-relaxed">
+              The Deaf patient signs. Unmute recognises supported ASL and turns it into clear text on screen and spoken words for the practitioner — so a patient can describe pain, symptoms and history in their own language, without waiting for an interpreter.
+            </div>
+            <button class="text-left flex items-center uppercase tracking-widest text-xs border-b border-white/30 pb-2 w-max hover:text-white transition-all font-semibold group">
+              Explore Recognition <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="ml-2 text-base group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </button>
+          </div>
+          <div class="card-img-wrap">
+            <img src="assets/img/feature-sign-to-speech.jpg" class="card-img" alt="A Deaf patient signing while a nurse reads the translated text on her phone">
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card-item">
+        <div class="card-inner">
+          <div class="card-content">
+            <div>
+              <div class="text-4xl md:text-5xl display mb-2 text-[var(--c-bg)] opacity-20">02</div>
+              <h3 class="text-2xl md:text-3xl font-semibold tracking-tight">Speech to Sign</h3>
+              <p class="text-xs mt-4 opacity-60 uppercase tracking-widest font-medium">The Practitioner Responds</p>
+            </div>
+            <div class="text-gray-400 font-light text-sm md:text-base leading-relaxed">
+              When the practitioner speaks or types, Unmute converts the message into visual sign-language output — closing the loop. Instructions, explanations and next steps reach the patient in a form they can actually understand, not through lip-reading or a handwritten note.
+            </div>
+            <button class="text-left flex items-center uppercase tracking-widest text-xs border-b border-white/30 pb-2 w-max hover:text-white transition-all font-semibold group">
+              See Visual Output <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="ml-2 text-base group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </button>
+          </div>
+          <div class="card-img-wrap">
+            <img src="assets/img/feature-text-to-sign.jpg" class="card-img" alt="A doctor's spoken instruction rendered as sign language on screen">
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card-item">
+        <div class="card-inner">
+          <div class="card-content">
+            <div>
+              <div class="text-4xl md:text-5xl display mb-2 text-[var(--c-bg)] opacity-20">03</div>
+              <h3 class="text-2xl md:text-3xl font-semibold tracking-tight">Team Plan for Hospitals</h3>
+              <p class="text-xs mt-4 opacity-60 uppercase tracking-widest font-medium">Institutional Access</p>
+            </div>
+            <div class="text-gray-400 font-light text-sm md:text-base leading-relaxed">
+              A monthly institutional subscription covering up to 10 practitioners, with custom plans for larger healthcare institutions. One department, one subscription — giving every clinician on the team a tool they can use at the bedside without booking an interpreter.
+            </div>
+            <button class="text-left flex items-center uppercase tracking-widest text-xs border-b border-white/30 pb-2 w-max hover:text-white transition-all font-semibold group">
+              View Plans <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="ml-2 text-base group-hover:translate-x-1 transition-transform"></iconify-icon>
+            </button>
+          </div>
+          <div class="card-img-wrap">
+            <img src="assets/img/feature-team.jpg" class="card-img" alt="A clinical team using Unmute on a shared team plan">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="py-32 px-6 md:px-20 bg-[var(--c-bg)] max-w-[1800px] mx-auto">
+    <div class="mb-16">
+      <div class="text-xs uppercase tracking-widest mb-4 text-gray-500 font-semibold">In the Room</div>
+      <h2 class="display text-3xl md:text-5xl tracking-tight font-semibold max-w-3xl">Routine healthcare conversations, handled directly.</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-12">
+      <div>
+        <div class="display text-2xl text-[var(--c-accent)] mb-4">01</div>
+        <h3 class="text-lg font-semibold mb-3">The patient signs</h3>
+        <p class="text-gray-600 font-light leading-relaxed">Supported ASL is recognised and converted into text and speech the practitioner can read or hear immediately.</p>
+      </div>
+      <div>
+        <div class="display text-2xl text-[var(--c-accent)] mb-4">02</div>
+        <h3 class="text-lg font-semibold mb-3">The practitioner replies</h3>
+        <p class="text-gray-600 font-light leading-relaxed">Spoken or written replies are converted into visual sign-language output for the patient — the conversation goes both ways.</p>
+      </div>
+      <div>
+        <div class="display text-2xl text-[var(--c-accent)] mb-4">03</div>
+        <h3 class="text-lg font-semibold mb-3">The team is covered</h3>
+        <p class="text-gray-600 font-light leading-relaxed">A team plan puts the tool in the hands of up to 10 practitioners, so the ward can communicate directly, shift after shift.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR HOSPITALS / PRICING -->
+  <section id="pricing" class="py-32 px-6 md:px-20 bg-[var(--c-dark)] text-[var(--c-bg)]">
+    <div class="max-w-[1400px] mx-auto grid md:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="text-xs uppercase tracking-widest mb-4 opacity-50 font-semibold">For Hospitals</div>
+        <h2 class="display text-3xl md:text-5xl tracking-tight font-semibold mb-8">Reduce reliance on on-site interpreters.</h2>
+        <p class="text-gray-400 font-light leading-relaxed mb-6">
+          On-site interpreters are scarce, expensive and rarely available the moment a patient arrives. Unmute gives practitioners an accessible tool to communicate directly with Deaf patients during routine interactions — so the everyday conversation no longer depends on scheduling.
+        </p>
+        <p class="text-gray-400 font-light leading-relaxed">
+          Unmute begins with ASL and routine healthcare interactions, with more advanced translation capabilities developed over time.
+        </p>
+      </div>
+      <div class="border border-white/15 p-8 md:p-10">
+        <div class="text-xs uppercase tracking-widest opacity-50 font-semibold mb-6">Team Plan</div>
+        <div class="display text-3xl mb-2">Up to 10</div>
+        <div class="text-sm uppercase tracking-widest text-gray-400 mb-8">Practitioners · Monthly</div>
+        <ul class="space-y-4 text-sm font-light text-gray-300 mb-10">
+          <li class="flex items-start gap-3"><iconify-icon icon="solar:check-circle-linear" stroke-width="1.5" class="text-lg text-[var(--c-accent)] mt-0.5"></iconify-icon> Two-way sign-language translation</li>
+          <li class="flex items-start gap-3"><iconify-icon icon="solar:check-circle-linear" stroke-width="1.5" class="text-lg text-[var(--c-accent)] mt-0.5"></iconify-icon> Access for 10 practitioners</li>
+          <li class="flex items-start gap-3"><iconify-icon icon="solar:check-circle-linear" stroke-width="1.5" class="text-lg text-[var(--c-accent)] mt-0.5"></iconify-icon> Routine healthcare interactions</li>
+          <li class="flex items-start gap-3"><iconify-icon icon="solar:check-circle-linear" stroke-width="1.5" class="text-lg text-[var(--c-accent)] mt-0.5"></iconify-icon> Custom plans for larger institutions</li>
+        </ul>
+        <a href="#contact" class="inline-flex items-center uppercase tracking-widest text-xs font-semibold border-b border-white/40 pb-2 hover:text-white transition-colors group">
+          Talk to Us <iconify-icon icon="solar:arrow-right-linear" stroke-width="1.5" class="ml-2 text-base group-hover:translate-x-1 transition-transform"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL SECTION -->
+  <section id="contact" class="py-40 bg-[#E3E1DC] text-center flex flex-col items-center justify-center relative z-10 px-6">
+    <img src="assets/img/unmute-mark.png" alt="" class="h-12 w-auto mb-8" aria-hidden="true">
+    <h2 class="display text-2xl md:text-4xl mb-8 tracking-tight font-semibold">Every voice deserves to be heard.</h2>
+    <div class="max-w-xl text-gray-600 font-light mb-12 leading-relaxed text-base md:text-lg">
+      If you run a hospital, clinic or care team and want to communicate directly with Deaf patients, we would like to hear how your ward works today.
+    </div>
+    <a href="mailto:contact@liveunmute.com" class="display text-sm md:text-base uppercase tracking-[0.3em] border border-black/20 px-8 py-4 hover:bg-[var(--c-dark)] hover:text-[var(--c-bg)] transition-colors">
+      contact@liveunmute.com
+    </a>
+    <div class="h-16 w-px bg-black/20 mt-12"></div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer-sticky px-6">
+  <div class="relative z-10 text-center">
+    <img src="assets/img/unmute-logo-white.png" alt="Unmute" class="footer-logo">
+    <div class="text-xs uppercase tracking-[0.3em] mb-4 text-gray-500 font-medium">Ready to communicate directly?</div>
+    <a href="mailto:contact@liveunmute.com" class="display text-[5vw] md:text-[7vw] leading-none hover:text-gray-400 transition-colors tracking-tighter font-semibold flex items-center justify-center gap-4">
+      Get in Touch <iconify-icon icon="solar:letter-linear" stroke-width="1.5"></iconify-icon>
+    </a>
+    <div class="flex justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-gray-400 font-medium">
+      <a href="#services" class="hover:text-white transition-colors">Platform</a>
+      <a href="#how" class="hover:text-white transition-colors">How It Works</a>
+      <a href="#pricing" class="hover:text-white transition-colors">For Hospitals</a>
+      <a href="mailto:contact@liveunmute.com" class="hover:text-white transition-colors">Contact</a>
+    </div>
+    <div class="mt-20 text-[10px] text-gray-700 font-medium tracking-widest">
+      © 2026 UNMUTE. ALL RIGHTS RESERVED.
+    </div>
+  </div>
+  <img src="assets/img/hero.jpg" class="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none grayscale" alt="">
+</footer>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    smooth: true,
+  });
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  function splitTextToWords(element) {
+    const text = element.innerText;
+    const words = text.split(' ');
+    element.innerHTML = '';
+    words.forEach(word => {
+      const wordWrap = document.createElement('span');
+      wordWrap.classList.add('word-wrap');
+      wordWrap.innerHTML = `<span class="word-inner">${word} </span>`;
+      element.appendChild(wordWrap);
+    });
+  }
+
+  document.querySelectorAll('.split-animate').forEach(el => {
+    splitTextToWords(el);
+  });
+
+  const loadTl = gsap.timeline({
+    onComplete: () => {
+      document.body.style.opacity = 1;
+      initSite();
+    }
+  });
+
+  loadTl.to('.loader-bar', { width: '100%', duration: 1.2, ease: 'power2.inOut' })
+        .to('.loader-text', { y: -30, opacity: 0, duration: 0.4 })
+        .to('.loader', { yPercent: -100, duration: 0.8, ease: 'power4.inOut' });
+
+  function initSite() {
+    gsap.to('.hero-text span', {
+      y: 0,
+      stagger: 0.1,
+      duration: 1.4,
+      ease: 'power4.out'
+    });
+    gsap.to('.hero-fade', { opacity: 1, duration: 1, delay: 0.6 });
+
+    gsap.to('.hero-img', {
+      yPercent: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero-img',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+
+    const splitElements = document.querySelectorAll('.split-animate');
+    splitElements.forEach(el => {
+      const words = el.querySelectorAll('.word-inner');
+      gsap.to(words, {
+        y: "0%",
+        duration: 0.8,
+        ease: "power3.out",
+        stagger: 0.015,
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    });
+
+    const cards = gsap.utils.toArray('.card-item');
+    cards.forEach((card, i) => {
+      const nextCard = cards[i+1];
+      if (nextCard) {
+        gsap.to(card.querySelector('.card-inner'), {
+          scale: 0.92,
+          opacity: 0.3,
+          ease: "none",
+          scrollTrigger: {
+            trigger: nextCard,
+            start: "top bottom",
+            end: "top 15vh",
+            scrub: true
+          }
+        });
+      }
+    });
+
+    gsap.from('.footer-sticky > div', {
+      y: 60,
+      opacity: 0,
+      scale: 0.95,
+      scrollTrigger: {
+        trigger: '.footer-sticky',
+        start: 'top bottom',
+        end: 'bottom bottom',
+        scrub: true
+      }
+    });
+  }
+
+  // Smooth-scroll the in-page links through Lenis
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id === '#') return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -20 });
+    });
+  });
+</script>
+
+</body>
+</html>
