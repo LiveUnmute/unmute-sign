@@ -317,8 +317,9 @@ body {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(10, 10, 10, 0.97);
-  backdrop-filter: blur(14px);
+  background: rgba(12, 12, 12, 0.52);
+  backdrop-filter: blur(20px) saturate(115%);
+  -webkit-backdrop-filter: blur(20px) saturate(115%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -349,22 +350,63 @@ body {
 /* The toggle sits above the overlay so it can always close it */
 #menuToggle { position: relative; z-index: 70; }
 body.menu-open #menuToggle { mix-blend-mode: normal; color: #fff; }
-body.menu-open nav { mix-blend-mode: normal; }
+/* The panel is z-60; the nav is z-50, which would put the CLOSE button behind
+   the overlay and make it unclickable. Lift the nav above it while open. */
+body.menu-open nav { mix-blend-mode: normal; z-index: 70; }
 
 html { -webkit-text-size-adjust: 100%; }
 body { overscroll-behavior-y: none; }
 
+/* Contact CTA. Sized here rather than with utilities so the mobile size can
+   override the desktop one: the tracked uppercase address was wider than the
+   padded box on a phone, so the border ran off both edges. */
+.contact-cta {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  border: 1px solid rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.contact-cta:hover {
+  background: var(--c-dark);
+  color: var(--c-bg);
+}
+
 @media (max-width: 768px) {
-  /* The sticky-footer trick assumes a stable viewport height; on phones the
-     URL bar changes it mid-scroll. Use a normal flow footer on small screens. */
-  .wrapper { margin-bottom: 0; box-shadow: none; }
-  .footer-sticky {
-    position: relative;
-    height: auto;
-    min-height: 70vh;
-    padding: 4rem 1.5rem;
+  .contact-cta {
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    padding: 0.9rem 1.4rem;
   }
-  .footer-sticky img:first-child { height: 26px; }
+}
+
+@media (min-width: 769px) {
+  .contact-cta {
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    padding: 1rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Keep the desktop reveal: the footer is pinned behind the page and slides
+     into view. svh keeps it exactly one screen tall when the URL bar shows. */
+  .wrapper {
+    margin-bottom: 100vh;
+    margin-bottom: 100svh;
+    box-shadow: none;
+  }
+  .footer-sticky {
+    height: 100vh;
+    height: 100svh;
+    padding: 5rem 1.5rem;
+  }
+  .footer-logo { height: 28px; }
+
+  /* The footer's own link row duplicates the menu; drop it on phones. */
+  .footer-nav { display: none; }
 }
 
 .hero-scrim {
@@ -608,7 +650,7 @@ body { overscroll-behavior-y: none; }
     <div class="max-w-xl text-gray-600 font-light mb-12 leading-relaxed text-base md:text-lg">
       If you run a hospital, clinic or care team and want to communicate directly with Deaf patients, we would like to hear how your ward works today.
     </div>
-    <a href="mailto:contact@liveunmute.com" class="display text-sm md:text-base uppercase tracking-[0.3em] border border-black/20 px-8 py-4 hover:bg-[var(--c-dark)] hover:text-[var(--c-bg)] transition-colors">
+    <a href="mailto:contact@liveunmute.com" class="contact-cta">
       contact@liveunmute.com
     </a>
     <div class="h-16 w-px bg-black/20 mt-12"></div>
@@ -624,7 +666,7 @@ body { overscroll-behavior-y: none; }
     <a href="mailto:contact@liveunmute.com" class="display text-[5vw] md:text-[7vw] leading-none hover:text-gray-400 transition-colors tracking-tighter font-semibold flex items-center justify-center gap-4">
       Get in Touch <iconify-icon icon="solar:letter-linear" stroke-width="1.5"></iconify-icon>
     </a>
-    <div class="flex justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-gray-400 font-medium">
+    <div class="footer-nav flex justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-gray-400 font-medium">
       <a href="#services" class="hover:text-white transition-colors">Platform</a>
       <a href="#how" class="hover:text-white transition-colors">How It Works</a>
       <a href="#pricing" class="hover:text-white transition-colors">For Hospitals</a>
@@ -774,21 +816,35 @@ body { overscroll-behavior-y: none; }
   const menuLabel = document.getElementById('menuLabel');
   const mobileMenu = document.getElementById('mobileMenu');
 
-  function setMenu(open) {
+  // Does the current history entry belong to the open menu?
+  const menuIsHistoryEntry = () =>
+    !!(window.history.state && window.history.state.unmuteMenu);
+
+  function setMenu(open, opts) {
     if (!mobileMenu) return;
-    document.body.classList.toggle('menu-open', open);
-    menuToggle.setAttribute('aria-expanded', String(open));
-    menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    menuLabel.textContent = open ? 'CLOSE' : 'MENU';
+    opts = opts || {};
 
     if (open) {
+      // Give the menu its own history entry so the phone's Back button closes
+      // it instead of leaving the site.
+      if (!menuIsHistoryEntry()) window.history.pushState({ unmuteMenu: true }, '');
+      document.body.classList.add('menu-open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      menuToggle.setAttribute('aria-label', 'Close menu');
+      menuLabel.textContent = 'CLOSE';
       mobileMenu.hidden = false;
       requestAnimationFrame(() => mobileMenu.classList.add('open'));
       if (window.lenis) window.lenis.stop();
     } else {
+      document.body.classList.remove('menu-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Open menu');
+      menuLabel.textContent = 'MENU';
       mobileMenu.classList.remove('open');
       setTimeout(() => { if (!mobileMenu.classList.contains('open')) mobileMenu.hidden = true; }, 250);
       if (window.lenis) window.lenis.start();
+      // Unwind the entry we pushed, so history stays clean.
+      if (!opts.skipHistory && menuIsHistoryEntry()) window.history.back();
     }
   }
 
@@ -797,10 +853,20 @@ body { overscroll-behavior-y: none; }
       setMenu(menuToggle.getAttribute('aria-expanded') !== 'true')
     );
     mobileMenu.querySelectorAll('a').forEach((a) =>
-      a.addEventListener('click', () => setMenu(false))
+      a.addEventListener('click', () => {
+        // The link is about to push its own #hash entry; drop ours rather than
+        // unwinding it, which would race with that navigation.
+        if (menuIsHistoryEntry()) window.history.replaceState(null, '');
+        setMenu(false, { skipHistory: true });
+      })
     );
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') setMenu(false);
+    });
+
+    // Back / swipe-back: close the menu, stay on the page.
+    window.addEventListener('popstate', () => {
+      setMenu(menuIsHistoryEntry(), { skipHistory: true });
     });
   }
 
