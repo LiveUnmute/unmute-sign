@@ -448,20 +448,43 @@ body {
   }
   requestAnimationFrame(raf);
 
-  function splitTextToWords(element) {
-    const text = element.innerText;
-    const words = text.split(' ');
-    element.innerHTML = '';
-    words.forEach(word => {
-      const wordWrap = document.createElement('span');
-      wordWrap.classList.add('word-wrap');
-      wordWrap.innerHTML = `<span class="word-inner">${word} </span>`;
-      element.appendChild(wordWrap);
+  // Splits text into word spans for the reveal animation.
+  //
+  // Two things this must get right:
+  //  1. The space BETWEEN words has to live outside the .word-inner span.
+  //     .word-wrap is inline-block with overflow:hidden, so a trailing space
+  //     inside it collapses and every word runs together.
+  //  2. Inline markup (e.g. the coloured <span> in the heading) has to survive,
+  //     otherwise the accent colour is lost when innerHTML is reset.
+  function splitIntoWords(node, target) {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        child.textContent.split(/(\s+)/).forEach((chunk) => {
+          if (!chunk) return;
+          if (/^\s+$/.test(chunk)) {
+            target.appendChild(document.createTextNode(' '));
+            return;
+          }
+          const wrap = document.createElement('span');
+          wrap.className = 'word-wrap';
+          const inner = document.createElement('span');
+          inner.className = 'word-inner';
+          inner.textContent = chunk;
+          wrap.appendChild(inner);
+          target.appendChild(wrap);
+        });
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const clone = child.cloneNode(false); // keep classes/styles
+        target.appendChild(clone);
+        splitIntoWords(child, clone);
+      }
     });
   }
 
-  document.querySelectorAll('.split-animate').forEach(el => {
-    splitTextToWords(el);
+  document.querySelectorAll('.split-animate').forEach((el) => {
+    const original = el.cloneNode(true);
+    el.innerHTML = '';
+    splitIntoWords(original, el);
   });
 
   const loadTl = gsap.timeline({

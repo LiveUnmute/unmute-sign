@@ -1,0 +1,13 @@
+{
+  "name": "unmute-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unmute marketing site",
+  "scripts": {
+    "serve": "python3 -m http.server 8081 --bind 0.0.0.0",
+    "test": "node test/text-split.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.3"
+  }
+}
