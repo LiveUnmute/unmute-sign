@@ -52,16 +52,28 @@ ok("image height is bounded so the card cannot overflow", () => {
 
 ok("portrait art direction is served on mobile", () => {
   const sources = [...html.matchAll(/<source media="\(max-width: 768px\)" srcset="([^"]+)"/g)];
-  assert.equal(sources.length, 3, "one <source> per card");
+  // Cards 1 and 2 use <picture>; card 3 is a single rendered product shot.
+  assert.equal(sources.length, 2, "one <source> per <picture> card");
   for (const [, path] of sources) {
-    assert.ok(readFileSync(path) .length > 1000, `${path} looks empty`);
+    assert.ok(readFileSync(path).length > 1000, `${path} looks empty`);
   }
+});
+
+ok("mobile cards run edge to edge", () => {
+  assert.match(firstMobileBlock, /\.card-inner\s*\{[^}]*width:\s*100%/);
+  assert.match(firstMobileBlock, /border-left:\s*none/);
+  assert.match(firstMobileBlock, /border-right:\s*none/);
+  assert.ok(!/width:\s*92%/.test(firstMobileBlock), "old 92% gutter still present");
 });
 
 ok("desktop still gets the landscape image", () => {
   const imgs = [...html.matchAll(/<img src="(assets\/img\/feature-[a-z-]+\.jpg)" class="card-img"/g)];
-  assert.equal(imgs.length, 3);
+  assert.equal(imgs.length, 3, "three card images");
   for (const [, path] of imgs) assert.ok(!path.includes("portrait"));
+});
+
+ok("Team Plan card uses the rendered product image", () => {
+  assert.match(html, /src="assets\/img\/feature-team-plan\.jpg"/);
 });
 
 console.log(`\n${pass} passed`);

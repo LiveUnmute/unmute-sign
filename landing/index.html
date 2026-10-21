@@ -165,8 +165,13 @@ body {
   .card-inner {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr) auto auto;
-    width: 92%;
+    /* full-bleed: remove the side gutters on mobile */
+    width: 100%;
+    border-left: none;
+    border-right: none;
   }
+
+  .stack-container { padding-left: 0; padding-right: 0; }
 
   /* Unwrap the content column so its children become grid items we can order:
      heading, then image, then description, then the button. */
@@ -184,6 +189,7 @@ body {
     height: auto;
     min-height: 0;
     max-height: 58vh;
+    width: 100%;
   }
 
   /* Let the picture size itself to the portrait source rather than stretching
@@ -495,10 +501,7 @@ body { overscroll-behavior-y: none; }
             </button>
           </div>
           <div class="card-img-wrap">
-            <picture>
-              <source media="(max-width: 768px)" srcset="assets/img/feature-team-portrait.jpg">
-              <img src="assets/img/feature-team.jpg" class="card-img" alt="A clinical team on a video call with a Deaf patient signing">
-            </picture>
+            <img src="assets/img/feature-team-plan.jpg" class="card-img" alt="The Unmute app on a tablet showing a patient signing with the translation beside it, above a team of clinicians">
           </div>
         </div>
       </div>
