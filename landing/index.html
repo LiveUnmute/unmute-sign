@@ -18,6 +18,7 @@
 
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+<meta name="build" content="20261021a">
 
 <!-- GSAP / Lenis / Iconify -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -268,6 +269,61 @@ body {
 .footer-logo { height: 34px; width: auto; margin: 0 auto 2rem; }
 
 /* Hero gets a soft scrim so the display type stays legible on any crop */
+/* --- mobile menu --- */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 10, 10, 0.97);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 6rem 2rem 3rem;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.mobile-menu[hidden] { display: none; }
+.mobile-menu.open { opacity: 1; transform: none; }
+
+.mobile-menu-link {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  transition: color 0.2s;
+}
+.mobile-menu-link:hover,
+.mobile-menu-link:focus-visible { color: var(--c-accent); }
+.mobile-menu-link.accent { border-bottom: none; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--c-accent); }
+
+/* The toggle sits above the overlay so it can always close it */
+#menuToggle { position: relative; z-index: 70; }
+body.menu-open #menuToggle { mix-blend-mode: normal; color: #fff; }
+body.menu-open nav { mix-blend-mode: normal; }
+
+html { -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior-y: none; }
+
+@media (max-width: 768px) {
+  /* The sticky-footer trick assumes a stable viewport height; on phones the
+     URL bar changes it mid-scroll. Use a normal flow footer on small screens. */
+  .wrapper { margin-bottom: 0; box-shadow: none; }
+  .footer-sticky {
+    position: relative;
+    height: auto;
+    min-height: 70vh;
+    padding: 4rem 1.5rem;
+  }
+  .footer-sticky img:first-child { height: 26px; }
+}
+
 .hero-scrim {
   position: absolute;
   inset: 0;
@@ -296,10 +352,23 @@ body {
     <a href="#pricing" class="hover:text-gray-400 transition-colors">For Hospitals</a>
     <a href="#contact" class="hover:text-gray-400 transition-colors">Contact</a>
   </div>
-  <div class="md:hidden text-xs tracking-widest flex items-center gap-2 cursor-pointer">
-    MENU <iconify-icon icon="solar:hamburger-menu-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
-  </div>
+  <button id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu"
+          class="md:hidden text-xs tracking-widest flex items-center gap-2 cursor-pointer bg-transparent border-0 text-white p-0">
+    <span id="menuLabel">MENU</span>
+    <iconify-icon icon="solar:hamburger-menu-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+  </button>
 </nav>
+
+
+
+<!-- MOBILE MENU (outside <nav>: nav uses mix-blend-difference, which would tint the overlay) -->
+<div id="mobileMenu" class="mobile-menu md:hidden" hidden>
+  <a href="#services" class="mobile-menu-link">Platform</a>
+  <a href="#how" class="mobile-menu-link">How It Works</a>
+  <a href="#pricing" class="mobile-menu-link">For Hospitals</a>
+  <a href="#contact" class="mobile-menu-link">Contact</a>
+  <a href="mailto:contact@liveunmute.com" class="mobile-menu-link accent">contact@liveunmute.com</a>
+</div>
 
 <!-- WRAPPER -->
 <div class="wrapper">
@@ -657,6 +726,41 @@ body {
         end: 'bottom bottom',
         scrub: true
       }
+    });
+  }
+
+  // --- Mobile menu ---
+  const menuToggle = document.getElementById('menuToggle');
+  const menuLabel = document.getElementById('menuLabel');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  function setMenu(open) {
+    if (!mobileMenu) return;
+    document.body.classList.toggle('menu-open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menuLabel.textContent = open ? 'CLOSE' : 'MENU';
+
+    if (open) {
+      mobileMenu.hidden = false;
+      requestAnimationFrame(() => mobileMenu.classList.add('open'));
+      if (window.lenis) window.lenis.stop();
+    } else {
+      mobileMenu.classList.remove('open');
+      setTimeout(() => { if (!mobileMenu.classList.contains('open')) mobileMenu.hidden = true; }, 250);
+      if (window.lenis) window.lenis.start();
+    }
+  }
+
+  if (menuToggle && mobileMenu) {
+    menuToggle.addEventListener('click', () =>
+      setMenu(menuToggle.getAttribute('aria-expanded') !== 'true')
+    );
+    mobileMenu.querySelectorAll('a').forEach((a) =>
+      a.addEventListener('click', () => setMenu(false))
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') setMenu(false);
     });
   }
 
