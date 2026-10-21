@@ -51,12 +51,22 @@ ok("image height is bounded so the card cannot overflow", () => {
 });
 
 ok("portrait art direction is served on mobile", () => {
-  const sources = [...html.matchAll(/<source media="\(max-width: 768px\)" srcset="([^"]+)"/g)];
   // Cards 1 and 2 use <picture>; card 3 is a single rendered product shot.
+  const sources = [...html.matchAll(/<source media="\(max-width: 768px\)" srcset="([^"]+)"/g)]
+    .filter(([, path]) => path.includes("feature-"));
   assert.equal(sources.length, 2, "one <source> per <picture> card");
   for (const [, path] of sources) {
     assert.ok(readFileSync(path).length > 1000, `${path} looks empty`);
   }
+});
+
+ok("hero and footer use the portrait crop on mobile", () => {
+  for (const cls of ["hero-media", "footer-media"]) {
+    const block = html.slice(html.indexOf(`class="${cls}"`));
+    const near = block.slice(0, 300);
+    assert.match(near, /srcset="assets\/img\/hero-portrait\.jpg"/, `${cls} has no portrait source`);
+  }
+  assert.ok(readFileSync("assets/img/hero-portrait.jpg").length > 1000);
 });
 
 ok("mobile cards run edge to edge", () => {

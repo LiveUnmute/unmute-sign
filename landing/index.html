@@ -296,6 +296,15 @@ body {
   align-items: center;
 }
 
+/* Art-directed image wrappers: the <picture> owns the box, the <img> fills it. */
+.hero-media,
+.footer-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.hero-media { z-index: 0; }
+
 .display { font-family: var(--font-display); }
 
 .noise-overlay {
@@ -401,12 +410,26 @@ body { overscroll-behavior-y: none; }
   .footer-sticky {
     height: 100vh;
     height: 100svh;
-    padding: 5rem 1.5rem;
+    padding: 5rem 1.25rem;
   }
   .footer-logo { height: 28px; }
 
-  /* The footer's own link row duplicates the menu; drop it on phones. */
-  .footer-nav { display: none; }
+  /* The footer's own link row duplicates the menu; drop it on phones.
+     Scoped to .footer-sticky so it outranks Tailwind's .flex utility, which
+     is injected after this stylesheet and would otherwise win the cascade. */
+  .footer-sticky .footer-nav { display: none; }
+
+  /* Portrait hero: the horizontal scrim leaves the centre too light once the
+     image is re-composed, so darken top and bottom instead. */
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.62) 0%,
+      rgba(0, 0, 0, 0.38) 38%,
+      rgba(0, 0, 0, 0.30) 62%,
+      rgba(0, 0, 0, 0.66) 100%
+    );
+  }
 }
 
 .hero-scrim {
@@ -460,7 +483,10 @@ body { overscroll-behavior-y: none; }
 
   <!-- HERO -->
   <section class="h-screen relative flex items-center justify-center overflow-hidden">
-    <img src="assets/img/hero.jpg" class="absolute inset-0 w-full h-full object-cover hero-img" alt="A Deaf patient communicating with a nurse using Unmute">
+    <picture class="hero-media">
+      <source media="(max-width: 768px)" srcset="assets/img/hero-portrait.jpg">
+      <img src="assets/img/hero.jpg" class="hero-img w-full h-full object-cover" alt="A Deaf patient communicating with a nurse using Unmute">
+    </picture>
     <div class="hero-scrim"></div>
     <div class="relative z-10 text-center text-white px-6">
       <h1 class="display text-[7vw] leading-none hero-text overflow-hidden tracking-tighter">
@@ -663,7 +689,7 @@ body { overscroll-behavior-y: none; }
   <div class="relative z-10 text-center">
     <img src="assets/img/unmute-logo-white.png" alt="Unmute" class="footer-logo">
     <div class="text-xs uppercase tracking-[0.3em] mb-4 text-gray-500 font-medium">Ready to communicate directly?</div>
-    <a href="mailto:contact@liveunmute.com" class="display text-[5vw] md:text-[7vw] leading-none hover:text-gray-400 transition-colors tracking-tighter font-semibold flex items-center justify-center gap-4">
+    <a href="mailto:contact@liveunmute.com" class="display text-[8.5vw] md:text-[7vw] leading-none hover:text-gray-400 transition-colors tracking-tighter font-semibold flex items-center justify-center gap-3 md:gap-5 whitespace-nowrap">
       Get in Touch <iconify-icon icon="solar:letter-linear" stroke-width="1.5"></iconify-icon>
     </a>
     <div class="footer-nav flex justify-center gap-8 mt-12 text-xs uppercase tracking-widest text-gray-400 font-medium">
@@ -676,7 +702,10 @@ body { overscroll-behavior-y: none; }
       © 2026 UNMUTE. ALL RIGHTS RESERVED.
     </div>
   </div>
-  <img src="assets/img/hero.jpg" class="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none grayscale" alt="">
+  <picture class="footer-media" aria-hidden="true">
+    <source media="(max-width: 768px)" srcset="assets/img/hero-portrait.jpg">
+    <img src="assets/img/hero.jpg" class="w-full h-full object-cover opacity-10 pointer-events-none grayscale" alt="">
+  </picture>
 </footer>
 
 <script>

@@ -48,8 +48,24 @@ ok("footer is pinned and one screen tall on mobile again", () => {
 });
 
 ok("the footer link row is hidden on mobile", () => {
-  assert.ok(mobileBlocks.some((b) => /\.footer-nav\s*\{\s*display:\s*none/.test(b)), "rule missing");
+  const block = mobileBlocks.find((b) => b.includes(".footer-nav"));
+  assert.ok(block, "rule missing");
+  // A bare .footer-nav ties with Tailwind's .flex utility, which is injected
+  // after this stylesheet and therefore wins. The selector must outrank it.
+  assert.match(
+    block,
+    /\.footer-sticky\s+\.footer-nav\s*\{\s*display:\s*none/,
+    "single-class selector loses the cascade to .flex"
+  );
   assert.match(html, /class="footer-nav flex/, "hook missing from markup");
+});
+
+ok("the footer call to action is hero-sized on mobile", () => {
+  // Anchor on the mailto so this cannot accidentally match a hero headline.
+  const m = html.match(/href="mailto:contact@liveunmute\.com" class="display text-\[(\d+(?:\.\d+)?)vw\]/);
+  assert.ok(m, "footer CTA sizing class not found");
+  assert.ok(parseFloat(m[1]) >= 8, `only ${m[1]}vw — too small next to the desktop 7vw`);
+  assert.match(html, /whitespace-nowrap/, "must not wrap at this size");
 });
 
 ok("menu backdrop is translucent, not opaque", () => {
