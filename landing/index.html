@@ -7,8 +7,13 @@
 <meta name="description" content="Unmute is an AI-powered sign-language communication platform that bridges the gap between Deaf patients and healthcare professionals. Two-way translation, starting with ASL and routine healthcare interactions.">
 
 <!-- Icons -->
-<link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="apple-touch-icon" href="assets/img/favicon.png">
+<!-- Browsers request /favicon.ico implicitly when no icon is declared, so ship
+     one at the root as well as explicit links for the sharper PNG sizes. -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#121212">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
