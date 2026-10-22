@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#121212" />
+<title>Unmute — Live Conversation</title>
+<link rel="icon" href="../landing/assets/img/favicon.ico" sizes="any" />
+<link rel="stylesheet" href="./css/live.css" />
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- READY                                                         -->
+<!-- ============================================================ -->
+<section class="screen ready" id="screenReady">
+  <div class="ready-inner">
+    <header class="brand-row">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 12h-2"/>
+        </svg>
+      </span>
+      <span class="brand-name">Unmute</span>
+    </header>
+
+    <p class="eyebrow">Sign-language communication for healthcare</p>
+    <h1 class="ready-title">Ready to<br />communicate?</h1>
+    <p class="ready-sub">Position the device between the practitioner and the patient.</p>
+
+    <div class="camera-choice">
+      <p class="field-label">Camera</p>
+      <div class="segmented" role="radiogroup" aria-label="Camera to record signing">
+        <button type="button" class="seg is-on" data-facing="user" role="radio" aria-checked="true">
+          <span class="seg-title">Front camera</span>
+          <span class="seg-note" id="frontNote">Faces the patient</span>
+        </button>
+        <button type="button" class="seg" data-facing="environment" role="radio" aria-checked="false">
+          <span class="seg-title">Back camera</span>
+          <span class="seg-note">Wider view of hands</span>
+        </button>
+      </div>
+      <p class="field-hint" id="cameraHint">
+        Both directions stay open during the conversation. You can change this at any time.
+      </p>
+    </div>
+
+    <button type="button" class="start-btn" id="startBtn">
+      Start conversation
+    </button>
+
+    <p class="ready-foot">
+      Demonstration build. Speech-to-text, speech playback and hand tracking run on this device.
+      The ASL output clip is not connected yet, and the sign recogniser covers a handful of
+      responses, not free-flowing signing.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- LIVE                                                          -->
+<!-- ============================================================ -->
+<section class="screen live" id="screenLive" hidden>
+
+  <header class="live-bar">
+    <span class="live-dot" aria-hidden="true"></span>
+    <span class="live-label">Session active</span>
+    <span class="live-spacer"></span>
+    <button type="button" class="bar-btn" id="cameraBtn" aria-label="Switch camera">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 16V8a2 2 0 0 0-2-2h-3l-2-2H9L7 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2Z"/><circle cx="11" cy="12" r="3"/>
+      </svg>
+      <span id="cameraBtnLabel">Front camera</span>
+    </button>
+    <button type="button" class="bar-btn danger" id="endBtn">End</button>
+  </header>
+
+  <div class="live-grid">
+
+    <!-- ---------- what the PATIENT sees ---------- -->
+    <section class="side patient" aria-label="Patient view">
+      <p class="side-label">Patient sees</p>
+
+      <div class="asl-stage" id="aslStage">
+        <div class="asl-idle" id="aslIdle">
+          <span class="asl-idle-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 13V6a1.6 1.6 0 0 1 3.2 0v6"/><path d="M11.2 12V5a1.6 1.6 0 0 1 3.2 0v7"/>
+              <path d="M14.4 12V6.6a1.6 1.6 0 0 1 3.2 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.9-1.9L4 14.4a1.7 1.7 0 0 1 2.5-2.3L8 13.4"/>
+            </svg>
+          </span>
+          <p class="asl-idle-text">Waiting for the practitioner to speak</p>
+        </div>
+
+        <div class="asl-active" id="aslActive" hidden>
+          <p class="asl-kicker">ASL output</p>
+          <p class="asl-phrase" id="aslPhrase"></p>
+          <p class="asl-note" id="aslNote">Avatar clip not connected in this build — showing the phrase the patient would see signed.</p>
+        </div>
+      </div>
+
+      <div class="cam-strip">
+        <div class="cam-frame">
+          <video id="video" playsinline muted autoplay></video>
+          <canvas id="overlay"></canvas>
+          <span class="cam-badge" id="camBadge">Camera starting…</span>
+        </div>
+        <p class="cam-caption" id="camCaption">Patient signs toward the camera</p>
+      </div>
+    </section>
+
+    <!-- ---------- what the PRACTITIONER sees ---------- -->
+    <section class="side clinician" aria-label="Practitioner view">
+      <p class="side-label">Practitioner sees</p>
+
+      <div class="transcript-card">
+        <div class="card-head">
+          <span class="dot-live" id="micDot"></span>
+          <span id="micState">Listening</span>
+          <button type="button" class="mini-btn" id="typeBtn">Type instead</button>
+        </div>
+
+        <div class="transcript" id="transcript" aria-live="polite">
+          <p class="transcript-empty" id="transcriptEmpty">Speak normally. What you say appears here.</p>
+        </div>
+
+        <form class="type-row" id="typeRow" hidden>
+          <input type="text" id="typeInput" placeholder="Type what you would say…" autocomplete="off" />
+          <button type="submit" class="mini-btn solid">Send</button>
+        </form>
+      </div>
+
+      <div class="response-card" id="responseCard">
+        <p class="response-label">Patient response</p>
+        <p class="response-text" id="responseText">—</p>
+        <div class="response-actions">
+          <span class="response-source" id="responseSource"></span>
+          <button type="button" class="mini-btn" id="replayBtn" hidden>Play again</button>
+        </div>
+      </div>
+
+      <div class="fallback" id="fallback">
+        <div class="fallback-head">
+          <span class="fallback-title">If the camera misses it</span>
+          <span class="fallback-sub">Patient picks the meaning. Anything outside this list needs an interpreter.</span>
+        </div>
+        <div class="chip-groups" id="chipGroups"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <p class="live-foot">
+    Demonstration build · not a medical device · not clinically validated ·
+    complex diagnosis, consent and emergencies require a qualified interpreter
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SUMMARY                                                       -->
+<!-- ============================================================ -->
+<section class="screen ended" id="screenEnded" hidden>
+  <div class="ended-inner">
+    <p class="eyebrow">Session ended</p>
+    <h2 class="ended-title" id="endedTitle">Conversation complete</h2>
+    <p class="ended-sub" id="endedSub">No audio or video was recorded or uploaded.</p>
+
+    <ol class="summary-list" id="summaryList"></ol>
+
+    <div class="ended-actions">
+      <button type="button" class="start-btn" id="againBtn">Start another conversation</button>
+    </div>
+
+    <p class="ready-foot">
+      This session demonstrated the interaction model only. It makes no claim about
+      translation accuracy, and it is not a substitute for a qualified interpreter.
+    </p>
+  </div>
+</section>
+
+<script type="module" src="./js/live.js"></script>
+</body>
+</html>

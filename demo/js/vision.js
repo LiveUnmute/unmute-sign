@@ -55,11 +55,15 @@ export async function startCamera(video, { width = 960, height = 720 } = {}) {
   return stream;
 }
 
-export function drawSkeleton(ctx, lm, w, h, connections) {
+/**
+ * @param {boolean} mirror  True when the preview is CSS-mirrored (front camera),
+ *                          so the overlay lines up with what the user sees.
+ */
+export function drawSkeleton(ctx, lm, w, h, connections, mirror = false) {
   ctx.clearRect(0, 0, w, h);
   if (!lm) return;
 
-  const px = (p) => [p.x * w, p.y * h];
+  const px = (p) => [mirror ? (1 - p.x) * w : p.x * w, p.y * h];
 
   ctx.lineWidth = Math.max(2, w / 320);
   ctx.strokeStyle = "rgba(45, 212, 191, 0.9)";

@@ -1,4 +1,18 @@
-# Unmute — Clinical Intake Demo
+# Unmute — demos
+
+Two builds live here:
+
+| Page | What it demonstrates |
+|---|---|
+| **`live.html`** | The MVP direction: one tablet, one continuous two-way conversation. Open → pick camera → start. |
+| **`index.html`** | The bounded clinical intake: four questions, patient-confirmed answers, structured record. |
+
+Both run from the same server (`npm start`, port 8080) once `npm run setup` has
+placed the MediaPipe runtime in `./vendor`.
+
+---
+
+# Clinical Intake Demo
 
 A working, self-contained demonstration of the interaction model: a Deaf patient signs
 a bounded answer, the app proposes its three best interpretations, **the patient confirms
