@@ -112,7 +112,7 @@ cover.alignment = WD_TABLE_ALIGNMENT.CENTER
 fields = [
     ("Participant Name", "Prince Michael"),
     ("Venture Name", "Unmute"),
-    ("Cohort", "Founders Lab Cohort 1, 2026"),
+    ("Cohort", "Founders Lab Cohort 2, 2026"),
     ("Date", "21 October 2026"),
 ]
 for i, (k, v) in enumerate(fields):
