@@ -787,16 +787,11 @@ fieldset.plain.invalid .check { border-color: #c62828; }
       '&body=' + encodeURIComponent(body);
     confirmationMailto.href = href;
 
-    // Same fix as the waitlist: no automatic navigation. Handing the tab to a
-    // mail handler that may not exist reads as a frozen page. The link is
-    // offered and the signatory decides.
     if (!LOI_ENDPOINT) {
-      confirmationCopy.textContent =
-        'Open the link below to send your letter to our team. It will open your email app with the letter filled in.';
-      confirmationMailto.textContent = 'Send my letter by email';
       form.hidden = true;
       confirmation.classList.add('show');
       confirmation.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.location.href = href;
       return;
     }
 

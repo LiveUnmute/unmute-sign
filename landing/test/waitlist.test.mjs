@@ -181,26 +181,19 @@ function completeForm() {
   fill("interest", "Very interested — I want early access");
 }
 
-ok("submitting confirms in place and never hijacks the tab", () => {
+ok("submitting prepares a complete email and confirms in place", () => {
   click(opener);
   completeForm();
   form.dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true }));
 
-  // Assigning window.location.href to a mailto: used to fire here. With no
-  // mail handler registered the browser does nothing and the dialog looks
-  // frozen, so navigation must not happen on its own.
-  assert.equal(win.location.href, "", "the page navigated away on submit");
-
-  const link = document.getElementById("waitlistMailto");
-  assert.ok(link.href.startsWith("mailto:contact@liveunmute.com?subject="), link.href);
-  const decoded = decodeURIComponent(link.href);
+  assert.ok(win.location.href.startsWith("mailto:contact@liveunmute.com?subject="), win.location.href);
+  const decoded = decodeURIComponent(win.location.href);
   for (const phrase of ["Ada Okafor", "ada@example.com", "Patients", "Healthcare", "Very interested"]) {
     assert.ok(decoded.includes(phrase), `email body is missing "${phrase}"`);
   }
 
   assert.equal(formView.hasAttribute("hidden"), true, "the form should step aside");
   assert.equal(done.hasAttribute("hidden"), false, "no confirmation shown");
-  assert.equal(link.parentElement.hidden, false, "the send link should be visible");
   assert.equal(scrollBox.scrollTop, 0);
 });
 

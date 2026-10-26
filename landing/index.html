@@ -70,10 +70,7 @@ body {
   /* clip, not hidden: hidden forces overflow-y to auto, which makes body the
      scroll container and breaks position: sticky and Lenis */
   overflow-x: clip;
-  /* Visible by default. The loader is an opaque sheet on top, so nothing
-     flashes — but the page can no longer be left invisible if the reveal
-     script never runs. That was the black, unresponsive screen. */
-  opacity: 1;
+  opacity: 0;
 }
 
 /* Backgrounds must always reach the viewport edges */
@@ -114,21 +111,7 @@ body {
   justify-content: center;
   align-items: center;
   color: #fff;
-  /* Fail-safe. If GSAP never loads — a blocked CDN, a parse error, JS off —
-     nothing would ever move this opaque sheet and the site would sit behind a
-     black screen forever. CSS clears it on its own after six seconds. */
-  animation: loader-escape 0.6s ease 6s forwards;
 }
-@keyframes loader-escape {
-  to { transform: translateY(-100%); visibility: hidden; }
-}
-
-/* Turned on by the guard below when an animation library is missing: show
-   everything the animations would have revealed, in its final state. */
-html.no-anim .hero-text span,
-html.no-anim .word-inner { transform: none !important; }
-html.no-anim .hero-fade { opacity: 1 !important; }
-html.no-anim .card-inner { transform: none !important; opacity: 1 !important; }
 .loader-text {
   font-family: var(--font-display);
   font-size: 4vw;
@@ -334,19 +317,7 @@ html.no-anim .card-inner { transform: none !important; opacity: 1 !important; }
 }
 
 /* --- logo sizing helpers --- */
-/* The wordmark is a raster PNG, so there is no font-weight to raise. Stacking a
-   few hairline same-colour shadows fattens the strokes the way a bolder weight
-   would, without resampling or softening the edges. */
-.nav-logo {
-  height: 26px;
-  width: auto;
-  display: block;
-  filter:
-    drop-shadow(0.5px 0 0 #fff)
-    drop-shadow(-0.5px 0 0 #fff)
-    drop-shadow(0 0.5px 0 #fff)
-    drop-shadow(0 -0.5px 0 #fff);
-}
+.nav-logo { height: 26px; width: auto; display: block; }
 .footer-logo { height: 34px; width: auto; margin: 0 auto 2rem; }
 
 /* Hero gets a soft scrim so the display type stays legible on any crop */
@@ -510,53 +481,6 @@ body { overscroll-behavior-y: none; }
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.15) 100%);
-}
-
-/* --- FOOTER NAVIGATION ---
-   These four carry the whole site now that the bar has no in-page links, so
-   they read as real navigation rather than small print: heavier weight, wider
-   tracking, brighter colour, and a rule that moves as you hover.
-
-   They arrive one after another rather than all at once. The reveal is CSS so
-   it still happens if the animation library never loads; the observer below
-   simply adds .is-in. */
-.footer-sticky .footer-nav a {
-  position: relative;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  color: #b9b6ae;
-  padding-bottom: 0.35rem;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    color 0.25s ease,
-    opacity 0.5s ease,
-    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.footer-sticky .footer-nav.is-in a { opacity: 1; transform: none; }
-.footer-sticky .footer-nav.is-in a:nth-child(1) { transition-delay: 0.05s; }
-.footer-sticky .footer-nav.is-in a:nth-child(2) { transition-delay: 0.13s; }
-.footer-sticky .footer-nav.is-in a:nth-child(3) { transition-delay: 0.21s; }
-.footer-sticky .footer-nav.is-in a:nth-child(4) { transition-delay: 0.29s; }
-
-.footer-sticky .footer-nav a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 1px;
-  width: 0;
-  background: #fff;
-  transition: width 0.3s ease;
-}
-.footer-sticky .footer-nav a:hover,
-.footer-sticky .footer-nav a:focus-visible { color: #fff; }
-.footer-sticky .footer-nav a:hover::after,
-.footer-sticky .footer-nav a:focus-visible::after { width: 100%; }
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-sticky .footer-nav a { opacity: 1; transform: none; transition: color 0.2s ease; }
-  .loader { animation: none; }
 }
 
 /* --- NAV BAR ---
@@ -1328,31 +1252,19 @@ body.wl-open { overflow: hidden; }
 
 <script src="assets/js/config.js"></script>
 <script>
-  // Everything below used to assume GSAP, ScrollTrigger and Lenis had loaded
-  // from their CDNs. One blocked request threw on the very first line, which
-  // killed this entire script block: no loader animation, no menu, no waitlist,
-  // and — because the loader is an opaque full-screen sheet — a black page that
-  // ignored every click. The page now degrades to a static, working site.
-  const HAS_ANIM = !!(window.gsap && window.ScrollTrigger);
-  const HAS_SMOOTH_SCROLL = !!window.Lenis;
+  gsap.registerPlugin(ScrollTrigger);
 
-  if (!HAS_ANIM) document.documentElement.classList.add('no-anim');
-  if (HAS_ANIM) window.gsap.registerPlugin(window.ScrollTrigger);
-
-  let lenis = null;
-  if (HAS_SMOOTH_SCROLL) {
-    lenis = new window.Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      smooth: true,
-    });
-    const raf = (time) => {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    };
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    direction: 'vertical',
+    smooth: true,
+  });
+  function raf(time) {
+    lenis.raf(time);
     requestAnimationFrame(raf);
   }
+  requestAnimationFrame(raf);
 
   // Splits text into word spans for the reveal animation.
   //
@@ -1393,37 +1305,16 @@ body.wl-open { overflow: hidden; }
     splitIntoWords(original, el);
   });
 
-  // Puts the page in its finished state and gets the loader out of the way.
-  // Safe to call twice: the script and the fail-safe timer can both reach it.
-  let siteRevealed = false;
-  function revealSite() {
-    if (siteRevealed) return;
-    siteRevealed = true;
-    document.body.style.opacity = 1;
-    const loader = document.querySelector('.loader');
-    if (loader) {
-      loader.style.pointerEvents = 'none';
-      loader.style.visibility = 'hidden';
+  const loadTl = gsap.timeline({
+    onComplete: () => {
+      document.body.style.opacity = 1;
+      initSite();
     }
-    if (HAS_ANIM) {
-      try { initSite(); } catch (err) { console.warn('Animations skipped:', err); }
-    }
-  }
+  });
 
-  if (HAS_ANIM) {
-    const loadTl = gsap.timeline({ onComplete: revealSite });
-    loadTl.to('.loader-bar', { width: '100%', duration: 1.2, ease: 'power2.inOut' })
-          .to('.loader-text', { y: -30, opacity: 0, duration: 0.4 })
-          .to('.loader', { yPercent: -100, duration: 0.8, ease: 'power4.inOut' });
-  } else {
-    // No GSAP: drop the loader now, and let the CSS .no-anim rules show the
-    // hero and headings in their final state.
-    revealSite();
-  }
-
-  // Belt and braces. If the timeline stalls for any reason, the page still
-  // becomes usable within five seconds instead of staying behind the loader.
-  setTimeout(revealSite, 5000);
+  loadTl.to('.loader-bar', { width: '100%', duration: 1.2, ease: 'power2.inOut' })
+        .to('.loader-text', { y: -30, opacity: 0, duration: 0.4 })
+        .to('.loader', { yPercent: -100, duration: 0.8, ease: 'power4.inOut' });
 
   function initSite() {
     gsap.to('.hero-text span', {
@@ -1515,7 +1406,7 @@ body.wl-open { overflow: hidden; }
       menuLabel.textContent = 'CLOSE';
       mobileMenu.hidden = false;
       requestAnimationFrame(() => mobileMenu.classList.add('open'));
-      if (typeof lenis !== 'undefined' && lenis) lenis.stop();
+      if (window.lenis) window.lenis.stop();
     } else {
       document.body.classList.remove('menu-open');
       menuToggle.setAttribute('aria-expanded', 'false');
@@ -1523,7 +1414,7 @@ body.wl-open { overflow: hidden; }
       menuLabel.textContent = 'MENU';
       mobileMenu.classList.remove('open');
       setTimeout(() => { if (!mobileMenu.classList.contains('open')) mobileMenu.hidden = true; }, 250);
-      if (typeof lenis !== 'undefined' && lenis) lenis.start();
+      if (window.lenis) window.lenis.start();
       // Unwind the entry we pushed, so history stays clean.
       if (!opts.skipHistory && menuIsHistoryEntry()) window.history.back();
     }
@@ -1551,23 +1442,6 @@ body.wl-open { overflow: hidden; }
     });
   }
 
-  // Footer navigation reveal. Kept out of the GSAP block so the links still
-  // appear when the animation library fails to load.
-  (function revealFooterNav() {
-    const nav = document.querySelector('.footer-nav');
-    if (!nav) return;
-    if (!('IntersectionObserver' in window)) { nav.classList.add('is-in'); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          nav.classList.add('is-in');
-          io.disconnect();
-        }
-      });
-    }, { threshold: 0.4 });
-    io.observe(nav);
-  })();
-
   // Smooth-scroll the in-page links through Lenis
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', (e) => {
@@ -1576,8 +1450,7 @@ body.wl-open { overflow: hidden; }
       const target = document.querySelector(id);
       if (!target) return;
       e.preventDefault();
-      if (typeof lenis !== 'undefined' && lenis) lenis.scrollTo(target, { offset: -20 });
-      else target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      lenis.scrollTo(target, { offset: -20 });
     });
   });
 
@@ -1662,14 +1535,14 @@ body.wl-open { overflow: hidden; }
       document.body.classList.add('wl-open');
       waitlist.hidden = false;
       requestAnimationFrame(() => waitlist.classList.add('open'));
-      if (typeof lenis !== 'undefined' && lenis) lenis.stop();
+      if (typeof lenis !== 'undefined') lenis.stop();
 
       const firstStop = waitlist.querySelector('.wl-close');
       if (firstStop) firstStop.focus({ preventScroll: true });
     } else {
       waitlist.classList.remove('open');
       document.body.classList.remove('wl-open');
-      if (typeof lenis !== 'undefined' && lenis) lenis.start();
+      if (typeof lenis !== 'undefined') lenis.start();
 
       setTimeout(() => {
         if (waitlist.classList.contains('open')) return;
@@ -1768,24 +1641,15 @@ body.wl-open { overflow: hidden; }
           waitlistMailto.href = `mailto:${WAITLIST_INBOX}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
 
-        // No relay configured: offer the answers by email.
-        //
-        // This used to assign window.location.href, which hands the whole tab
-        // to a mail handler. With no default client registered the browser does
-        // nothing at all — the button looked frozen and the dialog sat there
-        // unresponsive. The link is offered instead, and sending is the
-        // visitor's choice.
+        // No relay configured: hand the answers to the visitor's mail app.
         if (!WAITLIST_ENDPOINT) {
-          if (waitlistDoneTitle) waitlistDoneTitle.textContent = "You're nearly on the list";
+          if (waitlistDoneTitle) waitlistDoneTitle.textContent = "You're on the list";
           if (waitlistDoneCopy) {
             waitlistDoneCopy.textContent =
-              'Open the link below to send your details to us. It will open your email app with everything filled in.';
-          }
-          if (waitlistMailto) {
-            waitlistMailto.textContent = 'Send my details by email';
-            waitlistMailto.parentElement.hidden = false;
+              'Your email app should have opened with your details ready to send. If it did not, use the link below.';
           }
           showWaitlistDone();
+          window.location.href = waitlistMailto.href;
           return;
         }
 
