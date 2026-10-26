@@ -356,12 +356,57 @@ body {
 .mobile-menu-link:focus-visible { color: var(--c-accent); }
 .mobile-menu-link.accent { border-bottom: none; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--c-accent); }
 
+/* Calls to action inside the menu. Full-width pills rather than list rows, so
+   they read as actions and not as another destination. */
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1.5rem 0 0.75rem;
+}
+.mobile-menu-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.95rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.mobile-menu-cta--primary { background: var(--c-accent); }
+.mobile-menu-cta--primary:hover,
+.mobile-menu-cta--primary:focus-visible { background: var(--c-accent-deep); }
+.mobile-menu-cta--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.mobile-menu-cta--secondary:hover,
+.mobile-menu-cta--secondary:focus-visible { background: rgba(255, 255, 255, 0.18); }
+
+/* The extra pills can outgrow a short screen; let the panel scroll instead of
+   clipping the first link off the top. */
+.mobile-menu { overflow-y: auto; overscroll-behavior: contain; }
+@media (max-height: 640px) {
+  .mobile-menu { justify-content: flex-start; padding-top: 5.5rem; }
+}
+
 /* The toggle sits above the overlay so it can always close it */
 #menuToggle { position: relative; z-index: 70; }
 body.menu-open #menuToggle { mix-blend-mode: normal; color: #fff; }
-/* The panel is z-60; the nav is z-50, which would put the CLOSE button behind
-   the overlay and make it unclickable. Lift the nav above it while open. */
-body.menu-open nav { mix-blend-mode: normal; z-index: 70; }
+/* The panel is z-60; the bar is z-50, which would put the CLOSE button behind
+   the overlay and make it unclickable. Lift the bar above it while open. */
+body.menu-open .nav-inner { mix-blend-mode: normal; }
+body.menu-open .nav-shell { z-index: 70; }
 
 html { -webkit-text-size-adjust: 100%; }
 body { overscroll-behavior-y: none; }
@@ -437,6 +482,358 @@ body { overscroll-behavior-y: none; }
   inset: 0;
   background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.15) 100%);
 }
+
+/* --- NAV BAR ---
+   Logo left, two pills right — no container, and no in-page links.
+
+   Platform / How It Works / For Hospitals / Contact were removed from the bar
+   by request. Navigation now lives in the footer row below "Get in Touch" on
+   desktop, and in the menu on mobile.
+
+   The rounded glass panel that used to wrap this row is gone: only the
+   contents remain, sitting directly on the page. Layout, widths and spacing
+   are unchanged, so everything holds exactly the position it had inside the
+   panel.
+
+   The row is not a single blended group: mix-blend-difference inverts colour,
+   which is right for white type but would turn the accent pills orange. The
+   blend lives on the logo, links and menu toggle individually, so the buttons
+   render true on both the dark hero and the pale body. */
+.nav-shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0.9rem clamp(0.75rem, 3vw, 1.75rem);
+  pointer-events: none;
+}
+.nav-inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  /* Padding kept from the panel version so nothing shifts now that the
+     background, border, radius, blur and shadow are gone. */
+  padding: 0.45rem 0.5rem 0.45rem 1.1rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.nav-blend { mix-blend-mode: difference; color: #fff; }
+
+.nav-cta {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+/* Below 768px the bar keeps only the logo and the menu toggle; everything else
+   lives in the menu, which is unchanged. */
+@media (min-width: 768px) {
+  .nav-cta { display: flex; }
+  .nav-inner { padding-left: 1.1rem; }
+  /* Deliberately small: logo + four links + two pills has to clear 768px
+     without wrapping. It grows back at 1180px. */
+  .cta-pill { font-size: 0.5rem; letter-spacing: 0.09em; padding: 0.62rem 0.85rem; }
+}
+
+/* Roomy enough to breathe at laptop width and up. */
+@media (min-width: 1180px) {
+  .cta-pill { font-size: 0.58rem; letter-spacing: 0.12em; padding: 0.75rem 1.15rem; }
+  .nav-inner { padding-left: 1.5rem; }
+}
+
+.cta-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.78rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Solid fills, deliberately. The bar floats over both the dark hero and the
+   pale page body, so a text-only button would vanish on one of them. */
+.cta-pill--primary { background: #fff; color: var(--c-dark); }
+.cta-pill--primary:hover,
+.cta-pill--primary:focus-visible { background: var(--c-accent); color: #fff; }
+
+.cta-pill--secondary {
+  background: rgba(18, 18, 18, 0.92);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.cta-pill--secondary:hover,
+.cta-pill--secondary:focus-visible { background: rgba(38, 38, 38, 0.98); }
+
+/* On the pale sections the white pill disappears and the dark one is the only
+   legible fill, so the pair swaps roles rather than colours. */
+.cta-pill--onlight { background: var(--c-dark); color: var(--c-bg); }
+.cta-pill--onlight:hover,
+.cta-pill--onlight:focus-visible { background: var(--c-accent); color: #fff; }
+
+.cta-pill--outline {
+  background: transparent;
+  color: var(--c-dark);
+  border-color: rgba(0, 0, 0, 0.25);
+}
+.cta-pill--outline:hover,
+.cta-pill--outline:focus-visible { background: var(--c-dark); color: var(--c-bg); border-color: var(--c-dark); }
+
+/* --- WAITLIST DIALOG ---
+   Same material as the mobile menu: a dark translucent wash with a blurred
+   backdrop. The panel itself is glass too, so the page stays visible behind
+   the form rather than cutting to a solid sheet. */
+.wl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(12, 12, 12, 0.48);
+  backdrop-filter: blur(22px) saturate(115%);
+  -webkit-backdrop-filter: blur(22px) saturate(115%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.wl-overlay[hidden] { display: none; }
+.wl-overlay.open { opacity: 1; }
+
+.wl-panel {
+  position: relative;
+  width: 100%;
+  max-width: 41rem;
+  max-height: min(90svh, 54rem);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  background: rgba(18, 18, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 1.25rem;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  transform: translateY(14px) scale(0.985);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+}
+.wl-overlay.open .wl-panel { transform: none; }
+
+.wl-scroll {
+  /* flex + min-height:0 so the form scrolls inside the panel instead of
+     overflowing it; without these a column flex child refuses to shrink. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2.25rem 2rem 2.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+.wl-scroll::-webkit-scrollbar { width: 6px; }
+.wl-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); border-radius: 3px; }
+
+.wl-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.wl-close:hover,
+.wl-close:focus-visible { background: rgba(255, 255, 255, 0.2); }
+
+.wl-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+.wl-intro {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.55;
+  margin: 0 0 1.6rem;
+  max-width: 34ch;
+}
+
+.wl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+@media (max-width: 520px) { .wl-row { grid-template-columns: 1fr; gap: 0; } }
+
+.wl-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.95rem; }
+
+.wl-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+}
+.wl-label .req { color: var(--c-accent); }
+
+.wl-input,
+.wl-select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.6rem;
+  padding: 0.8rem 0.9rem;
+  outline: none;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+.wl-input::placeholder { color: rgba(255, 255, 255, 0.38); }
+.wl-input:focus,
+.wl-select:focus {
+  border-color: var(--c-accent);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+/* Native select: keep the OS list readable — its popup does not inherit the
+   glass, so the option colours have to be set explicitly. */
+.wl-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffffff' stroke-opacity='0.7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 14px;
+  cursor: pointer;
+}
+.wl-select option { color: #121212; background: #ffffff; }
+
+.wl-input[type="tel"] { letter-spacing: 0.02em; }
+
+.wl-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 1rem 1.25rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--c-accent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.wl-submit:hover,
+.wl-submit:focus-visible { background: var(--c-accent-deep); }
+.wl-submit:active { transform: scale(0.995); }
+
+.wl-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+}
+.wl-note a { color: rgba(255, 255, 255, 0.8); text-decoration: underline; }
+
+/* Confirmation replaces the form in place; the dialog stays open so the
+   submitter is not left wondering whether anything happened. */
+.wl-success { text-align: center; padding: 1rem 0 0.5rem; }
+.wl-success h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 1rem 0 0.75rem;
+}
+.wl-success p {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 auto 1.4rem;
+  max-width: 32ch;
+}
+.wl-success-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(0, 106, 254, 0.2);
+  border: 1px solid rgba(0, 106, 254, 0.5);
+  color: #6fa8ff;
+}
+.wl-success .cta-pill { font-size: 0.6rem; }
+.wl-success-link {
+  display: inline-block;
+  color: #fff;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.75;
+  word-break: break-all;
+}
+
+body.wl-open { overflow: hidden; }
+
+@media (max-width: 768px) {
+  .wl-overlay { padding: 0; align-items: stretch; }
+  .wl-panel {
+    max-width: none;
+    max-height: 100svh;
+    height: 100svh;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .wl-scroll { padding: 4.5rem 1.25rem 2rem; }
+  .wl-close { top: 1rem; right: 1rem; }
+}
+
+/* Two pills that share the row without the tracked label wrapping */
+.cta-stack { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: center; }
 </style>
 </head>
 <body class="antialiased">
@@ -450,31 +847,41 @@ body { overscroll-behavior-y: none; }
 </div>
 
 <!-- NAVIGATION -->
-<nav class="fixed top-0 w-full p-8 flex justify-between items-center z-50 mix-blend-difference text-white">
-  <a href="#" class="flex items-center gap-3" aria-label="Unmute home">
-    <img src="assets/img/unmute-logo-white.png" alt="Unmute" class="nav-logo">
-  </a>
-  <div class="hidden md:flex gap-10 text-xs uppercase tracking-widest font-medium items-center">
-    <a href="#services" class="hover:text-gray-400 transition-colors">Platform</a>
-    <a href="#how" class="hover:text-gray-400 transition-colors">How It Works</a>
-    <a href="#pricing" class="hover:text-gray-400 transition-colors">For Hospitals</a>
-    <a href="#contact" class="hover:text-gray-400 transition-colors">Contact</a>
-  </div>
-  <button id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu"
-          class="md:hidden text-xs tracking-widest flex items-center gap-2 cursor-pointer bg-transparent border-0 text-white p-0">
-    <span id="menuLabel">MENU</span>
-    <iconify-icon icon="solar:hamburger-menu-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
-  </button>
-</nav>
+<div class="nav-shell">
+  <nav class="nav-inner" aria-label="Primary">
+    <a href="#" class="nav-blend flex items-center shrink-0" aria-label="Unmute home">
+      <img src="assets/img/unmute-logo-white.png" alt="Unmute" class="nav-logo">
+    </a>
+
+    <!-- Two calls to action. The second becomes “Book a demo” once the MVP is
+         live; until then it collects non-binding letters of intent. -->
+    <div class="nav-cta">
+      <button type="button" data-waitlist-open class="cta-pill cta-pill--primary">Join the waitlist</button>
+      <a href="loi.html" class="cta-pill cta-pill--secondary">Letter of intent</a>
+    </div>
+
+    <button id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu"
+            class="nav-blend md:hidden text-xs tracking-widest flex items-center gap-2 cursor-pointer bg-transparent border-0 text-white p-0 shrink-0">
+      <span id="menuLabel">MENU</span>
+      <iconify-icon icon="solar:hamburger-menu-linear" stroke-width="1.5" class="text-xl"></iconify-icon>
+    </button>
+  </nav>
+</div>
 
 
 
 <!-- MOBILE MENU (outside <nav>: nav uses mix-blend-difference, which would tint the overlay) -->
-<div id="mobileMenu" class="mobile-menu md:hidden" hidden>
+<div id="mobileMenu" class="mobile-menu lg:hidden" hidden>
   <a href="#services" class="mobile-menu-link">Platform</a>
   <a href="#how" class="mobile-menu-link">How It Works</a>
   <a href="#pricing" class="mobile-menu-link">For Hospitals</a>
   <a href="#contact" class="mobile-menu-link">Contact</a>
+
+  <div class="mobile-menu-actions">
+    <button type="button" data-waitlist-open class="mobile-menu-cta mobile-menu-cta--primary">Join the waitlist</button>
+    <a href="loi.html" class="mobile-menu-cta mobile-menu-cta--secondary">Letter of intent</a>
+  </div>
+
   <a href="mailto:contact@liveunmute.com" class="mobile-menu-link accent">contact@liveunmute.com</a>
 </div>
 
@@ -673,9 +1080,14 @@ body { overscroll-behavior-y: none; }
   <section id="contact" class="py-40 bg-[#E3E1DC] text-center flex flex-col items-center justify-center relative z-10 px-6">
     <img src="assets/img/unmute-mark.png" alt="" class="h-12 w-auto mb-8" aria-hidden="true">
     <h2 class="display text-2xl md:text-4xl mb-8 tracking-tight font-semibold">Every voice deserves to be heard.</h2>
-    <div class="max-w-xl text-gray-600 font-light mb-12 leading-relaxed text-base md:text-lg">
+    <div class="max-w-xl text-gray-600 font-light mb-10 leading-relaxed text-base md:text-lg">
       If you run a hospital, clinic or care team and want to communicate directly with Deaf patients, we would like to hear how your ward works today.
     </div>
+    <div class="cta-stack mb-10">
+      <button type="button" data-waitlist-open class="cta-pill cta-pill--onlight">Join the waitlist</button>
+      <a href="loi.html" class="cta-pill cta-pill--outline">Letter of intent</a>
+    </div>
+    <p class="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium mb-10 -mt-4">Early access opens with our first pilot sites</p>
     <a href="mailto:contact@liveunmute.com" class="contact-cta">
       contact@liveunmute.com
     </a>
@@ -708,6 +1120,137 @@ body { overscroll-behavior-y: none; }
   </picture>
 </footer>
 
+<!-- WAITLIST DIALOG -->
+<div id="waitlist" class="wl-overlay" role="dialog" aria-modal="true" aria-labelledby="waitlistTitle" aria-describedby="waitlistIntro" hidden>
+  <div class="wl-panel">
+    <button type="button" class="wl-close" data-waitlist-close aria-label="Close the waitlist form">
+      <iconify-icon icon="solar:close-circle-linear" stroke-width="1.5" class="text-2xl"></iconify-icon>
+    </button>
+
+    <div class="wl-scroll">
+      <div id="waitlistFormView">
+        <h2 class="wl-title" id="waitlistTitle">Join the waitlist</h2>
+        <p class="wl-intro" id="waitlistIntro">Tell us a little about you so we can tailor early access.</p>
+
+        <form id="waitlistForm">
+          <div class="wl-row">
+            <div class="wl-field">
+              <label class="wl-label" for="wlFirstName">First name <span class="req">*</span></label>
+              <input class="wl-input" id="wlFirstName" name="firstName" type="text" autocomplete="given-name" placeholder="Ada" required>
+            </div>
+            <div class="wl-field">
+              <label class="wl-label" for="wlLastName">Last name <span class="req">*</span></label>
+              <input class="wl-input" id="wlLastName" name="lastName" type="text" autocomplete="family-name" placeholder="Okafor" required>
+            </div>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlEmail">Email address <span class="req">*</span></label>
+            <input class="wl-input" id="wlEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlPhone">Phone number</label>
+            <input class="wl-input" id="wlPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+234 800 000 0000">
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlRole">Which best describes you?</label>
+            <select class="wl-select" id="wlRole" name="role">
+              <option value="">Select an option</option>
+              <option>Individual</option>
+              <option>Parent / Caregiver</option>
+              <option>Educator</option>
+              <option>Healthcare professional</option>
+              <option>Business / Employer</option>
+              <option>Government / Public service</option>
+              <option>School / University</option>
+              <option>Accessibility organisation</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlNeeds">What best describes your communication needs?</label>
+            <select class="wl-select" id="wlNeeds" name="needs">
+              <option value="">Select an option</option>
+              <option>I am Deaf or hard of hearing</option>
+              <option>I communicate primarily using sign language</option>
+              <option>I regularly communicate with someone who uses sign language</option>
+              <option>I need accessibility support for work or education</option>
+              <option>I am exploring accessibility solutions for my organisation</option>
+              <option>None of the above</option>
+            </select>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlAudience">Who would you primarily use Unmute with?</label>
+            <select class="wl-select" id="wlAudience" name="audience">
+              <option value="">Select an option</option>
+              <option>Family and friends</option>
+              <option>Customers or clients</option>
+              <option>Colleagues</option>
+              <option>Students</option>
+              <option>Patients</option>
+              <option>Employees</option>
+              <option>Public service providers</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlPurpose">What would you most like to use Unmute for?</label>
+            <select class="wl-select" id="wlPurpose" name="purpose">
+              <option value="">Select an option</option>
+              <option>Everyday conversations</option>
+              <option>Work and meetings</option>
+              <option>Education and learning</option>
+              <option>Healthcare</option>
+              <option>Customer service</option>
+              <option>Travel and public services</option>
+              <option>Content creation</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="wl-field">
+            <label class="wl-label" for="wlInterest">How interested are you in trying Unmute when it launches?</label>
+            <select class="wl-select" id="wlInterest" name="interest">
+              <option value="">Select an option</option>
+              <option>Very interested — I want early access</option>
+              <option>Interested — keep me updated</option>
+              <option>I want to learn more first</option>
+              <option>Just exploring</option>
+            </select>
+          </div>
+
+          <button type="submit" class="wl-submit">Join the waitlist</button>
+
+          <p class="wl-note">
+            We use these answers only to decide who gets early access.
+            Prefer email? Write to <a href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>.
+          </p>
+        </form>
+      </div>
+
+      <div id="waitlistDone" class="wl-success" role="status" aria-live="polite" hidden>
+        <div class="wl-success-icon">
+          <iconify-icon icon="solar:check-read-linear" stroke-width="1.5" class="text-2xl"></iconify-icon>
+        </div>
+        <h3 id="waitlistDoneTitle">You're on the list</h3>
+        <p id="waitlistDoneCopy">
+          Your email app should have opened with your details ready to send. If it didn't, use the link below.
+        </p>
+        <a class="wl-success-link" id="waitlistMailto" href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>
+        <div class="mt-6">
+          <button type="button" data-waitlist-close class="cta-pill cta-pill--primary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/config.js"></script>
 <script>
   gsap.registerPlugin(ScrollTrigger);
 
@@ -910,6 +1453,230 @@ body { overscroll-behavior-y: none; }
       lenis.scrollTo(target, { offset: -20 });
     });
   });
+
+  // --- Waitlist dialog ---
+  //
+  // Answers go to the Apps Script relay configured in assets/js/config.js,
+  // which appends them to the waitlist Sheet in Drive. No email is sent for a
+  // waitlist signup: only letters of intent notify.
+  //
+  // With no relay configured the form falls back to a pre-filled email, so a
+  // preview build never silently swallows a signup.
+  const CONFIG = (typeof window !== 'undefined' && window.UNMUTE_CONFIG) || {};
+  const WAITLIST_ENDPOINT = CONFIG.relayUrl || '';
+  const WAITLIST_INBOX = CONFIG.inbox || 'contact@liveunmute.com';
+
+  // Posts to the relay. `no-cors` plus a text/plain body keeps this a "simple"
+  // request so the browser sends no preflight, which Apps Script would reject.
+  // The cost is that the reply is unreadable — one request, never retried, so
+  // nothing is ever written twice.
+  async function postToRelay(endpoint, payload) {
+    if (!endpoint) return { ok: false, reason: 'unconfigured' };
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return { ok: false, reason: 'offline' };
+    }
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      });
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, reason: 'network' };
+    }
+  }
+
+  const waitlist = document.getElementById('waitlist');
+  const waitlistForm = document.getElementById('waitlistForm');
+  const waitlistFormView = document.getElementById('waitlistFormView');
+  const waitlistDone = document.getElementById('waitlistDone');
+  const waitlistDoneTitle = document.getElementById('waitlistDoneTitle');
+  const waitlistDoneCopy = document.getElementById('waitlistDoneCopy');
+  const waitlistMailto = document.getElementById('waitlistMailto');
+
+  let waitlistReturnFocus = null;
+  let waitlistWasSubmitted = false;
+
+  const waitlistIsOpen = () => !!waitlist && waitlist.classList.contains('open');
+  const waitlistIsHistoryEntry = () =>
+    !!(window.history.state && window.history.state.unmuteWaitlist);
+
+  // Answers, in the order they should appear in the email.
+  const WAITLIST_FIELDS = [
+    ['First name', 'firstName'],
+    ['Last name', 'lastName'],
+    ['Email address', 'email'],
+    ['Phone number', 'phone'],
+    ['Which best describes you?', 'role'],
+    ['Communication needs', 'needs'],
+    ['Primarily used with', 'audience'],
+    ['Most like to use Unmute for', 'purpose'],
+    ['Interest', 'interest'],
+  ];
+
+  function setWaitlist(open, opts) {
+    if (!waitlist) return;
+    opts = opts || {};
+
+    if (open) {
+      // The menu and the dialog are both full-screen overlays; opening one
+      // has to close the other or the CLOSE button sits under the dialog.
+      if (document.body.classList.contains('menu-open')) {
+        if (menuIsHistoryEntry()) window.history.replaceState(null, '');
+        setMenu(false, { skipHistory: true });
+      }
+
+      if (!waitlistIsHistoryEntry()) {
+        window.history.pushState({ unmuteWaitlist: true }, '');
+      }
+      waitlistReturnFocus = document.activeElement;
+      document.body.classList.add('wl-open');
+      waitlist.hidden = false;
+      requestAnimationFrame(() => waitlist.classList.add('open'));
+      if (typeof lenis !== 'undefined') lenis.stop();
+
+      const firstStop = waitlist.querySelector('.wl-close');
+      if (firstStop) firstStop.focus({ preventScroll: true });
+    } else {
+      waitlist.classList.remove('open');
+      document.body.classList.remove('wl-open');
+      if (typeof lenis !== 'undefined') lenis.start();
+
+      setTimeout(() => {
+        if (waitlist.classList.contains('open')) return;
+        waitlist.hidden = true;
+        // A finished signup should come back as a clean form next time.
+        if (waitlistWasSubmitted && waitlistForm) {
+          waitlistForm.reset();
+          waitlistWasSubmitted = false;
+          if (waitlistFormView) waitlistFormView.hidden = false;
+          if (waitlistDone) waitlistDone.hidden = true;
+        }
+      }, 250);
+
+      if (waitlistReturnFocus && typeof waitlistReturnFocus.focus === 'function') {
+        waitlistReturnFocus.focus({ preventScroll: true });
+      }
+      waitlistReturnFocus = null;
+
+      if (!opts.skipHistory && waitlistIsHistoryEntry()) window.history.back();
+    }
+  }
+
+  function showWaitlistDone() {
+    waitlistWasSubmitted = true;
+    if (waitlistFormView) waitlistFormView.hidden = true;
+    if (waitlistDone) waitlistDone.hidden = false;
+    const scroller = waitlist.querySelector('.wl-scroll');
+    if (scroller) scroller.scrollTop = 0;
+    const primary = waitlistDone && waitlistDone.querySelector('[data-waitlist-close]');
+    if (primary) primary.focus({ preventScroll: true });
+  }
+
+  if (waitlist) {
+    // Any element can open the dialog, so the handler is delegated: the nav
+    // pill, the mobile menu pill and the closing section all use one hook.
+    document.addEventListener('click', (e) => {
+      const opener = e.target.closest && e.target.closest('[data-waitlist-open]');
+      if (opener) {
+        e.preventDefault();
+        setWaitlist(true);
+        return;
+      }
+      const closer = e.target.closest && e.target.closest('[data-waitlist-close]');
+      if (closer && waitlist.contains(closer)) {
+        e.preventDefault();
+        setWaitlist(false);
+      }
+    });
+
+    // Clicking the blurred area outside the panel dismisses it.
+    waitlist.addEventListener('click', (e) => {
+      if (e.target === waitlist) setWaitlist(false);
+    });
+
+    // Escape closes; Tab is kept inside the panel while it is open.
+    document.addEventListener('keydown', (e) => {
+      if (!waitlistIsOpen()) return;
+
+      if (e.key === 'Escape') {
+        setWaitlist(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = [...waitlist.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([type="hidden"]), select, textarea'
+      )].filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    window.addEventListener('popstate', () => {
+      if (!waitlistIsHistoryEntry()) setWaitlist(false, { skipHistory: true });
+    });
+
+    if (waitlistForm) {
+      waitlistForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = new FormData(waitlistForm);
+        const answers = WAITLIST_FIELDS.map(([label, key]) => [label, String(data.get(key) || '').trim()]);
+        const name = [data.get('firstName'), data.get('lastName')].filter(Boolean).join(' ').trim();
+        const subject = name ? `Waitlist — ${name}` : 'Waitlist signup';
+        const body = answers.map(([label, value]) => `${label}: ${value || '—'}`).join('\n');
+
+        if (waitlistMailto) {
+          waitlistMailto.href = `mailto:${WAITLIST_INBOX}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        // No relay configured: hand the answers to the visitor's mail app.
+        if (!WAITLIST_ENDPOINT) {
+          if (waitlistDoneTitle) waitlistDoneTitle.textContent = "You're on the list";
+          if (waitlistDoneCopy) {
+            waitlistDoneCopy.textContent =
+              'Your email app should have opened with your details ready to send. If it did not, use the link below.';
+          }
+          showWaitlistDone();
+          window.location.href = waitlistMailto.href;
+          return;
+        }
+
+        const payload = { kind: 'waitlist' };
+        answers.forEach(([label, value]) => { payload[label] = value; });
+
+        const result = await postToRelay(WAITLIST_ENDPOINT, payload);
+
+        if (result.ok) {
+          if (waitlistDoneTitle) waitlistDoneTitle.textContent = "You're on the list";
+          if (waitlistDoneCopy) {
+            waitlistDoneCopy.textContent =
+              'We have your details and will be in touch when early access opens.';
+          }
+          if (waitlistMailto && waitlistMailto.parentElement) waitlistMailto.parentElement.hidden = true;
+        } else {
+          // Do not lose a signup because the relay was unreachable.
+          if (waitlistDoneTitle) waitlistDoneTitle.textContent = 'Almost there';
+          if (waitlistDoneCopy) {
+            waitlistDoneCopy.textContent =
+              'We could not reach the server. Your details are ready to send by email instead — use the link below.';
+          }
+        }
+        showWaitlistDone();
+      });
+    }
+  }
 </script>
 
 </body>

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter of Intent | Unmute</title>
+<meta name="description" content="A non-binding letter of intent to evaluate and deploy Unmute — two-way sign-language communication for healthcare.">
+<meta name="robots" content="noindex">
+
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#E3E1DC">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;600;700&family=Caveat:wght@500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --c-bg: #E3E1DC;
+  --c-dark: #121212;
+  --c-accent: #006AFE;
+  --c-accent-deep: #0056cc;
+  --c-line: rgba(18, 18, 18, 0.14);
+  --c-muted: #6b6b66;
+  --font-display: 'Syncopate', sans-serif;
+  --font-body: 'Pretendard', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-dark);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+/* --- header --- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem clamp(1.25rem, 5vw, 4rem);
+}
+.site-header img { height: 24px; width: auto; display: block; }
+.back-link {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--c-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+}
+.back-link:hover,
+.back-link:focus-visible { color: var(--c-accent); }
+
+/* --- page head --- */
+.page-head {
+  text-align: center;
+  padding: 2.5rem 1.25rem 2.5rem;
+}
+.page-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+.page-head p {
+  margin: 0 auto;
+  max-width: 46ch;
+  color: var(--c-muted);
+  font-size: 1rem;
+}
+
+/* --- card --- */
+.sheet {
+  background: #F7F6F3;
+  border: 1px solid var(--c-line);
+  border-radius: 0.5rem;
+  max-width: 56rem;
+  margin: 0 auto 4rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.4);
+}
+
+.section + .section {
+  margin-top: 2.75rem;
+  padding-top: 2.75rem;
+  border-top: 1px solid var(--c-line);
+}
+.section > h2 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0 0 1.5rem;
+}
+.section-note {
+  margin: -0.9rem 0 1.4rem;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+  max-width: 62ch;
+}
+
+.field { margin-bottom: 1.15rem; }
+.field:last-child { margin-bottom: 0; }
+
+.label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+  color: #35342f;
+}
+.req { color: var(--c-accent); }
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: var(--c-dark);
+  background: #fff;
+  border: 1px solid rgba(18, 18, 18, 0.18);
+  border-radius: 0.4rem;
+  padding: 0.75rem 0.85rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.textarea { min-height: 5.5rem; resize: vertical; line-height: 1.5; }
+.input::placeholder,
+.textarea::placeholder { color: #9b9a94; }
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(0, 106, 254, 0.14);
+}
+.select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2355534f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.85rem center; background-size: 14px;
+}
+.hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--c-muted);
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+@media (max-width: 620px) { .two-col { grid-template-columns: 1fr; } }
+
+/* --- use-case checkboxes --- */
+fieldset.plain { border: 0; padding: 0; margin: 0 0 1.3rem; }
+fieldset.plain legend { padding: 0; margin-bottom: 0.45rem; }
+
+.check-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+@media (max-width: 620px) { .check-grid { grid-template-columns: 1fr; } }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(18, 18, 18, 0.16);
+  border-radius: 0.4rem;
+  background: #fff;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.check:hover { border-color: rgba(0, 106, 254, 0.45); }
+.check input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  border: 1.5px solid #a8a7a0;
+  border-radius: 9999px;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.check input:checked { border-color: var(--c-accent); background: var(--c-accent); box-shadow: inset 0 0 0 3px #fff; }
+.check input:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.check:has(input:checked) { border-color: var(--c-accent); background: rgba(0, 106, 254, 0.06); }
+
+/* --- signature --- */
+.sig-tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: #ebe9e4;
+  border: 1px solid rgba(18, 18, 18, 0.12);
+  border-radius: 0.45rem;
+  padding: 0.25rem;
+  width: fit-content;
+  margin-bottom: 0.75rem;
+}
+.sig-tab {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 0;
+  background: transparent;
+  color: var(--c-muted);
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.sig-tab[aria-selected="true"] { background: #fff; color: var(--c-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+.sig-surface {
+  position: relative;
+  border: 1px solid rgba(18, 18, 18, 0.18);
+  border-radius: 0.4rem;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(18,18,18,0.05) 27px, rgba(18,18,18,0.05) 28px),
+    #fff;
+  overflow: hidden;
+}
+.sig-canvas { display: block; width: 100%; height: 9.5rem; touch-action: none; cursor: crosshair; }
+.sig-typed {
+  width: 100%;
+  height: 9.5rem;
+  border: 0;
+  background: transparent;
+  font-family: 'Caveat', cursive;
+  font-size: 2.6rem;
+  color: #16181d;
+  padding: 0 1rem;
+  outline: none;
+}
+.sig-typed::placeholder { color: #bfbdb6; font-size: 1.5rem; }
+.sig-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.6rem; }
+.sig-clear {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #fff;
+  border: 1px solid rgba(18, 18, 18, 0.2);
+  border-radius: 9999px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.sig-clear:hover { border-color: var(--c-dark); }
+.sig-status { font-size: 0.78rem; color: var(--c-muted); }
+
+/* --- submit --- */
+.actions { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--c-line); }
+.submit {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 9999px;
+  padding: 1.05rem 1.5rem;
+  background: var(--c-accent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.submit:hover,
+.submit:focus-visible { background: var(--c-accent-deep); }
+.legal {
+  margin: 1rem auto 0;
+  max-width: 60ch;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--c-muted);
+  line-height: 1.6;
+}
+
+.error-summary {
+  display: none;
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid #c62828;
+  background: rgba(198, 40, 40, 0.07);
+  color: #8c1c1c;
+  font-size: 0.86rem;
+  border-radius: 0 0.35rem 0.35rem 0;
+}
+.error-summary.show { display: block; }
+.field.invalid .input,
+.field.invalid .textarea,
+.field.invalid .select,
+fieldset.plain.invalid .check { border-color: #c62828; }
+
+/* --- confirmation --- */
+.confirmation {
+  display: none;
+  max-width: 40rem;
+  margin: 0 auto 4.5rem;
+  padding: 2.5rem clamp(1.25rem, 4vw, 2.5rem);
+  background: #F7F6F3;
+  border: 1px solid var(--c-line);
+  border-radius: 0.5rem;
+  text-align: center;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.4);
+}
+.confirmation.show { display: block; }
+.confirmation h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0 0 0.8rem;
+}
+.confirmation p {
+  color: var(--c-muted);
+  font-size: 0.92rem;
+  margin: 0 auto 1.4rem;
+  max-width: 42ch;
+}
+.confirmation a.inline {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--c-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-all;
+}
+
+.site-footer {
+  border-top: 1px solid var(--c-line);
+  padding: 2rem clamp(1.25rem, 5vw, 4rem) 3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--c-muted);
+}
+.site-footer a { text-decoration: none; }
+.site-footer a:hover { color: var(--c-accent); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+@media print {
+  .site-header, .back-link, .site-footer, .submit, .sig-tabs, .sig-clear { display: none !important; }
+  .sheet { box-shadow: none; border: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" aria-label="Unmute home">
+    <img src="assets/img/unmute-logo-trimmed.png" alt="Unmute">
+  </a>
+  <a class="back-link" href="index.html">&larr; Back to site</a>
+</header>
+
+<div class="page-head">
+  <h1>Letter of Intent</h1>
+  <p>Non-binding statement of intent to evaluate and deploy Unmute.</p>
+</div>
+
+<main>
+  <form class="sheet" id="loiForm" novalidate>
+    <div class="error-summary" id="errors" role="alert" tabindex="-1"></div>
+
+    <section class="section">
+      <h2>Organisation</h2>
+
+      <div class="field">
+        <label class="label" for="orgName">Legal Name <span class="req">*</span></label>
+        <input class="input" id="orgName" name="orgName" type="text" autocomplete="organization" required>
+      </div>
+
+      <div class="field">
+        <label class="label" for="orgAddress">Registered Address <span class="req">*</span></label>
+        <textarea class="textarea" id="orgAddress" name="orgAddress" rows="3" autocomplete="street-address" required></textarea>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Intended Scope of Engagement</h2>
+
+      <fieldset class="plain" id="useCaseField">
+        <legend class="label">Use case <span class="req">*</span> <span class="hint" style="display:inline;text-transform:none;letter-spacing:0;font-weight:300">(select all that apply)</span></legend>
+        <div class="check-grid">
+          <label class="check"><input type="checkbox" name="useCase" value="Patient–provider communication (healthcare)"> Patient–provider communication (healthcare)</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Accessible internal meetings"> Accessible internal meetings</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Inclusive learning / education"> Inclusive learning / education</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Customer service / front-desk"> Customer service / front-desk</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Public services / government"> Public services / government</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Events &amp; conferences"> Events &amp; conferences</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Workplace accessibility / HR"> Workplace accessibility / HR</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Transport &amp; travel"> Transport &amp; travel</label>
+          <label class="check"><input type="checkbox" name="useCase" value="Other"> Other</label>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label class="label" for="scale">Indicative deployment scale <span class="req">*</span></label>
+        <input class="input" id="scale" name="scale" type="text" placeholder="e.g. 5 sites, 200 users, 50 seats" required>
+      </div>
+
+      <div class="field">
+        <label class="label" for="usage">Estimated annual usage <span class="req">*</span></label>
+        <select class="select" id="usage" name="usage" required>
+          <option value="">Select estimated annual usage</option>
+          <option>Under 1,000 signed minutes</option>
+          <option>1,000 – 10,000 signed minutes</option>
+          <option>10,000 – 50,000 signed minutes</option>
+          <option>Over 50,000 signed minutes</option>
+          <option>Not yet known</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Authorised Signatory</h2>
+      <p class="section-note">By signing below, you confirm authority to sign on behalf of the Organisation. This LOI is non-binding.</p>
+
+      <div class="two-col">
+        <div class="field">
+          <label class="label" for="sigName">Name <span class="req">*</span></label>
+          <input class="input" id="sigName" name="sigName" type="text" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label class="label" for="sigTitle">Title <span class="req">*</span></label>
+          <select class="select" id="sigTitle" name="sigTitle" required>
+            <option value="">Select title</option>
+            <option>Doctor / Physician</option>
+            <option>Nurse</option>
+            <option>Clinical Lead</option>
+            <option>Department Head</option>
+            <option>Administrator</option>
+            <option>Procurement</option>
+            <option>IT / Digital</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label class="label" for="sigEmail">Email Address <span class="req">*</span></label>
+          <input class="input" id="sigEmail" name="sigEmail" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label class="label" for="sigPhone">Phone Number <span class="req">*</span></label>
+          <input class="input" id="sigPhone" name="sigPhone" type="tel" autocomplete="tel" required>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label class="label" for="country">Country <span class="req">*</span></label>
+          <input class="input" id="country" name="country" type="text" autocomplete="country-name" required>
+        </div>
+        <div class="field">
+          <label class="label" for="date">Date <span class="req">*</span></label>
+          <input class="input" id="date" name="date" type="text" readonly>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="sigLabel">Signature <span class="req">*</span></span>
+
+        <div class="sig-tabs" role="tablist" aria-label="Signature method">
+          <button type="button" class="sig-tab" id="tabDraw" role="tab" aria-selected="true" aria-controls="sigDrawPanel">Draw Signature</button>
+          <button type="button" class="sig-tab" id="tabType" role="tab" aria-selected="false" aria-controls="sigTypePanel">Type Signature</button>
+        </div>
+
+        <div id="sigDrawPanel" role="tabpanel" aria-labelledby="tabDraw">
+          <div class="sig-surface">
+            <canvas class="sig-canvas" id="sigCanvas" aria-label="Draw your signature here"></canvas>
+          </div>
+          <div class="sig-foot">
+            <button type="button" class="sig-clear" id="sigClear">Clear</button>
+            <span class="sig-status" id="sigStatus">Sign in the box above</span>
+          </div>
+        </div>
+
+        <div id="sigTypePanel" role="tabpanel" aria-labelledby="tabType" hidden>
+          <div class="sig-surface">
+            <input class="sig-typed" id="sigTyped" type="text" placeholder="Type your full name" autocomplete="off">
+          </div>
+          <div class="sig-foot">
+            <button type="button" class="sig-clear" id="sigTypedClear">Clear</button>
+            <span class="sig-status">Typed signatures are recorded as text</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="submit" class="submit">Submit Letter of Intent</button>
+      <p class="legal">
+        This letter is non-binding and creates no obligation on either party. It is used to scope an
+        evaluation of Unmute. Details are sent to <a href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>.
+      </p>
+    </div>
+  </form>
+
+  <div class="confirmation" id="confirmation">
+    <h2>Letter of intent prepared</h2>
+    <p id="confirmationCopy">
+      Your email app should have opened with the letter ready to send. If it did not, use the link below and we will pick it up from there.
+    </p>
+    <a class="inline" id="confirmationMailto" href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>
+    <p style="margin-top:1.5rem">
+      <a class="inline" href="index.html">Return to unmute</a>
+    </p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <span>&copy; 2026 Unmute. All rights reserved.</span>
+  <a href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // The letter is posted to the Apps Script relay configured in
+  // assets/js/config.js. That relay saves it as a Google Doc in
+  // "10 Letters of Intent" and emails the link to the inbox below — the LOI is
+  // the only form that notifies anyone; the waitlist is silent.
+  //
+  // With no relay configured the letter is handed to the signatory's mail app
+  // instead, so a preview build still produces something sendable.
+  var CONFIG = (typeof window !== 'undefined' && window.UNMUTE_CONFIG) || {};
+  var LOI_ENDPOINT = CONFIG.relayUrl || '';
+  var LOI_INBOX = CONFIG.inbox || 'contact@liveunmute.com';
+
+  // `no-cors` + text/plain keeps this a "simple" request, avoiding the
+  // preflight Apps Script rejects. The reply is therefore unreadable, so a
+  // single request is sent and never retried: no duplicate letters.
+  function postToRelay(endpoint, payload) {
+    return new Promise(function (resolve) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        resolve({ ok: false, reason: 'offline' });
+        return;
+      }
+      fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      }).then(function () {
+        resolve({ ok: true });
+      }).catch(function () {
+        resolve({ ok: false, reason: 'network' });
+      });
+    });
+  }
+
+  var form = document.getElementById('loiForm');
+  var errors = document.getElementById('errors');
+  var confirmation = document.getElementById('confirmation');
+  var confirmationCopy = document.getElementById('confirmationCopy');
+  var confirmationMailto = document.getElementById('confirmationMailto');
+  var useCaseField = document.getElementById('useCaseField');
+
+  // --- date, filled in on load ---
+  var dateField = document.getElementById('date');
+  var today = new Date();
+  dateField.value = today.getDate() + ' ' +
+    today.toLocaleString('en-GB', { month: 'long' }) + ' ' +
+    today.getFullYear();
+
+  // --- signature: draw or type ---
+  var tabDraw = document.getElementById('tabDraw');
+  var tabType = document.getElementById('tabType');
+  var drawPanel = document.getElementById('sigDrawPanel');
+  var typePanel = document.getElementById('sigTypePanel');
+  var canvas = document.getElementById('sigCanvas');
+  var typed = document.getElementById('sigTyped');
+  var sigStatus = document.getElementById('sigStatus');
+  var mode = 'draw';
+  var drawn = false;
+
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+
+  function sizeCanvas() {
+    if (!ctx) return;
+    var rect = canvas.getBoundingClientRect();
+    if (!rect.width) return;
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#16181d';
+  }
+  sizeCanvas();
+  window.addEventListener('resize', function () {
+    // Resizing clears the bitmap; keep the drawn state honest.
+    sizeCanvas();
+    drawn = false;
+    sigStatus.textContent = 'Sign in the box above';
+  });
+
+  var pointerDown = false;
+  var lastPoint = null;
+
+  function pointFrom(evt) {
+    var rect = canvas.getBoundingClientRect();
+    return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+  }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    if (!ctx) return;
+    pointerDown = true;
+    lastPoint = pointFrom(e);
+    canvas.setPointerCapture(e.pointerId);
+    // A tap with no movement still counts as a mark.
+    ctx.beginPath();
+    ctx.arc(lastPoint.x, lastPoint.y, 1, 0, Math.PI * 2);
+    ctx.fillStyle = '#16181d';
+    ctx.fill();
+    drawn = true;
+    sigStatus.textContent = 'Signature captured';
+  });
+  // A drawn mark is recorded as "[drawn signature]": a mailto link cannot
+  // carry the bitmap, so the letter notes how it was signed.
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (!ctx || !pointerDown) return;
+    var p = pointFrom(e);
+    ctx.beginPath();
+    ctx.moveTo(lastPoint.x, lastPoint.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    lastPoint = p;
+  });
+
+  function endStroke() { pointerDown = false; lastPoint = null; }
+  canvas.addEventListener('pointerup', endStroke);
+  canvas.addEventListener('pointercancel', endStroke);
+  canvas.addEventListener('pointerleave', endStroke);
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawn = false;
+    sigStatus.textContent = 'Sign in the box above';
+  }
+  document.getElementById('sigClear').addEventListener('click', clearSignature);
+  document.getElementById('sigTypedClear').addEventListener('click', function () {
+    typed.value = '';
+    typed.focus();
+  });
+
+  function setMode(next) {
+    mode = next;
+    var isDraw = next === 'draw';
+    tabDraw.setAttribute('aria-selected', String(isDraw));
+    tabType.setAttribute('aria-selected', String(!isDraw));
+    drawPanel.hidden = !isDraw;
+    typePanel.hidden = isDraw;
+    if (!isDraw) typed.focus();
+  }
+  tabDraw.addEventListener('click', function () { setMode('draw'); });
+  tabType.addEventListener('click', function () { setMode('type'); });
+
+  function signatureValue() {
+    if (mode === 'type') return typed.value.trim();
+    return drawn ? '[drawn signature]' : '';
+  }
+
+  // --- validation ---
+  function collect() {
+    var data = new FormData(form);
+    var useCases = data.getAll('useCase');
+    var out = [
+      ['Organisation', data.get('orgName')],
+      ['Registered address', data.get('orgAddress')],
+      ['Use case', useCases.join('; ')],
+      ['Indicative deployment scale', data.get('scale')],
+      ['Estimated annual usage', data.get('usage')],
+      ['Signatory name', data.get('sigName')],
+      ['Title', data.get('sigTitle')],
+      ['Email', data.get('sigEmail')],
+      ['Phone', data.get('sigPhone')],
+      ['Country', data.get('country')],
+      ['Date', data.get('date')],
+      ['Signature', signatureValue()],
+    ];
+    return { rows: out, useCases: useCases };
+  }
+
+  function markInvalid(el, on) {
+    var field = el.closest('.field') || el;
+    field.classList.toggle('invalid', !!on);
+  }
+
+  function validate() {
+    var problems = [];
+    var required = ['orgName', 'orgAddress', 'scale', 'usage', 'sigName', 'sigTitle', 'sigEmail', 'sigPhone', 'country'];
+
+    required.forEach(function (name) {
+      var el = form.elements[name];
+      if (!el) return;
+      var bad = !String(el.value || '').trim();
+      markInvalid(el, bad);
+      if (bad) problems.push(el);
+    });
+
+    var data = new FormData(form);
+    if (!data.getAll('useCase').length) {
+      useCaseField.classList.add('invalid');
+      problems.push(useCaseField);
+    } else {
+      useCaseField.classList.remove('invalid');
+    }
+
+    if (!signatureValue()) {
+      problems.push(mode === 'type' ? typed : canvas);
+    }
+
+    return problems;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var problems = validate();
+    if (problems.length) {
+      errors.textContent = problems.length === 1
+        ? 'One required field still needs an answer.'
+        : problems.length + ' required fields still need an answer.';
+      errors.classList.add('show');
+      errors.focus();
+      var first = problems[0];
+      if (first.scrollIntoView) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    errors.classList.remove('show');
+
+    var collected = collect();
+    var org = (new FormData(form).get('orgName') || '').toString().trim();
+    var subject = 'Letter of Intent — ' + org;
+    var body = collected.rows.map(function (row) {
+      return row[0] + ': ' + (row[1] || '—');
+    }).join('\n') + '\n\nThis letter of intent is non-binding.';
+
+    var href = 'mailto:' + LOI_INBOX +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(body);
+    confirmationMailto.href = href;
+
+    if (!LOI_ENDPOINT) {
+      form.hidden = true;
+      confirmation.classList.add('show');
+      confirmation.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.location.href = href;
+      return;
+    }
+
+    var payload = { kind: 'loi' };
+    collected.rows.forEach(function (row) {
+      payload[row[0]] = row[1] || '';
+    });
+
+    postToRelay(LOI_ENDPOINT, payload).then(function (result) {
+      confirmationCopy.textContent = result.ok
+        ? 'Your letter has been saved and a link to it has been sent to our team. We will be in touch to scope an evaluation.'
+        : 'We could not reach the server. Your letter is ready to send by email instead — use the link below.';
+      form.hidden = true;
+      confirmation.classList.add('show');
+      confirmation.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

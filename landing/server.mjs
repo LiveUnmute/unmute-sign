@@ -33,11 +33,23 @@ const server = createServer(async (req, res) => {
     if (path === "/") path = "/index.html";
 
     const safe = normalize(path).replace(/^(\.\.[/\\])+/, "");
-    const file = join(ROOT, safe);
+    let file = join(ROOT, safe);
 
     if (!file.startsWith(ROOT)) {
       res.writeHead(403, { "Cache-Control": "no-store" }).end("Forbidden");
       return;
+    }
+
+    // Pretty URLs: Netlify serves /loi for loi.html, so local development
+    // should too, or a link that works in production 404s here.
+    if (!extname(file)) {
+      const html = `${file}.html`;
+      try {
+        await stat(html);
+        file = html;
+      } catch {
+        /* fall through to the 404 below */
+      }
     }
 
     const info = await stat(file);

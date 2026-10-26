@@ -77,7 +77,9 @@ ok("menu backdrop is translucent, not opaque", () => {
 });
 
 ok("the CLOSE button stays above the overlay", () => {
-  assert.match(css, /body\.menu-open nav\s*\{[^}]*z-index:\s*70/);
+  // The bar is .nav-shell now that it floats as a pill; the rule that lifts it
+  // above the menu panel has to follow it there.
+  assert.match(css, /body\.menu-open \.nav-shell\s*\{[^}]*z-index:\s*70/);
   const menuZ = Number((css.slice(css.indexOf(".mobile-menu {")).match(/z-index:\s*(\d+)/) || [])[1]);
   assert.ok(70 > (menuZ || 0), "nav must outrank the panel or the button is unreachable");
 });
