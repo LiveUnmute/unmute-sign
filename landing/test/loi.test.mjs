@@ -107,9 +107,13 @@ ok("a filled letter prepares the email and confirms", () => {
   submit();
 
   assert.equal(errors.classList.contains("show"), false, "validated fields still flagged");
-  assert.ok(win.location.href.startsWith("mailto:contact@liveunmute.com?subject="), win.location.href);
+  // No automatic navigation: the link is offered instead.
+  assert.equal(win.location.href, "", "the page navigated away on submit");
 
-  const decoded = decodeURIComponent(win.location.href);
+  const link = document.getElementById("confirmationMailto");
+  assert.ok(link.href.startsWith("mailto:contact@liveunmute.com?subject="), link.href);
+
+  const decoded = decodeURIComponent(link.href);
   for (const phrase of [
     "Benue Specialist Hospital",
     "Patient–provider communication (healthcare)",
@@ -127,7 +131,7 @@ ok("a filled letter prepares the email and confirms", () => {
 });
 
 ok("the typed name is used as the signature value", () => {
-  const decoded = decodeURIComponent(win.location.href);
+  const decoded = decodeURIComponent(document.getElementById("confirmationMailto").href);
   assert.match(decoded, /Signature: Amaka Ije/);
 });
 
