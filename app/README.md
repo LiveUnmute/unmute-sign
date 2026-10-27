@@ -1,19 +1,17 @@
 # App screens
 
-Three phone screens, built to a supplied visual reference.
+Four screens, in Unmute's own design language.
 
 ```
 app/
-├── index.html      the three screens side by side (the reference composition)
-├── app.html        one phone you can drive — screen switch, capture, mic
-├── css/app.css     all styling
-├── js/screens.js   the three screens as markup, shared by both pages
-├── js/app.js       launcher mount + the simulation
-├── assets/         signer.jpg, hands.jpg, favicon.ico
+├── index.html      all four screens side by side (the board)
+├── app.html        one phone you can drive — tabs, both directions, toggles
+├── css/app.css     all styling, tokens taken from the website
+├── js/screens.js   the four screens as markup, shared by both pages
+├── js/app.js       board mount + the simulation
+├── assets/         signer.jpg, hands.jpg, logo, favicon
 └── server.mjs      static server on :8083
 ```
-
-Run it:
 
 ```bash
 cd app && PORT=8083 node server.mjs
@@ -21,42 +19,55 @@ cd app && PORT=8083 node server.mjs
 
 No build step, no dependencies.
 
-## What the reference supplied, and what it didn't
+## The four screens
 
-The reference supplied **layout only**: a blue field, three devices, a warm hero
-card with a stacked pair of action buttons, a full-bleed camera view with a
-tracking box and a caption sheet, and a thread with a signed-reply tile over a
-single mic. That structure is reproduced.
+**01 Home** — the entry point. Dark hero card, the single action
+`Speak to patient`, two recent encounters, tab bar. The `Translate sign`
+button is gone on purpose: the Sign screen carries both directions, so a
+second entry button on Home only duplicated it.
 
-The content is Unmute's own. The reference is a social product — its hero card
-is a community panel, its feed is user posts. That belongs to a different
-product, so the same slots hold the clinical version: recent conversations, a
-198-phrase library, an ASL/English direction pair.
+**02 Sign** — the two-way screen. Full-bleed camera with a tracking frame and a
+confidence read-out, a bone caption sheet, and **two buttons of equal weight**:
+the hand (patient signs) and speech (clinician speaks). Those are the only
+controls on the screen — no library, no camera flip, no share row.
+
+**03 History** — past encounters, grouped by day, with duration and a flag on
+the one that needs attention.
+
+**04 Settings** — language pair, capture behaviour, accessibility, and the
+consent switch that governs whether a capture is ever stored.
+
+## Where the design comes from
+
+Not invented. Taken from `landing/index.html`:
+
+| Token | Value | Source |
+|---|---|---|
+| Bone | `#E3E1DC` | `--c-bg` |
+| Ink | `#121212` | `--c-dark` |
+| Blue | `#006AFE` | `--c-accent` |
+| Deep blue | `#0056CC` | `--c-accent-deep` |
+| Display | Syncopate, uppercase, `letter-spacing: .13–.2em` | `--font-display` |
+| Body | Pretendard | `--font-body` |
+
+Buttons are pills, cards are near-square, section breaks are 1px hairlines —
+the same conventions as the site. The wordmark is the real
+`unmute-logo-trimmed.png`, copied in so the folder is portable.
+
+Type is loaded from the same CDNs the landing page uses, so the letterforms
+match exactly rather than approximately.
 
 ## This is a prototype, and it says so
 
-There is no model. The capture button cycles five fixed phrases, the microphone
-plays three fixed questions. Both pages say that in plain language, on the page,
-because the deck's own status slide says there is no trained model and a design
-build that quietly implies otherwise would undercut it.
+There is no model. The hand button cycles four fixed signed phrases; the
+speech button plays three fixed questions. Both pages say that in plain
+language, because the deck's status slide says there is no trained model and a
+design build that quietly implied otherwise would undercut it.
 
 Photography is illustrative and licence-free, not a customer.
 
-## Screens
-
-**01 Home** — warm hero card ("Sign with your patient"), primary
-`Translate sign`, secondary `Speak to patient`, two recent items, four-tab bar.
-
-**02 Translate** — full-bleed video, blue tracking box with a confidence chip, a
-scanning sweep, and a white sheet carrying the recognised phrase with a shutter
-and two secondary controls. The `DEMO` chip is always visible.
-
-**03 Conversation** — ASL↔English direction pair with a swap control, a signed
-patient bubble, a spoken clinician bubble, a signed-reply video tile with a
-progress bar, and a single mic.
-
 ## Open thread
 
-The layout is fixed at a 288×596 device. When this becomes a real screen it
-should be built responsive — a 375-wide phone is the common case on the ward,
-and the current fixed width will feel small there.
+The device is fixed at 292×606 to match the reference proportion. On a real
+375-wide phone the screens should be rebuilt to fill the viewport rather than
+sitting in a frame.

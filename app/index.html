@@ -4,29 +4,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unmute — app screens</title>
-<meta name="description" content="Three app screens: home, sign translation, two-way conversation.">
+<meta name="description" content="Four app screens: home, sign, history, settings.">
+<meta name="theme-color" content="#E3E1DC">
 <link rel="icon" href="assets/favicon.ico">
+
+<!-- Same type stack as liveunmute.com -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
-<main class="field">
-  <header class="field-head">
-    <div class="field-kicker">Unmute · product screens</div>
-    <h1 class="field-title">Three screens, one conversation.</h1>
-    <p class="field-sub">
-      What a clinician opens on the ward: recognise the sign, speak back,
-      and keep both directions in one thread.
-    </p>
+<main class="board">
+  <header class="board-head">
+    <div>
+      <img src="assets/unmute-logo-trimmed.png" alt="Unmute" class="board-logo">
+      <h1 class="board-title">Four screens.<br>One conversation.</h1>
+    </div>
+    <div class="board-meta">
+      <div>App design</div>
+      <div><b>October 2026</b></div>
+      <div>v1</div>
+    </div>
   </header>
 
   <div class="rack" id="rack" aria-label="App screens"></div>
 
-  <p class="field-foot">
-    Photography is illustrative. The sign recognition is simulated —
-    the deck says there is no trained model, and this build does not pretend otherwise.
-    <br>Click any phone for the interactive version.
-  </p>
+  <footer class="board-foot">
+    <p>
+      Photography is illustrative. The recognition is simulated — the pitch deck states
+      there is no trained model, and this build does not pretend otherwise.
+    </p>
+    <span class="tag">Unmute · 2026</span>
+  </footer>
 </main>
 
 <script type="module" src="js/app.js"></script>

@@ -1,62 +1,40 @@
-// The three screens, as markup. Shared by the launcher and the interactive page
-// so the two can never drift apart.
+// The four screens, as markup. Shared by the board and the interactive page.
 //
-// Content note: the supplied reference supplies layout only. Everything a person
-// reads here is Unmute's own — a hospital conversation, not a social feed.
+//   01 Home       the entry point — hero, one action, recent history
+//   02 Sign       the two-way screen: patient signs ⇄ clinician speaks
+//   03 History    past encounters
+//   04 Settings   capture, accessibility, data
+//
+// Copy is Unmute's. Layout follows the supplied reference; the visual
+// language (Syncopate, bone/ink/blue, hairline rules) is the website's.
 
 export const ICONS = {
-  hand: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M8.2 13.2V5.6a1.55 1.55 0 0 1 3.1 0V12"/>
-    <path d="M11.3 12V4.5a1.55 1.55 0 0 1 3.1 0V12"/>
-    <path d="M14.4 12V6.6a1.55 1.55 0 0 1 3.1 0V14.6"/>
-    <path d="M8.2 13.2v-1.4a1.55 1.55 0 0 0-3.1 0v4.1a6.1 6.1 0 0 0 6.1 6.1h1.2a6.1 6.1 0 0 0 6.1-6.1v-2.1"/>
+  home: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 10.2 12 3.7l8.4 6.5V20a.9.9 0 0 1-.9.9H4.5a.9.9 0 0 1-.9-.9v-9.8Z"/><path d="M9.6 20.9v-6.3h4.8v6.3"/></svg>`,
+
+  // open palm — the sign direction
+  hand: `<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.5 13.4V6.2a1.4 1.4 0 0 1 2.8 0v5.6"/>
+    <path d="M11.3 11.8V4.7a1.4 1.4 0 0 1 2.8 0v7.1"/>
+    <path d="M14.1 11.8V6.6a1.4 1.4 0 0 1 2.8 0v7.2"/>
+    <path d="M8.5 13.4v-1.1a1.4 1.4 0 0 0-2.8 0v3.9a5.9 5.9 0 0 0 5.9 5.9h1.1a5.9 5.9 0 0 0 5.9-5.9v-2.1"/>
   </svg>`,
 
-  mark: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M8.2 13.2V5.6a1.55 1.55 0 0 1 3.1 0V12"/>
-    <path d="M11.3 12V4.5a1.55 1.55 0 0 1 3.1 0V12"/>
-    <path d="M14.4 12V6.6a1.55 1.55 0 0 1 3.1 0V14.6"/>
-    <path d="M8.2 13.2v-1.4a1.55 1.55 0 0 0-3.1 0v4.1a6.1 6.1 0 0 0 6.1 6.1h1.2a6.1 6.1 0 0 0 6.1-6.1v-2.1"/>
+  // speech — the speaking direction
+  speech: `<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.4 11.6a7.7 7.7 0 0 1-8.3 7.6 8.9 8.9 0 0 1-2.4-.4L4.6 20.4l1.3-3.9a7.6 7.6 0 0 1-1.3-4.4 7.7 7.7 0 0 1 7.9-7.6h.4a7.7 7.7 0 0 1 7.5 7.1Z"/>
+    <path d="M9.2 11.6h.01"/><path d="M12.4 11.6h.01"/><path d="M15.6 11.6h.01"/>
   </svg>`,
 
-  mic: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>
-  </svg>`,
+  clock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 2"/></svg>`,
 
-  kebab: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>`,
+  gear: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.1 14.4a1.5 1.5 0 0 0 .3 1.7l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.5 1.5 0 0 0-2.6 1.1v.2a1.9 1.9 0 1 1-3.8 0v-.1a1.5 1.5 0 0 0-2.6-1.1l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.5 1.5 0 0 0-1.1-2.6h-.2a1.9 1.9 0 1 1 0-3.8h.1a1.5 1.5 0 0 0 1.1-2.6l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.5 1.5 0 0 0 1.7.3h.1a1.5 1.5 0 0 0 .9-1.4v-.2a1.9 1.9 0 1 1 3.8 0v.1a1.5 1.5 0 0 0 2.6 1.1l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.5 1.5 0 0 0 1.1 2.6h.2a1.9 1.9 0 1 1 0 3.8h-.1a1.5 1.5 0 0 0-1.4.9Z"/></svg>`,
 
-  home: `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.3 12 3.6l8.5 6.7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-9.7Z"/><path d="M9.4 21v-6.6h5.2V21"/></svg>`,
-
-  camera: `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.8A2.3 2.3 0 0 1 5.3 6.5h1.4l1.2-2h8.2l1.2 2h1.4A2.3 2.3 0 0 1 21 8.8v9.4a2.3 2.3 0 0 1-2.3 2.3H5.3A2.3 2.3 0 0 1 3 18.2V8.8Z"/><circle cx="12" cy="13" r="3.6"/></svg>`,
-
-  chat: `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.7a8.2 8.2 0 0 1-8.9 8.1 9.4 9.4 0 0 1-2.6-.5L4 21l1.4-4.2A8.1 8.1 0 0 1 4 11.7 8.2 8.2 0 0 1 12.4 3.6h.5A8.2 8.2 0 0 1 21 11.7Z"/></svg>`,
-
-  gear: `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-2.8-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7h-.3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.1-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5v-.3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 2.8 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.3a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.5 1Z"/></svg>`,
-
-  back: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5 8 12l6.5 7"/></svg>`,
-
-  bookmark: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V5.5a1 1 0 0 1 1-1Z"/></svg>`,
-
-  copy: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M15 5.6A2.6 2.6 0 0 0 12.4 3H6.6A2.6 2.6 0 0 0 4 5.6v5.8A2.6 2.6 0 0 0 6.6 14"/></svg>`,
-
-  share: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5V3.5"/><path d="M7.6 7.9 12 3.5l4.4 4.4"/><path d="M5 14v5.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V14"/></svg>`,
-
-  edit: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 5.3 18.7 10.8"/><path d="M4 20.1 8.6 19 19.4 8.2a2.6 2.6 0 0 0-3.7-3.7L4.9 15.3 4 20.1Z"/></svg>`,
-
-  play: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px"><path d="M8 4.8c0-.9 1-1.5 1.8-1l9 6.4a1.7 1.7 0 0 1 0 2.8l-9 6.4c-.8.5-1.8-.1-1.8-1V4.8Z"/></svg>`,
-
-  swap: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h13"/><path d="M13.6 5.1 17 8.5l-3.4 3.4"/><path d="M20 15.5H7"/><path d="M10.4 12.1 7 15.5l3.4 3.4"/></svg>`,
-
-  chev: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 9 12 15.5 18.5 9"/></svg>`,
-
-  list: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1.1" fill="currentColor"/><circle cx="4" cy="12" r="1.1" fill="currentColor"/><circle cx="4" cy="18" r="1.1" fill="currentColor"/></svg>`,
-
-  flip: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v17"/><path d="M8.6 6.6H6.2a2.2 2.2 0 0 0-2.2 2.2v6.4a2.2 2.2 0 0 0 2.2 2.2h2.4"/><path d="M15.4 6.6h2.4a2.2 2.2 0 0 1 2.2 2.2v6.4a2.2 2.2 0 0 1-2.2 2.2h-2.4"/></svg>`,
+  chev: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg>`,
 };
 
-const SIG = `<svg width="15" height="10" viewBox="0 0 15 10" fill="currentColor"><rect x="0" y="6.2" width="2.5" height="3.8" rx="0.8"/><rect x="4.1" y="4.2" width="2.5" height="5.8" rx="0.8"/><rect x="8.2" y="2.1" width="2.5" height="7.9" rx="0.8"/><rect x="12.3" y="0" width="2.5" height="10" rx="0.8"/></svg>`;
-const WIFI = `<svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.6 5 7.4a2.9 2.9 0 0 1 4 0L7 9.6Z"/><path d="M3.5 5.7a5.5 5.5 0 0 1 7 0l-1.4 1.5a3.5 3.5 0 0 0-4.2 0L3.5 5.7Z"/><path d="M1.1 3.2a8.9 8.9 0 0 1 11.8 0l-1.4 1.5a6.9 6.9 0 0 0-9 0L1.1 3.2Z"/></svg>`;
-const BATT = `<svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x="0.5" y="0.6" width="18" height="9.8" rx="3" stroke="currentColor" stroke-opacity=".34"/><rect x="2" y="2.1" width="14.6" height="6.8" rx="1.7" fill="currentColor"/><path d="M20.1 3.7v3.6c.85-.28 1.25-.9 1.25-1.8s-.4-1.52-1.25-1.8Z" fill="currentColor" fill-opacity=".34"/></svg>`;
+const SIG = `<svg width="14" height="9" viewBox="0 0 14 9" fill="currentColor"><rect x="0" y="5.6" width="2.2" height="3.4" rx="0.7"/><rect x="3.8" y="3.8" width="2.2" height="5.2" rx="0.7"/><rect x="7.6" y="1.9" width="2.2" height="7.1" rx="0.7"/><rect x="11.4" y="0" width="2.2" height="9" rx="0.7"/></svg>`;
+const WIFI = `<svg width="13" height="9" viewBox="0 0 13 9" fill="currentColor"><path d="M6.5 8.7 4.7 6.7a2.6 2.6 0 0 1 3.6 0L6.5 8.7Z"/><path d="M3.3 5.1a5 5 0 0 1 6.4 0L8.4 6.4a3.2 3.2 0 0 0-3.8 0L3.3 5.1Z"/><path d="M1 2.8a8 8 0 0 1 11 0l-1.3 1.3a6.2 6.2 0 0 0-8.4 0L1 2.8Z"/></svg>`;
+const BATT = `<svg width="20" height="10" viewBox="0 0 20 10" fill="none"><rect x="0.4" y="0.5" width="16.4" height="9" rx="2.6" stroke="currentColor" stroke-opacity=".32"/><rect x="1.8" y="1.9" width="13.4" height="6.2" rx="1.5" fill="currentColor"/><path d="M18.3 3.4v3.2c.75-.25 1.1-.8 1.1-1.6s-.35-1.35-1.1-1.6Z" fill="currentColor" fill-opacity=".32"/></svg>`;
 
 const statusbar = (dark) => `
   <div class="statusbar${dark ? " is-on-dark" : ""}">
@@ -67,6 +45,27 @@ const statusbar = (dark) => `
 const homebar = (dark) =>
   `<div class="home-bar${dark ? " is-on-dark" : ""}"><span></span></div>`;
 
+const tabbar = (active) => {
+  const tabs = [
+    ["home", "home", "Home"],
+    ["sign", "hand", "Sign"],
+    ["history", "clock", "History"],
+    ["settings", "gear", "Settings"],
+  ];
+  return `
+  <div class="tabbar">
+    ${tabs
+      .map(
+        ([key, icon, label]) => `
+      <button class="tab${key === active ? " is-active" : ""}" data-go="${key}" aria-label="${label}"${key === active ? ' aria-current="page"' : ""}>
+        ${ICONS[icon]}
+        <span class="tab-label">${label}</span>
+      </button>`
+      )
+      .join("")}
+  </div>`;
+};
+
 /* ------------------------------------------------------------
    01 — HOME
    ------------------------------------------------------------ */
@@ -74,19 +73,17 @@ const homebar = (dark) =>
 export const renderHome = () => `
 <div class="screen">
   ${statusbar(false)}
-  <div class="topline">
-    <div class="brand">
-      <span class="mark">${ICONS.mark}</span>
-      <span class="brand-name">Unmute</span>
-    </div>
-    <button class="iconbtn" aria-label="More">${ICONS.kebab}</button>
+
+  <div class="appbar">
+    <img src="assets/unmute-logo-trimmed.png" alt="Unmute" class="wordmark">
+    <span class="appbar-note"><b>Hallway 4</b>St. Mary's</span>
   </div>
 
   <div class="home-body">
     <div class="hero">
-      <div class="hero-kicker">Two-way</div>
-      <div class="hero-title">Sign with your patient</div>
-      <div class="hero-sub">No interpreter. Both directions.</div>
+      <div class="kicker">Two-way · ASL ⇄ English</div>
+      <h1 class="hero-title">The conversation, both ways.</h1>
+      <p class="hero-sub">No interpreter on the ward — the patient signs, you speak, both are understood.</p>
       <div class="hero-people">
         <span class="pip pip--a"></span>
         <span class="pip pip--b"></span>
@@ -94,13 +91,13 @@ export const renderHome = () => `
       </div>
     </div>
 
-    <div class="stack">
-      <button class="btn btn--primary" data-go="translate">${ICONS.hand} Translate sign</button>
-      <button class="btn btn--ghost" data-go="chat">${ICONS.mic} Speak to patient</button>
-    </div>
+    <button class="cta" data-go="sign">
+      ${ICONS.speech}
+      Speak to patient
+    </button>
 
     <div class="section-head">
-      <span class="section-title">Recent</span>
+      <span class="kicker">Recent</span>
       <span class="section-link">See all</span>
     </div>
 
@@ -110,114 +107,207 @@ export const renderHome = () => `
         <span class="recent-title">Chest pain, two days</span>
         <span class="recent-meta">Signed reply · 2 min ago</span>
       </span>
-      <span class="recent-badge">Live</span>
+      <span class="recent-tag">Live</span>
     </div>
 
     <div class="recent">
       <span class="thumb thumb--b"></span>
       <span class="recent-text">
         <span class="recent-title">Allergies</span>
-        <span class="recent-meta">Saved phrase · 198 in library</span>
+        <span class="recent-meta">198 phrases in library</span>
       </span>
     </div>
   </div>
 
-  <div class="tabbar">
-    <span class="tab is-active">${ICONS.home}<i class="tab-dot"></i></span>
-    <span class="tab">${ICONS.camera}<i class="tab-dot"></i></span>
-    <span class="tab">${ICONS.chat}<i class="tab-dot"></i></span>
-    <span class="tab">${ICONS.gear}<i class="tab-dot"></i></span>
-  </div>
+  ${tabbar("home")}
   ${homebar(false)}
 </div>`;
 
 /* ------------------------------------------------------------
-   02 — TRANSLATE
+   02 — SIGN
+   The two-way screen. Two controls, equal weight:
+   patient signs (camera) or clinician speaks (voice).
    ------------------------------------------------------------ */
 
-export const renderTranslate = (caption = "My chest hurts. It started two days ago.") => `
-<div class="screen screen--stage">
+export const renderSign = () => `
+<div class="screen screen--camera">
   ${statusbar(true)}
   <div class="stage"></div>
-  <div class="sweep"></div>
 
   <div class="track">
+    <i></i><i></i><i></i><i></i>
     <span class="track-chip" data-chip>98%</span>
   </div>
 
   <span class="demo-chip">Demo</span>
 
-  <div class="stage-top">
-    <button class="backbtn" data-go="home" aria-label="Back">${ICONS.back}</button>
-  </div>
-
   <div class="sheet">
     <div class="sheet-head">
-      <span class="sheet-label">Patient signed</span>
-      <span class="sheet-actions">
-        <button class="mini" aria-label="Save">${ICONS.bookmark}</button>
-        <button class="mini" aria-label="Copy">${ICONS.copy}</button>
-        <button class="mini" aria-label="Share">${ICONS.share}</button>
-      </span>
+      <span class="sheet-kicker" data-kicker>Patient <b>signed</b></span>
     </div>
-    <p class="caption" data-caption>${caption}</p>
-    <div class="shutter-row">
-      <button class="round-ghost" aria-label="Phrase library">${ICONS.list}</button>
-      <button class="shutter" data-shutter aria-label="Capture sign">${ICONS.hand}</button>
-      <button class="round-ghost" aria-label="Flip camera">${ICONS.flip}</button>
+    <p class="caption" data-caption>My chest hurts.</p>
+
+    <div class="controls">
+      <div class="dir is-on" data-dir="sign">
+        <button class="dir-btn" data-mode="sign" aria-label="Patient signs">${ICONS.hand}</button>
+        <span class="dir-label">Sign</span>
+      </div>
+      <div class="dir" data-dir="speak">
+        <button class="dir-btn" data-mode="speak" aria-label="Clinician speaks">${ICONS.speech}</button>
+        <span class="dir-label">Speak</span>
+      </div>
     </div>
   </div>
+
+  ${tabbar("sign")}
   ${homebar(false)}
 </div>`;
 
 /* ------------------------------------------------------------
-   03 — CONVERSATION
+   03 — HISTORY
    ------------------------------------------------------------ */
 
-export const renderChat = () => `
+const ENCOUNTERS = [
+  {
+    group: "Today",
+    rows: [
+      ["Chest pain, two days", "09:38", "4 min", "Live"],
+      ["Allergies — penicillin", "09:12", "1 min", ""],
+      ["Discharge instructions", "08:54", "6 min", ""],
+    ],
+  },
+  {
+    group: "Yesterday",
+    rows: [
+      ["Where does it hurt?", "17:20", "3 min", ""],
+      ["Medication review", "14:05", "5 min", ""],
+      ["Consent for procedure", "11:47", "8 min", "Flagged"],
+    ],
+  },
+  {
+    group: "Earlier this week",
+    rows: [
+      ["Follow-up: dizziness", "Mon 16:30", "4 min", ""],
+    ],
+  },
+];
+
+export const renderHistory = () => `
 <div class="screen">
   ${statusbar(false)}
-  <div class="topbar">
-    <button class="backbtn backbtn--soft" data-go="home" aria-label="Back">${ICONS.back}</button>
-    <div class="lang-row">
-      <span class="lang"><span>Sign</span>${ICONS.chev}</span>
-      <button class="swap" data-swap aria-label="Swap direction">${ICONS.swap}</button>
-      <span class="lang"><span>English</span>${ICONS.chev}</span>
-    </div>
+
+  <div class="page-head">
+    <h1 class="page-title">History</h1>
+    <p class="page-sub">Every conversation is kept on device. Nothing leaves without consent.</p>
   </div>
 
-  <div class="chat-body" data-thread>
-    <div class="bubble">
-      <p>My chest hurts, and I get dizzy when I stand. It started two days ago.</p>
-      <div class="bubble-foot">
-        <span class="bubble-meta">Signed</span>
-        <button class="mini" style="width:23px;height:23px" aria-label="Speak">${ICONS.mic}</button>
-        <button class="mini" style="width:23px;height:23px" aria-label="Copy">${ICONS.copy}</button>
-        <button class="mini" style="width:23px;height:23px" aria-label="Edit">${ICONS.edit}</button>
-      </div>
-    </div>
-
-    <div class="bubble bubble--right">
-      <p>Where does it hurt, and when did it start?</p>
-      <div class="bubble-foot"><span class="bubble-meta bubble-meta--right">Spoken</span></div>
-    </div>
-
-    <div class="tile" data-tile>
-      <div class="tile-media"></div>
-      <span class="tile-tag">Signed reply</span>
-      <button class="tile-play" data-play aria-label="Play signed reply">${ICONS.play}</button>
-      <div class="tile-progress"><i></i></div>
-    </div>
+  <div class="list">
+    ${ENCOUNTERS.map(
+      (g) => `
+      <div class="list-group">${g.group}</div>
+      ${g.rows
+        .map(
+          ([title, time, dur, flag]) => `
+        <div class="row">
+          <span class="row-main">
+            <span class="row-title">${title}</span>
+            <span class="row-meta">${time}<i class="dot"></i>${dur}</span>
+          </span>
+          ${flag ? `<span class="row-flag${flag === "Live" ? " is-flag" : ""}">${flag}</span>` : ""}
+        </div>`
+        )
+        .join("")}`
+    ).join("")}
   </div>
 
-  <div class="mic-dock">
-    <button class="mic" data-mic aria-label="Hold to speak">${ICONS.mic}</button>
-    <span class="mic-hint" data-mic-hint>Hold to speak</span>
-  </div>
+  ${tabbar("history")}
   ${homebar(false)}
 </div>`;
 
-export const SCREENS = { home: renderHome, translate: renderTranslate, chat: renderChat };
+/* ------------------------------------------------------------
+   04 — SETTINGS
+   ------------------------------------------------------------ */
 
-export const device = (inner, extraClass = "") =>
-  `<div class="device ${extraClass}">${inner}</div>`;
+const toggle = (on) => `<span class="toggle${on ? " is-on" : ""}" data-toggle role="switch" aria-checked="${on}"></span>`;
+
+export const renderSettings = () => `
+<div class="screen">
+  ${statusbar(false)}
+
+  <div class="page-head">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-sub">St. Mary's · Hallway 4</p>
+  </div>
+
+  <div class="settings">
+    <div class="group" style="padding-top:0">
+      <div class="group-label">Language</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Sign language</span>
+          <span class="item-note">ASL, United States</span>
+        </span>
+        <span class="item-value is-accent">Change</span>
+      </div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Spoken language</span>
+          <span class="item-note">English</span>
+        </span>
+        <span class="item-value is-accent">Change</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Capture</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Speak the reply aloud</span>
+          <span class="item-note">Patient's signs are read out for the clinician</span>
+        </span>
+        ${toggle(true)}
+      </div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Show confidence</span>
+          <span class="item-note">Display the match score on screen</span>
+        </span>
+        ${toggle(true)}
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Accessibility</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Larger text</span>
+          <span class="item-note">Increases caption size</span>
+        </span>
+        ${toggle(false)}
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Data</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Recording consent</span>
+          <span class="item-note">Ask before any capture is stored</span>
+        </span>
+        ${toggle(true)}
+      </div>
+    </div>
+  </div>
+
+  ${tabbar("settings")}
+  ${homebar(false)}
+</div>`;
+
+export const SCREENS = {
+  home: renderHome,
+  sign: renderSign,
+  history: renderHistory,
+  settings: renderSettings,
+};
+
+export const device = (inner) => `<div class="device">${inner}</div>`;

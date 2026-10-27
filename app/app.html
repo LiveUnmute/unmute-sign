@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unmute — app prototype</title>
+<meta name="theme-color" content="#E3E1DC">
 <link rel="icon" href="assets/favicon.ico">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -12,15 +19,17 @@
 <main class="solo">
   <nav class="solo-nav" id="nav" aria-label="Screens">
     <button class="chip is-on" data-screen="home">Home</button>
-    <button class="chip" data-screen="translate">Translate</button>
-    <button class="chip" data-screen="chat">Conversation</button>
+    <button class="chip" data-screen="sign">Sign</button>
+    <button class="chip" data-screen="history">History</button>
+    <button class="chip" data-screen="settings">Settings</button>
   </nav>
 
   <div id="solo" aria-label="App prototype"></div>
 
   <p class="solo-note">
-    Simulated prototype. The capture button cycles a fixed list of signed phrases;
-    the microphone plays a fixed list of clinician questions. No model is running.
+    Simulated prototype. On the Sign screen, the hand button cycles a fixed list of
+    signed phrases and the speech button plays a fixed list of clinician questions.
+    No model is running.
   </p>
 </main>
 

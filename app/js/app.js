@@ -1,27 +1,22 @@
 // Two entry points, one source of screens.
 //
-//   index.html  — the three compositions side by side (the reference layout)
-//   app.html    — one phone you can actually drive
+//   index.html — the four screens laid out as a board
+//   app.html   — one phone you can drive
 //
-// Everything simulated here is labelled as simulated in the UI. There is no
-// model behind this build; the recognition is a scripted queue of phrases.
+// Everything simulated is labelled as simulated on the page. There is no model
+// behind this build: the camera cycles a fixed list of signed phrases and the
+// speech control plays a fixed list of clinician questions.
 
-import { device, renderHome, renderTranslate, renderChat } from "./screens.js";
+import { device, renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
 
-/* ------------------------------------------------------------
-   Sample content. Clinical, plausible, finite — the same discipline
-   as the demo build: nothing outside this list can be "recognised".
-   ------------------------------------------------------------ */
-
-const DEMO_SIGNS = [
+const SIGNED = [
   "My chest hurts.",
   "It started two days ago.",
   "I am allergic to penicillin.",
   "I get dizzy when I stand up.",
-  "My stomach hurts.",
 ];
 
-const CLINICIAN_LINES = [
+const SPOKEN = [
   "Where does it hurt?",
   "On a scale of 1 to 5, how bad is it?",
   "Are you taking any medication?",
@@ -30,111 +25,117 @@ const CLINICIAN_LINES = [
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+const RENDER = {
+  home: renderHome,
+  sign: renderSign,
+  history: renderHistory,
+  settings: renderSettings,
+};
+
 /* ------------------------------------------------------------
-   Launcher — three static devices
+   Board — four static devices
    ------------------------------------------------------------ */
 
-function mountLauncher(rack) {
-  const order = [
-    ["home", renderHome()],
-    ["translate", renderTranslate()],
-    ["chat", renderChat()],
-  ];
+const BOARD = [
+  ["home", "Home", "Entry point. One action."],
+  ["sign", "Sign", "Two-way. Sign or speak."],
+  ["history", "History", "Past encounters."],
+  ["settings", "Settings", "Language, capture, data."],
+];
 
-  rack.innerHTML = order
-    .map(
-      ([key, html]) => `
-      <a class="slot" href="app.html#${key}" aria-label="Open the ${key} screen">
-        ${device(html)}
-        <span class="slot-label">${key === "translate" ? "Translate" : key === "chat" ? "Conversation" : "Home"}</span>
-      </a>`
-    )
-    .join("");
+function mountBoard(rack) {
+  rack.innerHTML = BOARD.map(
+    ([key, label, note], i) => `
+    <a class="slot" href="app.html#${key}" aria-label="Open the ${label} screen">
+      ${device(RENDER[key]())}
+      <span class="slot-foot">
+        <span class="slot-num">0${i + 1}</span>
+        <span class="slot-label">${label}</span>
+        <span class="slot-note">${note}</span>
+      </span>
+    </a>`
+  ).join("");
 }
 
 /* ------------------------------------------------------------
    Interactive phone
    ------------------------------------------------------------ */
 
-const state = { screen: "home", signIndex: -1, clinicianIndex: -1, typing: null };
+const state = { screen: "home", mode: "sign", signedIndex: -1, spokenIndex: -1, typing: null };
 
 function mountSolo(host, nav) {
   const paint = () => {
-    const html =
-      state.screen === "home"
-        ? renderHome()
-        : state.screen === "translate"
-        ? renderTranslate()
-        : renderChat();
-
-    host.innerHTML = device(html);
+    host.innerHTML = device(RENDER[state.screen]());
 
     $$(".chip", nav).forEach((c) =>
       c.classList.toggle("is-on", c.dataset.screen === state.screen)
     );
 
-    wire(host);
+    wire();
   };
 
   const go = (screen) => {
-    if (!screen || screen === state.screen) return;
+    if (!screen || !RENDER[screen] || screen === state.screen) return;
     state.screen = screen;
     history.replaceState(null, "", `#${screen}`);
     paint();
-    if (screen === "translate") startRecognition();
+    if (screen === "sign") window.setTimeout(() => run("sign"), 800);
   };
 
-  const wire = (root) => {
-    // in-phone navigation
-    $$("[data-go]", root).forEach((el) =>
+  const wire = () => {
+    $$("[data-go]", host).forEach((el) =>
       el.addEventListener("click", (e) => {
         e.preventDefault();
         go(el.dataset.go);
       })
     );
 
-    $$(".tab", root).forEach((tab, i) =>
-      tab.addEventListener("click", () => {
-        const map = ["home", "translate", "chat", "chat"];
-        go(map[i]);
-      })
+    $$("[data-mode]", host).forEach((el) =>
+      el.addEventListener("click", () => setMode(el.dataset.mode))
     );
 
-    const shutter = $("[data-shutter]", root);
-    if (shutter) shutter.addEventListener("click", sign);
-
-    const play = $("[data-play]", root);
-    if (play) play.addEventListener("click", () => {
-      const tile = play.closest(".tile");
-      tile.classList.remove("is-playing");
-      void tile.offsetWidth; // restart the bar
-      tile.classList.add("is-playing");
-    });
-
-    const swap = $("[data-swap]", root);
-    if (swap) swap.addEventListener("click", () => swap.classList.toggle("is-flipped"));
-
-    const mic = $("[data-mic]", root);
-    if (mic) {
-      const hint = $("[data-mic-hint]", root);
-      mic.addEventListener("click", () => listen(mic, hint, root));
-    }
+    $$("[data-toggle]", host).forEach((el) =>
+      el.addEventListener("click", () => {
+        const on = el.classList.toggle("is-on");
+        el.setAttribute("aria-checked", String(on));
+      })
+    );
   };
 
-  /* --- camera: scripted recognition ------------------------- */
+  /* --- direction -------------------------------------------- */
 
-  function startRecognition() {
-    window.setTimeout(() => sign(), 900);
+  function setMode(mode) {
+    if (mode === state.mode) return;
+    state.mode = mode;
+
+    $$(".dir", host).forEach((d) => d.classList.toggle("is-on", d.dataset.dir === mode));
+
+    const kicker = $("[data-kicker]", host);
+    const caption = $("[data-caption]", host);
+
+    if (mode === "sign") {
+      if (kicker) kicker.innerHTML = "Patient <b>signed</b>";
+      run("sign");
+    } else {
+      if (kicker) kicker.innerHTML = "Clinician <b>speaking</b>";
+      window.clearInterval(state.typing);
+      if (caption) caption.textContent = "";
+      window.setTimeout(() => run("speak"), 420);
+    }
   }
 
-  function sign() {
+  /* --- simulation -------------------------------------------- */
+
+  function run(mode) {
     const caption = $("[data-caption]", host);
     const chip = $("[data-chip]", host);
     if (!caption) return;
 
     window.clearInterval(state.typing);
-    state.signIndex = (state.signIndex + 1) % DEMO_SIGNS.length;
-    const target = DEMO_SIGNS[state.signIndex];
+
+    const list = mode === "sign" ? SIGNED : SPOKEN;
+    const idx = mode === "sign" ? ++state.signedIndex : ++state.spokenIndex;
+    const target = list[idx % list.length];
 
     caption.textContent = "";
     let i = 0;
@@ -142,53 +143,20 @@ function mountSolo(host, nav) {
       i += 1;
       caption.textContent = target.slice(0, i);
       if (i >= target.length) window.clearInterval(state.typing);
-    }, 26);
+    }, mode === "sign" ? 30 : 34);
 
     if (chip) {
-      chip.textContent = `${96 + Math.floor(Math.random() * 4)}%`;
-      chip.style.transform = "translateX(-50%) scale(1.12)";
-      window.setTimeout(() => (chip.style.transform = "translateX(-50%)"), 180);
+      chip.style.opacity = mode === "sign" ? "1" : "0.35";
+      chip.textContent = mode === "sign" ? `${96 + Math.floor(Math.random() * 4)}%` : "voice";
     }
   }
 
-  /* --- voice: scripted clinician line ----------------------- */
-
-  function listen(mic, hint, root) {
-    if (mic.dataset.busy) return;
-    mic.dataset.busy = "1";
-    mic.classList.add("is-live");
-    if (hint) hint.textContent = "Listening…";
-
-    window.setTimeout(() => {
-      mic.classList.remove("is-live");
-      const line = CLINICIAN_LINES[++state.clinicianIndex % CLINICIAN_LINES.length];
-      if (hint) hint.textContent = `Heard: “${line}”`;
-      appendClinicianBubble(root, line);
-      window.setTimeout(() => {
-        mic.dataset.busy = "";
-        if (hint) hint.textContent = "Hold to speak";
-      }, 2200);
-    }, 1500);
-  }
-
-  function appendClinicianBubble(root, line) {
-    const thread = $("[data-thread]", root);
-    if (!thread) return;
-
-    $$(".bubble--right", thread).forEach((b) => b.remove());
-
-    const el = document.createElement("div");
-    el.className = "bubble bubble--right";
-    el.innerHTML = `<p>${line}</p>
-      <div class="bubble-foot"><span class="bubble-meta bubble-meta--right">Spoken</span></div>`;
-    thread.insertBefore(el, $(".tile", thread));
-  }
-
-  // initial screen from the hash, so a launcher card can deep-link
+  // initial screen from the hash, so a board card can deep-link
   const initial = (location.hash || "#home").slice(1);
-  state.screen = ["home", "translate", "chat"].includes(initial) ? initial : "home";
+  state.screen = RENDER[initial] ? initial : "home";
+
   paint();
-  if (state.screen === "translate") startRecognition();
+  if (state.screen === "sign") window.setTimeout(() => run("sign"), 800);
 
   $$(".chip", nav).forEach((c) =>
     c.addEventListener("click", () => go(c.dataset.screen))
@@ -200,18 +168,15 @@ function mountSolo(host, nav) {
    ------------------------------------------------------------ */
 
 const rack = $("#rack");
-if (rack) mountLauncher(rack);
+if (rack) mountBoard(rack);
 
 const solo = $("#solo");
 if (solo) mountSolo(solo, $("#nav"));
 
-// keyboard: 1 / 2 / 3 jump between screens on the interactive page
+/* keyboard: 1–4 jump between screens */
 if (solo) {
   window.addEventListener("keydown", (e) => {
-    const map = { 1: "home", 2: "translate", 3: "chat" };
-    if (map[e.key]) {
-      const chip = $(`.chip[data-screen="${map[e.key]}"]`);
-      chip?.click();
-    }
+    const map = { 1: "home", 2: "sign", 3: "history", 4: "settings" };
+    if (map[e.key]) $(`.chip[data-screen="${map[e.key]}"]`)?.click();
   });
 }
