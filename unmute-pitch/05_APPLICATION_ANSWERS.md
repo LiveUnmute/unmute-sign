@@ -164,8 +164,22 @@ That last part is the one that gets remembered.
 
 ## Pitch deck & data room
 
-Paste the Drive folder link, **shared as "Anyone with the link → Viewer"** before you
-submit. See the structure below.
+The folder exists and is already shared. Paste exactly this:
+
+```
+https://drive.google.com/drive/folders/1yHFwwgrPEmu512xCxKDdv6_hdWy8q6mS
+```
+
+Verified state of that folder:
+
+| Item | What it is |
+|---|---|
+| `00 — Data Room Index` | Google Doc: what's raising, what's in the room, what's available on request, and what does not exist yet |
+| `Unmute — Pitch Deck (Oct 2026).pdf` | 21 pages, 246 KB, 960×540pt, opens in Drive's viewer without downloading |
+
+Permissions are **anyone with the link → Viewer** on the folder *and* on both files
+(Drive does not inherit, so all three were set individually). File discovery is off,
+so the folder does not appear in search — only someone with the link can open it.
 
 The reviewer must be able to open it on the first click. A folder that shows
 "You need access" reads as a broken application.
@@ -221,32 +235,38 @@ with neither, and changes the entire regulatory story.
 
 ---
 
-## The Drive folder — build it before you submit
+## The Drive folder — already built
 
-Share settings that make this work:
+Share settings, as configured:
 
 | Who | Access |
 |---|---|
 | **Anyone with the link** | **Viewer** |
 | You | Owner |
-| Your graphics designer | **Editor** (added by email) |
+| Your graphics designer | *not yet added* — add by email as **Editor** |
 
 That combination lets the reviewer open it today and lets your designer edit, and
 nobody can alter anything you did not intend. The link never changes when you add
 files, so you submit it once.
 
-Structure:
+Current structure — deliberately flat, so the reviewer lands on the deck instead of
+clicking through an empty subfolder:
 
 ```
 Unmute — Data Room/
-├── 01 Pitch Deck/          Unmute — Deck v1 (Oct 2026).pdf
-├── 02 Product/             Prototype screenshots, link to live page
-├── 03 Evidence/            The sourced statistics, one page
-└── 04 Team & Legal/        Incorporation docs, if they exist
+├── 00 — Data Room Index                    Google Doc
+└── Unmute — Pitch Deck (Oct 2026).pdf      21 pages
 ```
 
-Do not submit it empty. A two-page PDF in `01` changes the read from "nothing here"
-to "early, but organised" — and you cannot control which hour they open it.
+When you have more material, add `01 Pitch Deck/`, `02 Product/`, `03 Evidence/`,
+`04 Team & Legal/` and move the files in then. Do not create the empty shells now:
+an empty folder reads as unfinished, which is worse than a small room.
+
+### One thing still owed
+
+The **designer is not on the folder**. Add them by email as Editor before you hand
+this to anyone else, or they will rebuild the deck somewhere private and you will be
+back to emailing PDFs.
 
 ---
 
@@ -254,14 +274,13 @@ to "early, but organised" — and you cannot control which hour they open it.
 
 1. **▸ CONFIRM** every flagged field above — website, incorporation, full-time, name,
    previous role, traction, advisors.
-2. Export the deck to PDF from `pitch-deck/index.html` (Print → Landscape →
-   background graphics on → margins none).
-3. Create the Drive folder, add the PDF and whatever else is real, set
-   **Anyone with the link → Viewer**.
-4. Open the link in a private window. If it asks for access, it is wrong.
-5. Send the designer the deck PDF *and* `03_DECK_OUTLINE.md` — the outline explains
+2. ~~Export the deck to PDF~~ — done, `pitch-deck/Unmute-Pitch-Deck.pdf`, and uploaded.
+3. ~~Create the Drive folder and share it~~ — done, link above.
+4. Open the link in a private window yourself, once. If it asks for access, it is wrong.
+5. Add the designer as **Editor** on the folder.
+6. Send the designer the deck PDF *and* `03_DECK_OUTLINE.md` — the outline explains
    the argument behind each slide, which is what stops a redesign from flattening it.
-6. Submit.
+7. Submit.
 
 The deadline pressure is real, and the folder sharing is the one item that must be
 right on the first try, because you get no second click.
