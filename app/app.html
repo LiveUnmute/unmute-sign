@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unmute — app prototype</title>
+<link rel="icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<main class="solo">
+  <nav class="solo-nav" id="nav" aria-label="Screens">
+    <button class="chip is-on" data-screen="home">Home</button>
+    <button class="chip" data-screen="translate">Translate</button>
+    <button class="chip" data-screen="chat">Conversation</button>
+  </nav>
+
+  <div id="solo" aria-label="App prototype"></div>
+
+  <p class="solo-note">
+    Simulated prototype. The capture button cycles a fixed list of signed phrases;
+    the microphone plays a fixed list of clinician questions. No model is running.
+  </p>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
