@@ -30,7 +30,7 @@ There is no drawn status bar. On a phone the device's own status bar is the one
 that should show, so the mock `9:41` strip was removed from all four screens
 and the top padding now takes `env(safe-area-inset-top)` instead.
 
-To deploy, see **DEPLOY.md**.
+To deploy, see **DEPLOY.md** — the DNS for liveunmute.com is already on Netlify DNS, so the subdomain needs no Namecheap work.
 
 ## Changing an image to a video
 
