@@ -24,6 +24,68 @@ Everything happens in the Netlify dashboard.
 
 ---
 
+## "It deployed to a weird netlify.app URL instead"
+
+If the address you got looks like this:
+
+```
+https://6ae2869ccaa8d9ee61a9682a--liveunmute.netlify.app/
+```
+
+That is a **deploy preview**, not a site address. The `<hash>--` prefix means
+Netlify built a branch preview of the site called `liveunmute`.
+
+Two things follow, and they are both certain:
+
+1. **A deploy preview can never carry a custom domain.** It is regenerated on
+   every build; there is no stable address to point DNS at. Do not try.
+2. **It does not mean the deploy failed.** It usually means the build was fine
+   and the domain was simply never added.
+
+Check the plain site address — drop the hash:
+
+```
+https://liveunmute.netlify.app/
+```
+
+If that serves the app, the deploy is correct and only step 2 is missing.
+
+### Which site do I add the domain to?
+
+Open both candidates and compare what they serve:
+
+| The site serving... | Is it |
+|---|---|
+| The four-screen board | **The app site.** Add `app.liveunmute.com` here. |
+| "Every Voice Deserves to Be Heard" | The landing site. **Do not** add it here — the app address would serve the marketing page. |
+
+### Then
+
+1. On the app site: **Domain management → Add a domain**
+2. Enter `app.liveunmute.com` → **Verify** → **Add domain**
+3. Accept the DNS record Netlify offers to create
+4. Wait for the HTTPS badge, then open the address in a private window
+
+If Netlify says **"domain is already in use"**, it is attached to the landing
+site — remove it there first.
+
+### And check the production branch
+
+If only a *preview* built, the site's production branch may still be `main`,
+which contains nothing but a README. Set it under
+**Site configuration → Build & deploy → Branches** to
+`arena/fcc551fe-unmute-sign`. Otherwise the working `netlify.app` address will
+go blank after the next push.
+
+### Turn off the Netlify badge
+
+New sites show a "Build your own site with Netlify" bar at the bottom of every
+page. **Site configuration → Build & deploy → Post processing → Netlify badge
+→ disable.** On a link handed to a clinician or an investor, that badge reads as
+"someone dragged a folder onto a free host".
+
+---
+
 ## The two traps
 
 ### Trap 1 — `main` is empty
