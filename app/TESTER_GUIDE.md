@@ -31,14 +31,19 @@ will be recognised, and the app will not invent anything.
 | Hand at the throat | My throat is sore. |
 | Hand at the temple | I get dizzy when I stand up. |
 
+Five phrases, then it cycles back to the first.
+
 ### Clinician speaks → signer  (the clinician is on screen)
 
-| The clinician says | The signer renders |
+| The clinician says | What the signer renders |
 |---|---|
 | Where does it hurt? | "Where does it hurt?" |
 | On a scale of 1 to 5, how bad is it? | the severity question |
 | Are you taking any medication? | the medication question |
+| I'm going to press here — tell me if it hurts. | the examination cue |
 | One moment, please. | the wait |
+
+Five sentences, then it cycles back to the first.
 
 ---
 
@@ -46,7 +51,8 @@ will be recognised, and the app will not invent anything.
 
 1. Open the **Sign** tab.
 2. **Sign mode** (hand button): tap the hand to move to the next patient
-   phrase. The camera frame and the confidence score belong to this mode.
+   phrase — five of them, then it loops. The camera frame and the confidence
+   score belong to this mode.
 3. **Speak mode** (speech button): the patient disappears and the signer
    appears. Tap speech once — the browser will ask for microphone permission.
    Allow it, say something, and wait.
@@ -65,7 +71,8 @@ will be recognised, and the app will not invent anything.
 - Would a Deaf patient trust this screen? What would make them trust it less?
 - On the clinician side, is the difference between "the patient is signing"
   and "I am speaking" obvious without reading the labels?
-- Is the text big enough to read across a bed?
+- Is the text big enough to read across a bed, now that it sits directly on
+  the footage with no panel behind it?
 - When the app isn't sure, what should it do — say nothing, or say
   "I'm not sure"?
 - What is missing that you would need on a real shift?

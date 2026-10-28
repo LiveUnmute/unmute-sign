@@ -61,6 +61,11 @@ export const TRANSLATOR_SIGNS = [
     media: "media/translator-03.jpg",
   },
   {
+    id: "pressure",
+    text: "I'm going to press here — tell me if it hurts.",
+    media: "media/translator-05.jpg",
+  },
+  {
     id: "moment",
     text: "One moment, please.",
     media: "media/translator-04.jpg",
@@ -75,7 +80,11 @@ export const SCRIPT = [
   { who: "clinician", key: "severity" },
   { who: "patient",   key: "two-days" },
   { who: "clinician", key: "medication" },
+  { who: "patient",   key: "throat" },
+  { who: "clinician", key: "pressure" },
   { who: "patient",   key: "dizzy" },
+  { who: "clinician", key: "moment" },
+  { who: "patient",   key: "dont-understand" },
 ];
 
 const byId = (list, key) => list.find((e) => e.id === key) || list[0];
