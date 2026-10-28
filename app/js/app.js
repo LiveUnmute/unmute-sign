@@ -1,39 +1,63 @@
+// The app.
+//
 // Two entry points, one source of screens.
+//   index.html — the board (desktop) / the app itself (mobile)
+//   app.html   — the app, framed on desktop
 //
-//   index.html — the four screens laid out as a board
-//   app.html   — one phone you can drive
-//
-// Everything simulated is labelled as simulated on the page. There is no model
-// behind this build: the camera cycles a fixed list of signed phrases and the
-// speech control plays a fixed list of clinician questions.
+// ── What is real and what is scripted ─────────────────────────────────────
+// REAL     the microphone permission prompt, the audio stream, the live input
+//          level meter. If the browser exposes SpeechRecognition, the
+//          transcript underneath is genuinely your speech.
+// SCRIPTED the conversation itself. There is no sign-recognition model, so the
+//          patient's phrases come from the pre-arranged script in media.js and
+//          the signer media is a still image per phrase.
+// The UI says which one you are getting rather than leaving it ambiguous.
 
 import { device, renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
-
-const SIGNED = [
-  "My chest hurts.",
-  "It started two days ago.",
-  "I am allergic to penicillin.",
-  "I get dizzy when I stand up.",
-];
-
-const SPOKEN = [
-  "Where does it hurt?",
-  "On a scale of 1 to 5, how bad is it?",
-  "Are you taking any medication?",
-];
+import { SCRIPT, TRANSLATOR_SIGNS, resolveStep } from "./media.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-const RENDER = {
-  home: renderHome,
-  sign: renderSign,
-  history: renderHistory,
-  settings: renderSettings,
+const RENDER = { home: renderHome, sign: renderSign, history: renderHistory, settings: renderSettings };
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const state = {
+  screen: "home",
+  mode: "patient",
+
+  // two independent cursors over the same script
+  patientIndex: 0,
+  clinicianIndex: 0,
+
+  caption: "",
+  note: "",
+  confidence: 98,
+  busy: false,
+
+  micStream: null,
+  audioCtx: null,
+  levelRAF: null,
+  recognition: null,
 };
 
 /* ------------------------------------------------------------
-   Board — four static devices
+   Which entry is on screen right now
+   ------------------------------------------------------------ */
+
+const patientSteps = SCRIPT.filter((s) => s.who === "patient");
+const clinicianSteps = SCRIPT.filter((s) => s.who === "clinician");
+
+function currentEntry() {
+  const steps = state.mode === "patient" ? patientSteps : clinicianSteps;
+  const i = state.mode === "patient" ? state.patientIndex : state.clinicianIndex;
+  const step = steps[i % steps.length];
+  return { entry: resolveStep(step), index: i % steps.length, total: steps.length };
+}
+
+/* ------------------------------------------------------------
+   Board (desktop) — four screens side by side
    ------------------------------------------------------------ */
 
 const BOARD = [
@@ -43,11 +67,11 @@ const BOARD = [
   ["settings", "Settings", "Language, capture, data."],
 ];
 
-function mountBoard(rack) {
-  rack.innerHTML = BOARD.map(
+function boardMarkup() {
+  return BOARD.map(
     ([key, label, note], i) => `
     <a class="slot" href="app.html#${key}" aria-label="Open the ${label} screen">
-      ${device(RENDER[key]())}
+      ${device(RENDER[key](key === "sign" ? signState() : undefined))}
       <span class="slot-foot">
         <span class="slot-num">0${i + 1}</span>
         <span class="slot-label">${label}</span>
@@ -57,126 +81,407 @@ function mountBoard(rack) {
   ).join("");
 }
 
+function signState() {
+  const { entry } = currentEntry();
+  return {
+    mode: state.mode === "patient" ? "sign" : "speak",
+    entry,
+    caption: state.caption || entry.text,
+    note: state.note,
+    confidence: state.confidence,
+  };
+}
+
+function mountBoard(rack) {
+  rack.innerHTML = boardMarkup();
+}
+
 /* ------------------------------------------------------------
-   Interactive phone
+   The app shell
    ------------------------------------------------------------ */
 
-const state = { screen: "home", mode: "sign", signedIndex: -1, spokenIndex: -1, typing: null };
+let host = null;
 
-function mountSolo(host, nav) {
-  const paint = () => {
-    host.innerHTML = device(RENDER[state.screen]());
+function paint() {
+  if (!host) return;
 
-    $$(".chip", nav).forEach((c) =>
-      c.classList.toggle("is-on", c.dataset.screen === state.screen)
-    );
+  const html =
+    state.screen === "sign"
+      ? renderSign(signState())
+      : RENDER[state.screen]();
 
-    wire();
-  };
+  host.innerHTML = device(html);
+  wire();
+}
 
-  const go = (screen) => {
-    if (!screen || !RENDER[screen] || screen === state.screen) return;
-    state.screen = screen;
-    history.replaceState(null, "", `#${screen}`);
-    paint();
-    if (screen === "sign") window.setTimeout(() => run("sign"), 800);
-  };
+function go(screen) {
+  if (!RENDER[screen] || screen === state.screen) return;
+  state.screen = screen;
+  history.replaceState(null, "", `#${screen}`);
+  syncNav();
+  paint();
 
-  const wire = () => {
-    $$("[data-go]", host).forEach((el) =>
-      el.addEventListener("click", (e) => {
-        e.preventDefault();
-        go(el.dataset.go);
-      })
-    );
+  if (screen === "sign") armSignScreen();
+}
 
-    $$("[data-mode]", host).forEach((el) =>
-      el.addEventListener("click", () => setMode(el.dataset.mode))
-    );
+function syncNav() {
+  if (!navEl) return;
+  $$(".chip", navEl).forEach((c) =>
+    c.classList.toggle("is-on", c.dataset.screen === state.screen)
+  );
+}
 
-    $$("[data-toggle]", host).forEach((el) =>
-      el.addEventListener("click", () => {
-        const on = el.classList.toggle("is-on");
-        el.setAttribute("aria-checked", String(on));
-      })
-    );
-  };
+function wire() {
+  $$("[data-go]", host).forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      go(el.dataset.go);
+    })
+  );
 
-  /* --- direction -------------------------------------------- */
+  $$("[data-mode]", host).forEach((el) =>
+    el.addEventListener("click", () => setMode(el.dataset.mode))
+  );
 
-  function setMode(mode) {
-    if (mode === state.mode) return;
-    state.mode = mode;
+  $$("[data-repeat]", host).forEach((el) =>
+    el.addEventListener("click", () => repeatSign())
+  );
 
-    $$(".dir", host).forEach((d) => d.classList.toggle("is-on", d.dataset.dir === mode));
+  $$("[data-toggle]", host).forEach((el) =>
+    el.addEventListener("click", () => {
+      const on = el.classList.toggle("is-on");
+      el.setAttribute("aria-checked", String(on));
+    })
+  );
+}
 
-    const kicker = $("[data-kicker]", host);
-    const caption = $("[data-caption]", host);
+function armSignScreen() {
+  if (state.mode === "patient") {
+    showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+  } else {
+    showClinician(state.clinicianIndex, "Tap the speech button and talk.");
+  }
+}
 
-    if (mode === "sign") {
-      if (kicker) kicker.innerHTML = "Patient <b>signed</b>";
-      run("sign");
-    } else {
-      if (kicker) kicker.innerHTML = "Clinician <b>speaking</b>";
-      window.clearInterval(state.typing);
-      if (caption) caption.textContent = "";
-      window.setTimeout(() => run("speak"), 420);
-    }
+/* ------------------------------------------------------------
+   Direction
+   ------------------------------------------------------------ */
+
+function setMode(mode) {
+  const next = mode === "sign" ? "patient" : "clinician";
+  if (next === state.mode) {
+    if (next === "patient") nextPatient();
+    else listen();
+    return;
   }
 
-  /* --- simulation -------------------------------------------- */
+  state.mode = next;
+  state.caption = "";
+  state.note = "";
 
-  function run(mode) {
-    const caption = $("[data-caption]", host);
-    const chip = $("[data-chip]", host);
-    if (!caption) return;
-
-    window.clearInterval(state.typing);
-
-    const list = mode === "sign" ? SIGNED : SPOKEN;
-    const idx = mode === "sign" ? ++state.signedIndex : ++state.spokenIndex;
-    const target = list[idx % list.length];
-
-    caption.textContent = "";
-    let i = 0;
-    state.typing = window.setInterval(() => {
-      i += 1;
-      caption.textContent = target.slice(0, i);
-      if (i >= target.length) window.clearInterval(state.typing);
-    }, mode === "sign" ? 30 : 34);
-
-    if (chip) {
-      chip.style.opacity = mode === "sign" ? "1" : "0.35";
-      chip.textContent = mode === "sign" ? `${96 + Math.floor(Math.random() * 4)}%` : "voice";
-    }
+  if (next === "patient") {
+    showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+  } else {
+    showClinician(state.clinicianIndex, "Tap the speech button and talk.");
   }
+}
 
-  // initial screen from the hash, so a board card can deep-link
-  const initial = (location.hash || "#home").slice(1);
-  state.screen = RENDER[initial] ? initial : "home";
+/* ------------------------------------------------------------
+   Patient direction — scripted
+   ------------------------------------------------------------ */
+
+function showPatient(index, note = "") {
+  state.patientIndex = index;
+  const { entry } = currentEntry();
+
+  state.caption = "";
+  state.confidence = 96 + Math.floor(Math.random() * 4);
+  state.note = note;
 
   paint();
-  if (state.screen === "sign") window.setTimeout(() => run("sign"), 800);
+  typeCaption(entry.text);
+}
 
-  $$(".chip", nav).forEach((c) =>
-    c.addEventListener("click", () => go(c.dataset.screen))
-  );
+function nextPatient() {
+  const next = (state.patientIndex + 1) % patientSteps.length;
+  showPatient(next, "");
+}
+
+/* ------------------------------------------------------------
+   Clinician direction — real mic, scripted fallback
+   ------------------------------------------------------------ */
+
+function showClinician(index, note = "") {
+  state.clinicianIndex = index;
+  const { entry } = currentEntry();
+
+  state.caption = entry.text;
+  state.note = note;
+
+  paint();
+}
+
+function repeatSign() {
+  const { entry } = currentEntry();
+  state.caption = entry.text;
+  state.note = "Repeated.";
+  paint();
+
+  // re-run any video from the top
+  const v = $("video.stage-media", host);
+  if (v) {
+    v.currentTime = 0;
+    v.play().catch(() => {});
+  }
+
+  // and flash the frame so a repeat is visible even on a still
+  const stage = $("[data-stage]", host);
+  if (stage) {
+    stage.classList.remove("is-flash");
+    void stage.offsetWidth;
+    stage.classList.add("is-flash");
+  }
+}
+
+async function listen() {
+  if (state.busy) return;
+  state.busy = true;
+
+  const btn = $('.dir-btn[data-mode="speak"]', host);
+  btn?.classList.add("is-live");
+
+  const proceed = async () => {
+    // 1. Ask for the microphone. This is a real permission prompt.
+    let granted = false;
+    try {
+      if (!state.micStream) {
+        state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+      granted = true;
+      startMeter(state.micStream);
+    } catch (err) {
+      setNote("Microphone blocked — showing the scripted transcript instead.");
+    }
+
+    // 2. Transcribe. Real where the browser offers it.
+    if (granted && SR) {
+      runRecognition();
+    } else {
+      window.setTimeout(() => {
+        finishListening();
+        advanceClinician(granted ? "Scripted transcript — this browser has no speech engine." : "");
+      }, 1600);
+    }
+  };
+
+  await proceed();
+}
+
+function runRecognition() {
+  const rec = new SR();
+  state.recognition = rec;
+
+  rec.lang = "en-US";
+  rec.interimResults = true;
+  rec.continuous = false;
+  rec.maxAlternatives = 1;
+
+  rec.onresult = (ev) => {
+    let interim = "";
+    let final = "";
+
+    for (let i = ev.resultIndex; i < ev.results.length; i += 1) {
+      const chunk = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) final += chunk;
+      else interim += chunk;
+    }
+
+    const caption = $("[data-caption]", host);
+    if (caption) caption.textContent = (final || interim).trim();
+  };
+
+  rec.onerror = () => {
+    finishListening();
+    advanceClinician("Couldn't hear that — using the scripted line.");
+  };
+
+  rec.onend = () => {
+    const caption = $("[data-caption]", host);
+    const heard = (caption?.textContent || "").trim();
+
+    finishListening();
+
+    if (heard) {
+      pickPoseFor(heard);
+    } else {
+      advanceClinician("Didn't catch that — using the scripted line.");
+    }
+  };
+
+  try {
+    rec.start();
+  } catch {
+    finishListening();
+    advanceClinician("Speech engine unavailable — scripted transcript.");
+  }
+
+  // Safety net: a recogniser that never fires still returns the user to a
+  // usable screen rather than leaving the button stuck.
+  window.setTimeout(() => {
+    if (state.busy) rec.stop();
+  }, 8000);
+}
+
+/** Choose the translator pose whose scripted line best matches what was heard. */
+function pickPoseFor(heard) {
+  const words = heard.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+
+  let best = 0;
+  let bestScore = -1;
+
+  TRANSLATOR_SIGNS.forEach((entry, i) => {
+    const text = entry.text.toLowerCase();
+    const score = words.reduce((n, w) => n + (text.includes(w) ? 1 : 0), 0);
+    if (score > bestScore) {
+      bestScore = score;
+      best = i;
+    }
+  });
+
+  const entry = TRANSLATOR_SIGNS[best];
+  const stepIndex = clinicianSteps.findIndex((s) => s.key === entry.id);
+
+  state.clinicianIndex = stepIndex >= 0 ? stepIndex : 0;
+  state.caption = heard;
+  state.note = "Heard from the microphone.";
+  paint();
+}
+
+function advanceClinician(note) {
+  const next = (state.clinicianIndex + 1) % clinicianSteps.length;
+  state.clinicianIndex = next;
+  const { entry } = currentEntry();
+
+  state.caption = entry.text;
+  state.note = note;
+  paint();
+}
+
+function finishListening() {
+  state.busy = false;
+  stopMeter();
+  $('.dir-btn[data-mode="speak"]', host)?.classList.remove("is-live");
+}
+
+function setNote(text) {
+  state.note = text;
+  const el = $("[data-note]", host);
+  if (el) el.textContent = text;
+}
+
+/* --- live input level -------------------------------------
+   Proves the mic is actually open: the ring around the speech button
+   tracks real input, not a CSS animation. */
+
+function startMeter(stream) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+
+    state.audioCtx = state.audioCtx || new Ctx();
+    const ctx = state.audioCtx;
+    if (ctx.state === "suspended") ctx.resume();
+
+    const src = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const btn = $('.dir-btn[data-mode="speak"]', host);
+
+    const tick = () => {
+      analyser.getByteTimeDomainData(data);
+      let peak = 0;
+      for (let i = 0; i < data.length; i += 1) {
+        peak = Math.max(peak, Math.abs(data[i] - 128) / 128);
+      }
+      if (btn) btn.style.setProperty("--lvl", peak.toFixed(3));
+      state.levelRAF = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch {
+    /* metering is a nicety; never block the demo */
+  }
+}
+
+function stopMeter() {
+  if (state.levelRAF) cancelAnimationFrame(state.levelRAF);
+  state.levelRAF = null;
+  const btn = $('.dir-btn[data-mode="speak"]', host);
+  if (btn) btn.style.setProperty("--lvl", "0");
+}
+
+/* --- typewriter for scripted captions ---------------------- */
+
+let typer = null;
+
+function typeCaption(text) {
+  window.clearInterval(typer);
+  const el = $("[data-caption]", host);
+  if (!el) return;
+
+  el.textContent = "";
+  let i = 0;
+  typer = window.setInterval(() => {
+    i += 1;
+    el.textContent = text.slice(0, i);
+    if (i >= text.length) window.clearInterval(typer);
+  }, 26);
 }
 
 /* ------------------------------------------------------------
    Boot
    ------------------------------------------------------------ */
 
-const rack = $("#rack");
-if (rack) mountBoard(rack);
+const isMobile = () => window.matchMedia("(max-width: 640px)").matches;
 
-const solo = $("#solo");
-if (solo) mountSolo(solo, $("#nav"));
+const navEl = $("#nav");
+const soloEl = $("#solo");
+const rackEl = $("#rack");
 
-/* keyboard: 1–4 jump between screens */
-if (solo) {
+// app.html, or index.html on a phone: the app, full bleed.
+if (soloEl) {
+  host = soloEl;
+  const initial = (location.hash || "#home").slice(1);
+  state.screen = RENDER[initial] ? initial : "home";
+  syncNav();
+  paint();
+  if (state.screen === "sign") armSignScreen();
+
+  $$(".chip", navEl).forEach((c) => c.addEventListener("click", () => go(c.dataset.screen)));
+
   window.addEventListener("keydown", (e) => {
     const map = { 1: "home", 2: "sign", 3: "history", 4: "settings" };
-    if (map[e.key]) $(`.chip[data-screen="${map[e.key]}"]`)?.click();
+    if (map[e.key]) go(map[e.key]);
   });
+}
+
+// index.html: board on desktop, the app itself on a phone.
+if (rackEl) {
+  if (isMobile()) {
+    document.body.classList.add("app-mode");
+
+    const shell = document.createElement("div");
+    shell.className = "app-shell";
+    shell.id = "solo";
+    document.body.appendChild(shell);
+
+    host = shell;
+    state.screen = RENDER[(location.hash || "#home").slice(1)] ? (location.hash || "#home").slice(1) : "home";
+    paint();
+    if (state.screen === "sign") armSignScreen();
+  } else {
+    mountBoard(rackEl);
+  }
 }

@@ -1,73 +1,95 @@
 # App screens
 
-Four screens, in Unmute's own design language.
+Four screens, in Unmute's own design language, wired to a scripted
+conversation and a real microphone.
 
 ```
 app/
-├── index.html      all four screens side by side (the board)
-├── app.html        one phone you can drive — tabs, both directions, toggles
-├── css/app.css     all styling, tokens taken from the website
-├── js/screens.js   the four screens as markup, shared by both pages
-├── js/app.js       board mount + the simulation
-├── assets/         signer.jpg, hands.jpg, logo, favicon
-└── server.mjs      static server on :8083
+├── index.html        the board on desktop · the app itself on a phone
+├── app.html          the app, framed on desktop
+├── TESTER_GUIDE.md   hand this to a tester — supported phrases and what to look for
+├── css/app.css       all styling
+├── js/screens.js     the four screens as markup
+├── js/media.js       sign media + the pre-arranged conversation   ← edit here
+├── js/app.js         navigation, microphone, simulation
+├── assets/           logo, favicon
+├── media/            patient-01…05, translator-01…04
+└── server.mjs        static server on :8083
 ```
 
 ```bash
 cd app && PORT=8083 node server.mjs
 ```
 
-No build step, no dependencies.
+Open `/` on a desktop for the board, or open either page on a phone and it
+becomes the app — no frame, no backdrop, safe-area insets respected.
 
-## The four screens
+## Changing an image to a video
 
-**01 Home** — the entry point. Dark hero card, the single action
-`Speak to patient`, two recent encounters, tab bar. The `Translate sign`
-button is gone on purpose: the Sign screen carries both directions, so a
-second entry button on Home only duplicated it.
+Everything about a phrase lives in `js/media.js`. Each entry has a `media`
+field, and the extension decides how it renders:
 
-**02 Sign** — the two-way screen. Full-bleed camera with a tracking frame and a
-confidence read-out, a bone caption sheet, and **two buttons of equal weight**:
-the hand (patient signs) and speech (clinician speaks). Those are the only
-controls on the screen — no library, no camera flip, no share row.
+```js
+{ id: "chest", text: "My chest hurts.", media: "media/patient-02.jpg" }   // still
+{ id: "chest", text: "My chest hurts.", media: "media/patient-02.mp4" }   // video
+{ id: "chest", text: "My chest hurts.", media: "https://…/sign-02.mp4" }  // remote
+```
 
-**03 History** — past encounters, grouped by day, with duration and a flag on
-the one that needs attention.
+`.mp4`, `.webm`, `.mov` and `.m4v` all render as a muted, looping,
+`playsinline` video. Nothing else changes. Drop the file in `media/` and edit
+the one string.
 
-**04 Settings** — language pair, capture behaviour, accessibility, and the
-consent switch that governs whether a capture is ever stored.
+**Framing:** the stage crops the sides only, never the top or bottom
+(`object-position: center 34%`). Shoot or generate vertical media with the
+subject centred and clear space above and below the hands. If a particular
+clip needs letterboxing instead, add `data-fit="contain"` to `.stage` in
+`renderSign`.
 
-## Where the design comes from
+## The two characters
 
-Not invented. Taken from `landing/index.html`:
+- **Patient** — `media/patient-01…05.jpg`. Same woman, same wardrobe, same
+  background, same framing; only the hands change.
+- **Translator** — `media/translator-01…04.jpg`. Same man throughout, distinct
+  from the patient, so a clinician never confuses who is on screen.
 
-| Token | Value | Source |
-|---|---|---|
-| Bone | `#E3E1DC` | `--c-bg` |
-| Ink | `#121212` | `--c-dark` |
-| Blue | `#006AFE` | `--c-accent` |
-| Deep blue | `#0056CC` | `--c-accent-deep` |
-| Display | Syncopate, uppercase, `letter-spacing: .13–.2em` | `--font-display` |
-| Body | Pretendard | `--font-body` |
+New poses should be generated from the existing images (image-to-image,
+changing only the hands) so the character stays recognisable. Nine stills were
+made that way; the prompts are in the commit history.
 
-Buttons are pills, cards are near-square, section breaks are 1px hairlines —
-the same conventions as the site. The wordmark is the real
-`unmute-logo-trimmed.png`, copied in so the folder is portable.
+## What is real and what is scripted
 
-Type is loaded from the same CDNs the landing page uses, so the letterforms
-match exactly rather than approximately.
+| | |
+|---|---|
+| **Real** | The microphone permission prompt, the audio stream, and the live input-level ring around the speech button. Where the browser exposes `SpeechRecognition`, the transcript is genuinely what you said. |
+| **Scripted** | The conversation. There is no sign-recognition model, so patient phrases come from `SCRIPT` in `media.js` and the confidence score is cosmetic. |
 
-## This is a prototype, and it says so
+The app says which one you are getting on screen rather than leaving it
+ambiguous. This matters because the deck's status slide says there is no
+trained model — a prototype that quietly implied otherwise would contradict it.
 
-There is no model. The hand button cycles four fixed signed phrases; the
-speech button plays three fixed questions. Both pages say that in plain
-language, because the deck's status slide says there is no trained model and a
-design build that quietly implied otherwise would undercut it.
+**Speech recognition needs a secure context.** It works on `https://` and on
+`localhost`; it will not prompt on a plain-`http` LAN address.
 
-Photography is illustrative and licence-free, not a customer.
+## The conversation
 
-## Open thread
+`SCRIPT` in `js/media.js` is the pre-arranged two-way exchange:
 
-The device is fixed at 292×606 to match the reference proportion. On a real
-375-wide phone the screens should be rebuilt to fill the viewport rather than
-sitting in a frame.
+```
+clinician  Where does it hurt?            →  translator-01
+patient    My chest hurts.                →  patient-02
+clinician  On a scale of 1 to 5…          →  translator-02
+patient    It started two days ago.       →  patient-03
+clinician  Are you taking any medication? →  translator-03
+patient    I get dizzy when I stand up.   →  patient-05
+```
+
+The two directions keep independent cursors, so switching between Sign and
+Speak never loses the thread.
+
+## Known gaps
+
+- The signer is a still photograph per phrase. Animation is the next step and
+  is why the media layer takes video already.
+- History and Settings are static.
+- The board's four frames are fixed-size mockups; on a phone the app goes
+  full-bleed instead.

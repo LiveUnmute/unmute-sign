@@ -214,8 +214,8 @@ a { color: inherit; }
   margin-left: -7px;
 }
 .hero-people .pip:first-child { margin-left: 0; }
-.hero-people .pip--a { background-image: url("../assets/signer.jpg"); }
-.hero-people .pip--b { background-image: url("../assets/hands.jpg"); background-position: center; }
+.hero-people .pip--a { background-image: url("../media/patient-02.jpg"); }
+.hero-people .pip--b { background-image: url("../media/translator-01.jpg"); }
 .hero-people .pip--c {
   background: var(--bone);
   color: var(--ink);
@@ -289,8 +289,8 @@ a { color: inherit; }
   background-position: center 28%;
   flex: none;
 }
-.thumb--a { background-image: url("../assets/signer.jpg"); }
-.thumb--b { background-image: url("../assets/hands.jpg"); background-position: center; }
+.thumb--a { background-image: url("../media/patient-02.jpg"); }
+.thumb--b { background-image: url("../media/patient-03.jpg"); }
 
 .recent-text { flex: 1; min-width: 0; }
 
@@ -370,58 +370,89 @@ a { color: inherit; }
    02 — SIGN  (the two-way screen)
    ============================================================ */
 
-.screen--camera { background: #0C0C0C; }
+.screen--media { background: #0C0C0C; }
 
 .stage {
   position: absolute;
   inset: 0;
-  background-image: url("../assets/signer.jpg");
-  background-size: cover;
-  background-position: center 22%;
+  background: #0C0C0C;
+  overflow: hidden;
 }
 
-.stage::after {
-  content: "";
+/* The signer fills the screen. object-position sits the subject high so the
+   hands stay above the caption sheet — cropping the sides only, never the
+   hands. Set data-fit="contain" on .stage if a clip needs letterboxing. */
+.stage-media {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 34%;
+  display: block;
+}
+
+.stage[data-fit="contain"] .stage-media {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.stage.is-flash .stage-media {
+  animation: flash 620ms ease-out;
+}
+
+@keyframes flash {
+  0%   { filter: brightness(1); }
+  18%  { filter: brightness(1.22); }
+  100% { filter: brightness(1); }
+}
+
+/* Softens the top for the status bar and the bottom for the sheet. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(10, 10, 10, 0.55) 0%, rgba(10, 10, 10, 0) 30%),
-    linear-gradient(180deg, rgba(10, 10, 10, 0) 58%, rgba(10, 10, 10, 0.5) 100%);
+    linear-gradient(180deg, rgba(8, 8, 8, 0.60) 0%, rgba(8, 8, 8, 0) 24%),
+    linear-gradient(180deg, rgba(8, 8, 8, 0) 46%, rgba(8, 8, 8, 0.34) 100%);
+  z-index: 2;
 }
 
 .demo-chip {
   position: absolute;
-  top: 38px; right: 20px;
+  top: 36px; right: 18px;
   z-index: 6;
   font-family: var(--display);
   font-size: 6.5px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
   background: rgba(10, 10, 10, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
   padding: 4px 9px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-/* tracking frame */
+/* tracking frame — only while the patient is the subject */
 
 .track {
   position: absolute;
   left: 50%;
-  top: 34%;
-  width: 124px;
-  height: 124px;
+  top: 31%;
+  width: 118px;
+  height: 118px;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 4px;
   z-index: 3;
 }
 
 .track i {
   position: absolute;
-  width: 12px; height: 12px;
+  width: 11px; height: 11px;
   border: 2px solid #fff;
   border-radius: 2px;
 }
@@ -475,6 +506,35 @@ a { color: inherit; }
 
 .sheet-kicker b { color: var(--blue); }
 
+/* Repeat — top of the clinician sheet. Replays the same translation. */
+.repeat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+  padding: 5px 10px 5px 8px;
+  color: var(--ink-70);
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--paper);
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.repeat:hover { background: var(--ink); border-color: var(--ink); color: var(--bone); }
+.repeat:active { transform: scale(0.96); }
+
+.caption-note {
+  margin: 5px 0 0;
+  font-size: 8.5px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--ink-45);
+  min-height: 12px;
+}
+
 .caption {
   font-size: 14.5px;
   line-height: 1.34;
@@ -516,6 +576,17 @@ a { color: inherit; }
   transition: transform 130ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 .dir-btn:active { transform: scale(0.94); }
+
+.dir-btn { --lvl: 0; }
+
+/* Real input level from the microphone, drawn as a ring.
+   It moves only while the mic is genuinely open. */
+.dir-btn.is-live {
+  box-shadow:
+    0 0 0 4px rgba(0, 106, 254, 0.16),
+    0 0 0 calc(4px + (var(--lvl) * 26px)) rgba(0, 106, 254, calc(0.10 + var(--lvl) * 0.22)),
+    0 10px 20px -10px rgba(0, 106, 254, 0.9);
+}
 
 .dir.is-on .dir-btn {
   background: var(--blue);
@@ -908,4 +979,133 @@ a { color: inherit; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ============================================================
+   MOBILE — this is an app, not a mockup on a page
+   No bone backdrop, no device frame, no board chrome.
+   ============================================================ */
+
+.app-shell {
+  position: fixed;
+  inset: 0;
+  background: #0C0C0C;
+  z-index: 1;
+}
+
+body.app-mode {
+  background: #0C0C0C;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.app-mode .board-head,
+body.app-mode .board-foot,
+body.app-mode #rack { display: none; }
+
+body.app-mode .board { padding: 0; min-height: 0; }
+
+/* The frame dissolves; the screen becomes the viewport. */
+body.app-mode .device {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.app-mode .screen {
+  border-radius: 0;
+  height: 100%;
+}
+
+/* Real notch/dynamic-island and gesture bar instead of drawn ones. */
+body.app-mode .statusbar {
+  height: calc(26px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: max(22px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+body.app-mode .home-bar {
+  height: calc(14px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: transparent;
+}
+
+body.app-mode .tabbar {
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+body.app-mode .home-body,
+body.app-mode .list,
+body.app-mode .settings { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+
+body.app-mode .sheet { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+
+/* ---- the tablet-and-up board keeps its frame ---- */
+@media (min-width: 641px) and (max-width: 900px) {
+  .rack { gap: 18px; }
+  .board { padding: 44px 24px 40px; }
+}
+
+/* ---- phones: whichever page you open, it is the app ---- */
+@media (max-width: 640px) {
+  html, body { height: 100%; overflow: hidden; }
+
+  .solo {
+    padding: 0;
+    gap: 0;
+    justify-content: flex-start;
+    min-height: 100dvh;
+    height: 100dvh;
+  }
+
+  /* the tab bar inside the app does the navigating */
+  .solo-nav, .solo-note { display: none; }
+
+  #solo {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  #solo .device {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #solo .screen {
+    border-radius: 0;
+    height: 100%;
+  }
+
+  #solo .statusbar {
+    height: calc(26px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+
+  #solo .home-bar {
+    height: calc(14px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: transparent;
+  }
+
+  #solo .tabbar { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+
+  #solo .home-body,
+  #solo .list,
+  #solo .settings { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+
+  #solo .sheet { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+
+  /* a phone is taller than the mockup: let the stage breathe */
+  #solo .stage-media { object-position: center 30%; }
+  #solo .track { top: 30%; width: 132px; height: 132px; }
 }
