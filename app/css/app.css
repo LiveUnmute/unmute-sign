@@ -71,27 +71,6 @@ a { color: inherit; }
   isolation: isolate;
 }
 
-/* status bar ------------------------------------------------ */
-
-.statusbar {
-  flex: none;
-  height: 30px;
-  padding: 0 20px 0 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  position: relative;
-  z-index: 6;
-}
-
-.statusbar.is-on-dark { color: #fff; }
-.statusbar .glyphs { display: flex; align-items: center; gap: 4px; }
-.statusbar svg { display: block; }
-
 /* home indicator -------------------------------------------- */
 
 .home-bar {
@@ -136,7 +115,8 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 20px 13px;
+  padding: 22px 20px 13px;
+  padding-top: calc(22px + env(safe-area-inset-top, 0px));
 }
 
 .wordmark { height: 19px; width: auto; display: block; }
@@ -439,7 +419,8 @@ a { color: inherit; }
 
 .demo-chip {
   position: absolute;
-  top: 36px; right: 18px;
+  top: 18px; right: 18px;
+  top: calc(18px + env(safe-area-inset-top, 0px));
   z-index: 6;
   font-family: var(--display);
   font-size: 6.5px;
@@ -460,7 +441,7 @@ a { color: inherit; }
 .track {
   position: absolute;
   left: 50%;
-  top: 31%;
+  top: 29%;
   width: 118px;
   height: 118px;
   transform: translate(-50%, -50%);
@@ -641,7 +622,8 @@ a { color: inherit; }
 
 .page-head {
   flex: none;
-  padding: 6px 20px 16px;
+  padding: 24px 20px 16px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
 }
 
 .page-title {
@@ -1050,13 +1032,6 @@ body.app-mode .screen {
 }
 
 /* Real notch/dynamic-island and gesture bar instead of drawn ones. */
-body.app-mode .statusbar {
-  height: calc(26px + env(safe-area-inset-top, 0px));
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-left: max(22px, env(safe-area-inset-left, 0px));
-  padding-right: max(20px, env(safe-area-inset-right, 0px));
-}
-
 body.app-mode .home-bar {
   height: calc(14px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1111,13 +1086,6 @@ body.app-mode .sheet { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0
   #solo .screen {
     border-radius: 0;
     height: 100%;
-  }
-
-  #solo .statusbar {
-    height: calc(26px + env(safe-area-inset-top, 0px));
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-left: max(22px, env(safe-area-inset-left, 0px));
-    padding-right: max(20px, env(safe-area-inset-right, 0px));
   }
 
   #solo .home-bar {

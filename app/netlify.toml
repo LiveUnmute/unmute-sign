@@ -1,0 +1,81 @@
+# Netlify config for app.liveunmute.com
+#
+# This file only applies when the site's **Base directory** is set to `app`
+# (Site configuration → Build & deploy → Base directory). That setting is what
+# matters: the repo root has its own netlify.toml that builds demo/, and a new
+# site connected without a base directory would use that one instead and
+# publish the wrong thing.
+#
+# There is no build step. The app is plain HTML, CSS, ES modules and images.
+
+[build]
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# --- caching -------------------------------------------------------------
+# The HTML shell must never be cached: a stale index.html pointing at new
+# module filenames is the classic way a deploy "doesn't work".
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+# JS and CSS are loaded as ES modules and change together. Short cache so a
+# redeploy is picked up without a hard refresh.
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+# Sign media is the heavy part. It changes rarely, so let it sit in the CDN.
+# If you swap an image or add a video and it does not appear, this is why —
+# either wait, or rename the file (a new filename is a new URL).
+
+[[headers]]
+  for = "/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# --- baseline security headers ------------------------------------------
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+# --- routes --------------------------------------------------------------
+# /app and /demo are the short links you hand to a tester.
+
+[[redirects]]
+  from = "/app"
+  to = "/app.html"
+  status = 200
+
+# The app is a single page; every unknown path lands on it rather than a
+# Netlify 404.
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

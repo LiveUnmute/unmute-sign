@@ -14,6 +14,8 @@ app/
 ├── js/app.js         navigation, microphone, simulation
 ├── assets/           logo, favicon
 ├── media/            patient-01…05, translator-01…05
+├── netlify.toml      deploy config for app.liveunmute.com
+├── DEPLOY.md         how to ship it to the subdomain
 └── server.mjs        static server on :8083
 ```
 
@@ -23,6 +25,12 @@ cd app && PORT=8083 node server.mjs
 
 Open `/` on a desktop for the board, or open either page on a phone and it
 becomes the app — no frame, no backdrop, safe-area insets respected.
+
+There is no drawn status bar. On a phone the device's own status bar is the one
+that should show, so the mock `9:41` strip was removed from all four screens
+and the top padding now takes `env(safe-area-inset-top)` instead.
+
+To deploy, see **DEPLOY.md**.
 
 ## Changing an image to a video
 
