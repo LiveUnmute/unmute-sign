@@ -13,7 +13,7 @@
 //          the signer media is a still image per phrase.
 // The UI says which one you are getting rather than leaving it ambiguous.
 
-import { device, renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
+import { renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
 import { SCRIPT, TRANSLATOR_SIGNS, resolveStep } from "./media.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -56,31 +56,6 @@ function currentEntry() {
   return { entry: resolveStep(step), index: i % steps.length, total: steps.length };
 }
 
-/* ------------------------------------------------------------
-   Board (desktop) — four screens side by side
-   ------------------------------------------------------------ */
-
-const BOARD = [
-  ["home", "Home", "Entry point. One action."],
-  ["sign", "Sign", "Two-way. Sign or speak."],
-  ["history", "History", "Past encounters."],
-  ["settings", "Settings", "Language, capture, data."],
-];
-
-function boardMarkup() {
-  return BOARD.map(
-    ([key, label, note], i) => `
-    <a class="slot" href="app.html#${key}" aria-label="Open the ${label} screen">
-      ${device(RENDER[key](key === "sign" ? signState() : undefined))}
-      <span class="slot-foot">
-        <span class="slot-num">0${i + 1}</span>
-        <span class="slot-label">${label}</span>
-        <span class="slot-note">${note}</span>
-      </span>
-    </a>`
-  ).join("");
-}
-
 function signState() {
   const { entry } = currentEntry();
   return {
@@ -90,10 +65,6 @@ function signState() {
     note: state.note,
     confidence: state.confidence,
   };
-}
-
-function mountBoard(rack) {
-  rack.innerHTML = boardMarkup();
 }
 
 /* ------------------------------------------------------------
@@ -110,7 +81,7 @@ function paint() {
       ? renderSign(signState())
       : RENDER[state.screen]();
 
-  host.innerHTML = device(html);
+  host.innerHTML = html;
   wire();
 }
 
@@ -118,17 +89,9 @@ function go(screen) {
   if (!RENDER[screen] || screen === state.screen) return;
   state.screen = screen;
   history.replaceState(null, "", `#${screen}`);
-  syncNav();
   paint();
 
   if (screen === "sign") armSignScreen();
-}
-
-function syncNav() {
-  if (!navEl) return;
-  $$(".chip", navEl).forEach((c) =>
-    c.classList.toggle("is-on", c.dataset.screen === state.screen)
-  );
 }
 
 function wire() {
@@ -441,47 +404,30 @@ function typeCaption(text) {
 }
 
 /* ------------------------------------------------------------
-   Boot
+   Boot — one app, every width
    ------------------------------------------------------------ */
 
-const isMobile = () => window.matchMedia("(max-width: 640px)").matches;
+host = $("#app");
 
-const navEl = $("#nav");
-const soloEl = $("#solo");
-const rackEl = $("#rack");
+const initial = (location.hash || "#home").slice(1);
+state.screen = RENDER[initial] ? initial : "home";
 
-// app.html, or index.html on a phone: the app, full bleed.
-if (soloEl) {
-  host = soloEl;
-  const initial = (location.hash || "#home").slice(1);
-  state.screen = RENDER[initial] ? initial : "home";
-  syncNav();
-  paint();
-  if (state.screen === "sign") armSignScreen();
+paint();
+if (state.screen === "sign") armSignScreen();
 
-  $$(".chip", navEl).forEach((c) => c.addEventListener("click", () => go(c.dataset.screen)));
+// 1–4 switch screens, as a keyboard shortcut for desktop.
+window.addEventListener("keydown", (e) => {
+  if (e.target.matches("input, textarea")) return;
+  const map = { 1: "home", 2: "sign", 3: "history", 4: "settings" };
+  if (map[e.key]) go(map[e.key]);
+});
 
-  window.addEventListener("keydown", (e) => {
-    const map = { 1: "home", 2: "sign", 3: "history", 4: "settings" };
-    if (map[e.key]) go(map[e.key]);
-  });
-}
-
-// index.html: board on desktop, the app itself on a phone.
-if (rackEl) {
-  if (isMobile()) {
-    document.body.classList.add("app-mode");
-
-    const shell = document.createElement("div");
-    shell.className = "app-shell";
-    shell.id = "solo";
-    document.body.appendChild(shell);
-
-    host = shell;
-    state.screen = RENDER[(location.hash || "#home").slice(1)] ? (location.hash || "#home").slice(1) : "home";
+// Keep the hash honest when the browser's back button is used.
+window.addEventListener("hashchange", () => {
+  const next = (location.hash || "#home").slice(1);
+  if (RENDER[next] && next !== state.screen) {
+    state.screen = next;
     paint();
-    if (state.screen === "sign") armSignScreen();
-  } else {
-    mountBoard(rackEl);
+    if (next === "sign") armSignScreen();
   }
-}
+});

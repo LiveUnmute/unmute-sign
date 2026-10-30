@@ -5,13 +5,15 @@ conversation and a real microphone.
 
 ```
 app/
-├── index.html        the board on desktop · the app itself on a phone
-├── app.html          the app, framed on desktop
+├── index.html        the app — full bleed at every width
+├── app.html          forwards to / (kept so old links work)
 ├── TESTER_GUIDE.md   hand this to a tester — supported phrases and what to look for
 ├── css/app.css       all styling
 ├── js/screens.js     the four screens as markup
 ├── js/media.js       sign media + the pre-arranged conversation   ← edit here
 ├── js/app.js         navigation, microphone, simulation
+├── js/providers/     the translation seam: contract, mock, Talksign skeleton
+├── ROADMAP_TO_LIVE.md  what is left before the API key is the last step
 ├── assets/           logo, favicon
 ├── media/            patient-01…05, translator-01…05
 ├── netlify.toml      deploy config for app.liveunmute.com
@@ -23,8 +25,9 @@ app/
 cd app && PORT=8083 node server.mjs
 ```
 
-Open `/` on a desktop for the board, or open either page on a phone and it
-becomes the app — no frame, no backdrop, safe-area insets respected.
+Open `/` — it is the app, at any width. No frame, no backdrop, no board: the
+screens fill the window, with the content held to a readable column and the
+background running edge to edge. On a phone, safe-area insets are respected.
 
 There is no drawn status bar. On a phone the device's own status bar is the one
 that should show, so the mock `9:41` strip was removed from all four screens
@@ -116,5 +119,6 @@ Speak never loses the thread.
 - The signer is a still photograph per phrase. Animation is the next step and
   is why the media layer takes video already.
 - History and Settings are static.
-- The board's four frames are fixed-size mockups; on a phone the app goes
-  full-bleed instead.
+- The translation providers in `js/providers/` are not yet wired into the UI.
+  The mock works and is tested; `talksign.js` is a skeleton that throws until a
+  key is configured. See `ROADMAP_TO_LIVE.md` step 2.

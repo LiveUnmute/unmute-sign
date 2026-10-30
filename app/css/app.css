@@ -45,31 +45,22 @@ a { color: inherit; }
    device
    ------------------------------------------------------------ */
 
-.device {
-  position: relative;
-  width: var(--device-w);
-  height: var(--device-h);
-  padding: 6px;
-  border-radius: 38px;
-  background: #101010;
-  box-shadow:
-    0 1px 2px rgba(18, 18, 18, 0.16),
-    0 16px 34px -16px rgba(18, 18, 18, 0.34),
-    0 44px 80px -40px rgba(18, 18, 18, 0.28);
-  flex: none;
-}
-
 .screen {
   position: relative;
   width: 100%;
-  height: 100%;
-  border-radius: 32px;
+  height: 100dvh;
   background: var(--bone);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   isolation: isolate;
 }
+
+/* Every screen is a centred column. The background still runs edge to edge,
+   but text stops at a readable measure — the same restraint the landing page
+   uses, which is what makes it read as a product rather than a stretched
+   phone screenshot. */
+.screen > * { --gutter: clamp(20px, 6vw, 64px); }
 
 /* home indicator -------------------------------------------- */
 
@@ -797,191 +788,114 @@ a { color: inherit; }
 .toggle.is-on { background: var(--blue); }
 .toggle.is-on::after { transform: translateX(14px); }
 
+
 /* ============================================================
-   launcher page
+   THE SHELL — a web app, not a phone mockup
+   No frame, no backdrop, no board. Every screen fills the window.
    ============================================================ */
 
-.board {
-  min-height: 100vh;
-  padding: 64px 40px 56px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.board-head {
-  width: 100%;
-  max-width: 1180px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 22px;
-  margin-bottom: 44px;
-}
-
-.board-logo { height: 24px; width: auto; display: block; margin-bottom: 26px; }
-
-.board-title {
-  font-family: var(--display);
-  font-size: clamp(20px, 3vw, 33px);
-  line-height: 1.16;
-  font-weight: 700;
-  letter-spacing: 0.005em;
-  text-transform: uppercase;
+html, body {
+  height: 100%;
   margin: 0;
-  max-width: 620px;
+  background: var(--bone);
 }
 
-.board-meta {
-  font-family: var(--display);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ink-45);
-  text-align: right;
-  line-height: 2;
-  flex: none;
-}
-.board-meta b { color: var(--ink); }
-
-.rack {
-  display: flex;
-  gap: 26px;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
-.slot {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  text-decoration: none;
-}
-
-.slot .device { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease; }
-
-.slot:hover .device {
-  transform: translateY(-9px);
-  box-shadow:
-    0 1px 2px rgba(18, 18, 18, 0.16),
-    0 26px 44px -18px rgba(18, 18, 18, 0.4),
-    0 60px 96px -44px rgba(18, 18, 18, 0.3);
-}
-
-.slot-foot {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.slot-num {
-  font-family: var(--display);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--blue);
-}
-
-.slot-label {
-  font-family: var(--display);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.slot-note {
-  font-size: 9.5px;
-  font-weight: 400;
-  color: var(--ink-45);
-  margin-left: auto;
-  text-align: right;
-  max-width: 120px;
-  line-height: 1.4;
-}
-
-.board-foot {
-  margin-top: 52px;
-  padding-top: 20px;
-  border-top: 1px solid var(--rule);
+#app {
+  height: 100dvh;
   width: 100%;
-  max-width: 1180px;
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  font-size: 10px;
-  color: var(--ink-45);
-  line-height: 1.6;
-}
-.board-foot p { margin: 0; max-width: 560px; }
-.board-foot .tag {
-  font-family: var(--display);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  flex: none;
 }
 
-/* ============================================================
-   interactive page
-   ============================================================ */
+/* ---- readable measure -------------------------------------
+   The background runs edge to edge; the content stops at a column.
+   Without this, a 1440px window gives 200-character lines. */
 
-.solo {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.appbar,
+.home-body,
+.page-head,
+.list,
+.settings {
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.appbar { padding-inline: clamp(20px, 5vw, 40px); }
+.home-body,
+.page-head,
+.list,
+.settings { padding-inline: clamp(20px, 5vw, 40px); }
+
+/* The hero is the one block allowed to grow with the window. */
+.hero { min-height: clamp(150px, 22vh, 240px); }
+
+.hero-title {
+  font-size: clamp(17px, 2.2vw, 25px);
+  max-width: 26ch;
+}
+
+.hero-sub {
+  font-size: clamp(10.5px, 1.05vw, 13px);
+  max-width: 44ch;
+}
+
+.caption { font-size: clamp(14.5px, 1.7vw, 21px); }
+.cta { height: clamp(46px, 6vh, 56px); }
+
+/* ---- the sheet on the media screen ----------------------- */
+
+.sheet {
+  width: 100%;
+  max-width: 940px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 40px);
+}
+
+/* ---- tab bar ---------------------------------------------
+   Full width so it reads as app chrome, with the tabs themselves
+   clustered rather than smeared across 1900px. */
+
+.tabbar {
   justify-content: center;
-  gap: 26px;
-  padding: 44px 20px;
+  gap: clamp(4px, 3vw, 26px);
+  padding-inline: 12px;
 }
 
-.solo-nav {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--rule);
-  border-radius: 9999px;
-  background: rgba(247, 246, 243, 0.7);
+.tab { flex: 0 0 auto; width: clamp(58px, 9vw, 110px); }
+.tab-label { font-size: clamp(6px, 0.62vw, 7.5px); }
+
+/* ---- the stored-art fills the frame ---------------------- */
+
+.stage-media { object-position: center 30%; }
+
+/* ---- desktop only ---------------------------------------- */
+
+@media (min-width: 641px) {
+  /* the iOS gesture bar has no meaning in a browser */
+  .home-bar { display: none; }
+
+  .screen { height: 100dvh; }
+  .tabbar { height: 58px; bottom: 0; border-top-color: var(--rule); }
+
+  .home-body,
+  .list,
+  .settings { padding-bottom: 74px; }
+
+  .sheet { padding-bottom: 74px; }
+
+  /* room for the tracking frame to sit in the upper third */
+  .track { width: clamp(118px, 13vw, 168px); height: clamp(118px, 13vw, 168px); top: 27%; }
+
+  .demo-chip { top: 20px; right: clamp(20px, 5vw, 40px); }
 }
 
-.chip {
-  font-family: var(--display);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-45);
-  padding: 8px 14px;
-  border-radius: 9999px;
-  transition: background 160ms ease, color 160ms ease;
-}
-.chip:hover { color: var(--ink); }
-.chip.is-on { background: var(--ink); color: var(--bone); }
-
-.solo-note {
-  font-size: 10px;
-  color: var(--ink-45);
-  text-align: center;
-  max-width: 400px;
-  line-height: 1.65;
-}
-
-@media (max-width: 1340px) {
-  .rack { gap: 20px; }
-  .board { padding: 48px 28px 44px; }
-}
-
-@media (max-width: 760px) {
-  .board-head { flex-direction: column; align-items: flex-start; gap: 18px; }
-  .board-meta { text-align: left; }
+/* Keep the media from becoming a tiny band on very wide, short windows. */
+@media (min-width: 1200px) and (min-height: 780px) {
+  .home-body { max-width: 900px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -990,119 +904,4 @@ a { color: inherit; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-}
-
-/* ============================================================
-   MOBILE — this is an app, not a mockup on a page
-   No bone backdrop, no device frame, no board chrome.
-   ============================================================ */
-
-.app-shell {
-  position: fixed;
-  inset: 0;
-  background: #0C0C0C;
-  z-index: 1;
-}
-
-body.app-mode {
-  background: #0C0C0C;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-body.app-mode .board-head,
-body.app-mode .board-foot,
-body.app-mode #rack { display: none; }
-
-body.app-mode .board { padding: 0; min-height: 0; }
-
-/* The frame dissolves; the screen becomes the viewport. */
-body.app-mode .device {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-body.app-mode .screen {
-  border-radius: 0;
-  height: 100%;
-}
-
-/* Real notch/dynamic-island and gesture bar instead of drawn ones. */
-body.app-mode .home-bar {
-  height: calc(14px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: transparent;
-}
-
-body.app-mode .tabbar {
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-}
-
-body.app-mode .home-body,
-body.app-mode .list,
-body.app-mode .settings { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
-
-body.app-mode .sheet { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
-
-/* ---- the tablet-and-up board keeps its frame ---- */
-@media (min-width: 641px) and (max-width: 900px) {
-  .rack { gap: 18px; }
-  .board { padding: 44px 24px 40px; }
-}
-
-/* ---- phones: whichever page you open, it is the app ---- */
-@media (max-width: 640px) {
-  html, body { height: 100%; overflow: hidden; }
-
-  .solo {
-    padding: 0;
-    gap: 0;
-    justify-content: flex-start;
-    min-height: 100dvh;
-    height: 100dvh;
-  }
-
-  /* the tab bar inside the app does the navigating */
-  .solo-nav, .solo-note { display: none; }
-
-  #solo {
-    width: 100%;
-    height: 100dvh;
-  }
-
-  #solo .device {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  #solo .screen {
-    border-radius: 0;
-    height: 100%;
-  }
-
-  #solo .home-bar {
-    height: calc(14px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: transparent;
-  }
-
-  #solo .tabbar { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
-
-  #solo .home-body,
-  #solo .list,
-  #solo .settings { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
-
-  #solo .sheet { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
-
-  /* a phone is taller than the mockup: let the stage breathe */
-  #solo .stage-media { object-position: center 30%; }
-  #solo .track { top: 30%; width: 132px; height: 132px; }
 }
