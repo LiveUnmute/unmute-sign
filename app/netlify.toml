@@ -72,15 +72,6 @@
   to = "/app.html"
   status = 200
 
-# The pitch deck lives at /deck. Netlify serves existing files before applying
-# redirects, but this makes the trailing-slash case explicit so the catch-all
-# below can never swallow it.
-
-[[redirects]]
-  from = "/deck"
-  to = "/deck/index.html"
-  status = 200
-
 # The app is a single page; every unknown path lands on it rather than a
 # Netlify 404.
 
