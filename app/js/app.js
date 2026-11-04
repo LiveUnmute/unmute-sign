@@ -15,6 +15,9 @@
 
 import { renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
 import { SCRIPT, TRANSLATOR_SIGNS, resolveStep } from "./media.js";
+import { getProvider } from "./providers/index.js";
+import { createLiveSession } from "./live.js";
+import { readConfig } from "./config.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -40,6 +43,11 @@ const state = {
   audioCtx: null,
   levelRAF: null,
   recognition: null,
+
+  // The live engine. `null` until providers/index.js has resolved, which is
+  // instant when there is no key and one dynamic import when there is.
+  live: null,
+  liveReady: false,
 };
 
 /* ------------------------------------------------------------
@@ -64,14 +72,19 @@ function signState() {
     caption: state.caption || entry.text,
     note: state.note,
     confidence: state.confidence,
+    live: state.live,
   };
 }
+
+/** True only when a real engine is configured and answered. */
+const isLiveEngine = () => Boolean(state.live && !state.live.isMock);
 
 /* ------------------------------------------------------------
    The app shell
    ------------------------------------------------------------ */
 
 let host = null;
+let session = null;
 
 function paint() {
   if (!host) return;
@@ -83,10 +96,16 @@ function paint() {
 
   host.innerHTML = html;
   wire();
+  bindLiveVideo();
 }
 
 function go(screen) {
   if (!RENDER[screen] || screen === state.screen) return;
+
+  // Leaving the conversation closes the camera. Browsing history is not a
+  // reason for a patient's room to stay on a lens.
+  if (state.screen === "sign") session?.disarm();
+
   state.screen = screen;
   history.replaceState(null, "", `#${screen}`);
   paint();
@@ -110,6 +129,11 @@ function wire() {
     el.addEventListener("click", () => repeatSign())
   );
 
+  $("[data-consent-yes]", host)?.addEventListener("click", () => session?.grantConsent());
+  $("[data-consent-no]", host)?.addEventListener("click", () => session?.declineConsent());
+  $("[data-confirm-yes]", host)?.addEventListener("click", () => session?.accept());
+  $("[data-confirm-no]", host)?.addEventListener("click", () => session?.discard());
+
   $$("[data-toggle]", host).forEach((el) =>
     el.addEventListener("click", () => {
       const on = el.classList.toggle("is-on");
@@ -120,10 +144,26 @@ function wire() {
 
 function armSignScreen() {
   if (state.mode === "patient") {
-    showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+    // With a real engine the camera comes up; without one the scripted poses
+    // carry the demo exactly as before.
+    if (isLiveEngine() || state.live?.phase === "consent") {
+      armPatient();
+    } else {
+      showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+    }
   } else {
     showClinician(state.clinicianIndex, "Tap the speech button and talk.");
   }
+}
+
+/** Bring the camera up, or explain why we cannot. */
+function armPatient() {
+  if (!state.liveReady) {
+    state.note = "Starting the engine…";
+    paint();
+    return;
+  }
+  session?.arm();
 }
 
 /* ------------------------------------------------------------
@@ -133,7 +173,7 @@ function armSignScreen() {
 function setMode(mode) {
   const next = mode === "sign" ? "patient" : "clinician";
   if (next === state.mode) {
-    if (next === "patient") nextPatient();
+    if (next === "patient") onHandTap();
     else listen();
     return;
   }
@@ -143,8 +183,15 @@ function setMode(mode) {
   state.note = "";
 
   if (next === "patient") {
-    showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+    if (isLiveEngine() || state.live?.phase === "consent") {
+      armPatient();
+    } else {
+      showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+    }
   } else {
+    // The patient must never be visible on the clinician page — and the camera
+    // is not merely hidden, it is closed.
+    session?.disarm();
     showClinician(state.clinicianIndex, "Tap the speech button and talk.");
   }
 }
@@ -163,6 +210,19 @@ function showPatient(index, note = "") {
 
   paint();
   typeCaption(entry.text);
+}
+
+/** One tap does both jobs: start the take, or end it. */
+function onHandTap() {
+  if (!isLiveEngine() && state.live?.phase !== "consent") {
+    nextPatient();
+    return;
+  }
+  if (!state.liveReady || !session) return;
+
+  if (state.live.phase === "recording") session.stop();
+  else if (state.live.phase === "sending") return;
+  else session.record();
 }
 
 function nextPatient() {
@@ -194,7 +254,8 @@ function repeatSign() {
   const v = $("video.stage-media", host);
   if (v) {
     v.currentTime = 0;
-    v.play().catch(() => {});
+    const started = v.play?.();
+    if (started && typeof started.catch === "function") started.catch(() => {});
   }
 
   // and flash the frame so a repeat is visible even on a still
@@ -318,6 +379,16 @@ function pickPoseFor(heard) {
   state.caption = heard;
   state.note = "Heard from the microphone.";
   paint();
+
+  // The other half of the conversation: hand the sentence to the engine and
+  // render whatever it returns to sign. With no engine this is a no-op and the
+  // matched pose above stands.
+  maybeSign(heard);
+}
+
+function maybeSign(text) {
+  if (!isLiveEngine() || !session || !text) return;
+  session.sign(text);
 }
 
 function advanceClinician(note) {
@@ -385,6 +456,68 @@ function stopMeter() {
   if (btn) btn.style.setProperty("--lvl", "0");
 }
 
+/* ------------------------------------------------------------
+   The live engine
+   ------------------------------------------------------------ */
+
+function bindLiveVideo() {
+  const cam = $("[data-cam]", host);
+  if (cam && session) session.attach(cam);
+
+  // play() returns a promise in modern engines and undefined in older ones.
+  // Calling .catch() on undefined throws — inside a render path, that turns a
+  // working screen into an error state.
+  const sv = $("[data-sign-video]", host);
+  const started = sv?.play?.();
+  if (started && typeof started.catch === "function") started.catch(() => {});
+}
+
+/**
+ * The engine reports every change here. A full repaint on every tick would
+ * detach the camera stream from the <video> each frame, so only material
+ * changes repaint; the countdown is written straight into the note.
+ */
+function onLiveChange(snap) {
+  const prev = state.live || {};
+  state.live = snap;
+
+  const material = ["phase", "transcript", "confidence", "note", "error", "consent", "signing", "isMock"].some(
+    (k) => JSON.stringify(prev[k]) !== JSON.stringify(snap[k])
+  );
+
+  if (material) {
+    paint();
+    return;
+  }
+
+  if (snap.phase === "recording") {
+    const el = $("[data-note]", host);
+    if (el) el.textContent = `Recording — ${(Math.max(0, snap.msLeft) / 1000).toFixed(1)}s left.`;
+  }
+
+  bindLiveVideo();
+}
+
+async function bootLive() {
+  const cfg = readConfig();
+
+  try {
+    const { provider, reason } = await getProvider(cfg);
+    if (provider.name === "mock") console.info("[unmute] scripted demo:", reason);
+
+    session = createLiveSession({ provider, config: cfg, onChange: onLiveChange });
+    state.live = session.state;
+    state.liveReady = true;
+
+    paint();
+    if (state.screen === "sign") armSignScreen();
+  } catch (err) {
+    console.warn("[unmute] live engine failed to start:", err?.message);
+    state.liveReady = false;
+    paint();
+  }
+}
+
 /* --- typewriter for scripted captions ---------------------- */
 
 let typer = null;
@@ -414,6 +547,10 @@ state.screen = RENDER[initial] ? initial : "home";
 
 paint();
 if (state.screen === "sign") armSignScreen();
+
+// Resolve the engine in the background. Everything above already works without
+// it, so a slow or failed resolve cannot leave a blank screen.
+bootLive();
 
 // 1–4 switch screens, as a keyboard shortcut for desktop.
 window.addEventListener("keydown", (e) => {

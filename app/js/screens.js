@@ -130,29 +130,70 @@ export const renderSign = (state = {}) => {
   const mode = state.mode || "sign";
   const entry = state.entry || {};
   const speaking = mode === "speak";
+  const live = state.live || null;
+
+  const phase = live?.phase || "idle";
+  const consenting = !speaking && phase === "consent";
+  const confirming = !speaking && phase === "confirm";
+  const recording = !speaking && phase === "recording";
+  const sending = !speaking && phase === "sending";
+
+  // The camera only occupies the stage while we are genuinely capturing. Once
+  // the patient confirms, the stage returns to the pose so nobody is staring at
+  // themselves for the rest of the conversation.
+  // Whenever the camera is open it is also visible. A lens that is on while the
+  // screen shows something else is exactly the thing patients do not trust.
+  const camLive = !speaking && live && live.consent === "granted" && phase !== "consent";
+
+  const signed = speaking ? live?.signing : null;
 
   const kicker = speaking
     ? `Clinician <b>speaking</b>`
+    : consenting
+    ? `Before we capture`
+    : confirming
+    ? `Patient <b>confirm</b>`
+    : recording
+    ? `Recording`
+    : sending
+    ? `Reading signs`
     : `Patient <b>signed</b>`;
 
-  const caption = state.caption || entry.text || "";
+  const caption = confirming ? live?.transcript || "" : state.caption || entry.text || "";
+
+  const confidence =
+    confirming && live ? Math.round((live.confidence || 0) * 100) : state.confidence || 98;
+
+  const stageMarkup = signed?.videoUrl
+    ? `<video class="stage-media" src="${signed.videoUrl}" autoplay muted loop playsinline data-sign-video></video>`
+    : camLive
+    ? `<video class="stage-media" data-cam autoplay muted playsinline></video>`
+    : mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "");
+
+  const isLive = Boolean(live && !live.isMock);
+  const chip = isLive ? "Live" : "Demo";
+  const chipTitle = isLive
+    ? `${live.vendor || live.providerName} engine`
+    : "Scripted — no engine configured";
+
+  const note = live?.error || live?.note || state.note || "";
 
   return `
-<div class="screen screen--media">
+<div class="screen screen--media${recording ? " is-recording" : ""}">
 
-  <div class="stage" data-stage>
-    ${mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")}
+  <div class="stage" data-stage${confirming ? ' data-dim="on"' : ""}>
+    ${stageMarkup}
   </div>
 
   <div class="scrim" aria-hidden="true"></div>
 
-  ${speaking ? "" : `
+  ${speaking || consenting || confirming ? "" : `
   <div class="track" aria-hidden="true">
     <i></i><i></i><i></i><i></i>
-    <span class="track-chip">${state.confidence || 98}%</span>
+    <span class="track-chip">${confidence}%</span>
   </div>`}
 
-  <span class="demo-chip">Demo</span>
+  <span class="demo-chip${isLive ? " is-live" : ""}" title="${chipTitle}">${chip}</span>
 
   <div class="sheet">
     <div class="sheet-head">
@@ -164,13 +205,39 @@ export const renderSign = (state = {}) => {
         : ""}
     </div>
 
-    <p class="caption" data-caption>${caption}</p>
-    <p class="caption-note" data-note>${state.note || ""}</p>
+    ${consenting ? `
+    <div class="consent" data-consent>
+      <p class="consent-body">
+        The patient is filmed so their signs can be read. If a live engine is
+        configured, <b>that video is sent to ${live?.vendor || "the translation provider"}</b>
+        to be translated. This app does not store it.
+      </p>
+      <div class="consent-actions">
+        <button class="btn-quiet" data-consent-no>Not now</button>
+        <button class="btn-solid" data-consent-yes>Patient agrees</button>
+      </div>
+    </div>` : ""}
+
+    ${confirming ? `
+    <div class="confirm" data-confirm>
+      <p class="caption" data-caption>${caption}</p>
+      <p class="confirm-meta">
+        <span class="conf-pill${live?.uncertain ? " is-low" : ""}">${confidence}% match</span>
+        <span>${live?.uncertain ? "Low confidence — check with the patient." : "Read from signing."}</span>
+      </p>
+      <div class="confirm-actions">
+        <button class="btn-quiet" data-confirm-no>No — sign again</button>
+        <button class="btn-solid" data-confirm-yes>Yes, that's right</button>
+      </div>
+    </div>` : ""}
+
+    ${consenting || confirming ? "" : `<p class="caption" data-caption>${caption}</p>`}
+    <p class="caption-note" data-note>${note}</p>
 
     <div class="controls">
       <div class="dir${speaking ? "" : " is-on"}" data-dir="sign">
-        <button class="dir-btn" data-mode="sign" aria-label="Patient signs">${ICONS.hand}</button>
-        <span class="dir-label">Sign</span>
+        <button class="dir-btn${recording ? " is-live" : ""}" data-mode="sign" aria-label="${recording ? "Stop recording" : "Patient signs"}">${ICONS.hand}</button>
+        <span class="dir-label">${recording ? "Stop" : "Sign"}</span>
       </div>
       <div class="dir${speaking ? " is-on" : ""}" data-dir="speak">
         <button class="dir-btn" data-mode="speak" aria-label="Clinician speaks">${ICONS.speech}</button>
