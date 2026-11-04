@@ -38,9 +38,18 @@ const ENDPOINTS = {
   batchGetParam: "request_id",
 };
 
+const VENDOR_ORIGIN = "https://api.sign-speak.com";
+
 const DEFAULTS = {
-  baseUrl: "https://api.sign-speak.com",
+  baseUrl: VENDOR_ORIGIN,
   model: "SLR.2.sm",
+  // true → calls go to /api/sign/* through our own Netlify Function, which
+  // holds the key. No key in the browser, and no CORS allowlist needed on the
+  // vendor side because the caller is a server.
+  proxy: false,
+  // BLOCKING holds up to 30s, which exceeds a Lambda's 10s. Through the proxy
+  // we must use BATCH and poll. Direct from the browser, BLOCKING is fine.
+  requestClass: null,
   // "log" per their documented filter at Math.log(0.5). See toProbability.
   confidenceScale: "log",
   payloadFormat: "bare", // "bare" | "dataUri"
@@ -98,6 +107,20 @@ function extractPrediction(payload) {
   return null;
 }
 
+/** The video URL out of a production response, wherever it sits. */
+function pickVideoUrl(json) {
+  if (!json || typeof json !== "object") return "";
+  return (
+    json.video_url ??
+    json.url ??
+    json.video ??
+    json.signed_video_url ??
+    json.data?.video_url ??
+    json.data?.url ??
+    ""
+  );
+}
+
 /** Normalise one entry into { word, p }. */
 function readEntry(entry, scale) {
   if (typeof entry === "string") return { word: entry, p: NaN };
@@ -112,18 +135,25 @@ function readEntry(entry, scale) {
 export function createSignSpeakProvider(config = {}) {
   const cfg = { ...DEFAULTS, ...config };
   const key = cfg.apiKey;
+  const proxy = Boolean(cfg.proxy);
 
-  if (!key) {
+  // Through the proxy there is deliberately no key in this process.
+  if (!proxy && !key) {
     throw new Error(
-      "Sign-Speak: no API key. Set window.UNMUTE_CONFIG.signSpeakKey, or a " +
-        '<meta name="signspeak-key"> tag. Use a PUBLIC key — never a private one.'
+      "Sign-Speak: no API key and no proxy. Set window.UNMUTE_CONFIG.signSpeakKey, " +
+        'or a <meta name="signspeak-key"> tag, or leave proxy mode on. ' +
+        "Use a PUBLIC key — never a private one."
     );
   }
 
-  const headers = {
-    "content-type": "application/json",
-    authorization: key,
-  };
+  const headers = { "content-type": "application/json" };
+  if (key) headers.authorization = key;
+
+  // Where relative video URLs should resolve. Through the proxy, relative
+  // vendor URLs must point at the vendor, not at our function path.
+  const mediaBase = cfg.mediaOrigin || (proxy ? VENDOR_ORIGIN : cfg.baseUrl);
+
+  const requestClass = cfg.requestClass || (proxy ? "BATCH" : "BLOCKING");
 
   async function request(method, path, body, timeoutMs) {
     const ctrl = new AbortController();
@@ -189,17 +219,25 @@ export function createSignSpeakProvider(config = {}) {
     throw new Error("Sign-Speak: the batch job did not finish in time.");
   }
 
-  /** Handles the 200-or-202 dance in one place. */
-  async function submit(path, body) {
+  /**
+   * Handles every shape the vendor can answer with:
+   *   200 + result            → done
+   *   202 + request_id        → poll (BLOCKING overran, or we asked for BATCH)
+   *   200 + request_id only   → also poll (BATCH succeeded, result later)
+   */
+  async function submit(path, body, isDone) {
     const first = await request("POST", path, body);
-
-    if (first.status !== 202) return first.json;
 
     const requestId =
       first.json?.request_id ?? first.json?.requestId ?? first.json?.batch_id ?? first.json?.id;
 
+    if (first.status !== 202 && isDone(first.json)) return first.json;
+
     if (!requestId) {
-      throw new Error("Sign-Speak: batch downgrade without a request id.");
+      if (first.status === 202) {
+        throw new Error("Sign-Speak: batch downgrade without a request id.");
+      }
+      return first.json;
     }
 
     return await pollBatch(requestId);
@@ -226,7 +264,7 @@ export function createSignSpeakProvider(config = {}) {
 
       const body = {
         payload: cfg.payloadFormat === "dataUri" ? `data:video/webm;base64,${payload}` : payload,
-        request_class: "BLOCKING",
+        request_class: requestClass,
         model: cfg.model,
         single_recognition_mode: Boolean(singleRecognition),
       };
@@ -236,7 +274,7 @@ export function createSignSpeakProvider(config = {}) {
       // whole reason our corpus matters.
       if (hints?.length) body.hint = hints[hints.length - 1];
 
-      const json = await submit(ENDPOINTS.recognize, body);
+      const json = await submit(ENDPOINTS.recognize, body, (j) => Boolean(extractPrediction(j)));
       const entries = extractPrediction(json);
 
       if (!entries) {
@@ -277,24 +315,27 @@ export function createSignSpeakProvider(config = {}) {
     async textToSign({ text, model = "MALE" } = {}) {
       if (!text) throw new Error("Sign-Speak: nothing to sign.");
 
-      const json = await submit(ENDPOINTS.produce, {
-        english: text,
-        request_class: "BATCH",
-        model,
-      });
+      const json = await submit(
+        ENDPOINTS.produce,
+        {
+          english: text,
+          // Production is a render, not a conversation turn — BATCH is right
+          // in both modes, because a Lambda cannot wait for a video to render.
+          request_class: "BATCH",
+          model,
+        },
+        (j) => Boolean(pickVideoUrl(j) || (j?.video_base64 ?? j?.data?.video_base64))
+      );
 
-      const url =
-        json?.video_url ??
-        json?.url ??
-        json?.video ??
-        json?.signed_video_url ??
-        json?.data?.video_url ??
-        json?.data?.url ??
-        "";
+      const url = pickVideoUrl(json);
 
       if (url) {
         return {
-          videoUrl: /^https?:|^blob:|^data:/.test(url) ? url : `${cfg.baseUrl}${url.startsWith("/") ? "" : "/"}${url}`,
+          // Relative URLs are vendor media, so they resolve against the vendor
+          // origin even when commands go through our proxy.
+          videoUrl: /^https?:|^blob:|^data:/.test(url)
+            ? url
+            : `${mediaBase}${url.startsWith("/") ? "" : "/"}${url}`,
           durationMs: Number(json?.duration_ms ?? json?.duration ?? 0) || 0,
           source: "signspeak",
         };
@@ -320,7 +361,7 @@ export function createSignSpeakProvider(config = {}) {
      * so a dead key surfaces at sign-in rather than mid-sentence.
      */
     async healthy() {
-      return Boolean(key);
+      return proxy || Boolean(key);
     },
 
     /** Spends inference. Only call it from Settings, never from the ward. */
@@ -336,7 +377,13 @@ export function createSignSpeakProvider(config = {}) {
 
     /** Exposed so the UI can name the vendor without importing constants. */
     get meta() {
-      return { vendor: "Sign-Speak", model: cfg.model, baseUrl: cfg.baseUrl };
+      return {
+        vendor: "Sign-Speak",
+        model: cfg.model,
+        baseUrl: cfg.baseUrl,
+        mode: proxy ? "proxy" : "direct",
+        requestClass,
+      };
     },
   };
 }

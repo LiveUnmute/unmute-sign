@@ -64,36 +64,54 @@ Sign up at <https://client.sign-speak.com>. Their docs describe three key types:
 This app is static files on Netlify. There is no server to hold a secret, so a
 private key in the bundle is a key anyone can spend. Use `PUBLIC`.
 
-### Step 2 — put the key in one place
+### Step 2 — put the key somewhere the browser cannot read it
 
-Open `index.html` and uncomment the two tags near the top:
+Two ways. **Do the first one.**
+
+#### A. Proxy mode — recommended
+
+The key goes in a Netlify environment variable and is used by
+`netlify/functions/sign.js`. It never ships to the browser, and the app never
+holds it.
+
+1. Netlify → **Site configuration → Environment variables → Add a variable**
+2. Name `SIGNSPEAK_KEY`, value = your key
+3. Optionally `SIGNSPEAK_MODEL` (defaults to `SLR.2.sm`)
+4. **Trigger a deploy** — functions only pick up env changes on a new build
+
+That is all. On boot the app asks `/api/sign/status`, the function says whether
+a key exists, and the `Demo` chip becomes `Live`. No key in `index.html`, no
+rebuild of the client code.
+
+In proxy mode the app sends `request_class: "BATCH"` and polls, because a
+Lambda cannot hold a connection for the 30 seconds `BLOCKING` may take.
+
+#### B. Direct mode — a key in the page
+
+Only if the proxy is unavailable. Uncomment the meta tags near the top of
+`index.html`:
 
 ```html
 <meta name="signspeak-key" content="PUB-xxxxxxxx">
 <meta name="signspeak-model" content="SLR.2.sm">
 ```
 
-That is the whole change. `js/config.js` reads it, `js/providers/index.js` picks
-the provider, and the `Demo` chip becomes `Live`.
+In direct mode the browser calls Sign-Speak itself, so the key is readable by
+anyone who opens the page, and Sign-Speak must allow your origin. Use a
+`PUBLIC` key and nothing else.
 
-Alternative, for a private test deployment only — a snippet in the page before
-the module loads:
+### Step 3 — CORS is only a problem in direct mode
 
-```html
-<script>window.UNMUTE_CONFIG = { signSpeakKey: "PUB-xxxxxxxx" };</script>
-```
+Through the proxy the caller is a Netlify server, not a browser, so Sign-Speak's
+origin allowlist does not apply. **This is the main practical reason to prefer
+the proxy**: the most likely day-one failure simply cannot happen.
 
-### Step 3 — ask them to allow your origin
-
-Their API almost certainly restricts which origins may call it, and this will
-look like a network failure, not a permission error:
-
-> `Could not reach the engine — check the connection.`
-
-Send them the exact URLs you deploy to:
+In direct mode it can. If every clip fails with
+`Could not reach the engine`, open DevTools, watch the Network tab, and look for
+a blocked request. Send them:
 
 - `https://liveunmute.netlify.app`
-- `https://app.liveunmute.com` (once DNS resolves)
+- `https://app.liveunmute.com`
 - `http://localhost:8083` for local work
 
 ### Step 4 — check it before a patient is in the room
@@ -202,7 +220,9 @@ winner blind.
 | `js/capture.js` | camera, MediaRecorder, base64, the 8-second ceiling |
 | `js/providers/signspeak.js` | recognition + production, confidence, batch polling |
 | `js/providers/index.js` | picks the engine; `?provider=mock` forces the demo |
-| `js/config.js` | where the key is read, and the rule that it is never private |
+| `js/config.js` | where the key is read, proxy probing, capture limits |
+| `netlify/functions/sign.js` | the proxy: holds the key, allowlists five routes, rate limits |
+| `tester.html` | the page at `/tester` that tells a clinician what is real |
 | `js/screens.js` | consent gate, camera stage, confirmation bar |
 | `js/app.js` | wiring; the camera closes on navigation |
 

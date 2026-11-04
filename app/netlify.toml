@@ -14,6 +14,14 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# --- functions -----------------------------------------------------------
+# The sign-language proxy that keeps the vendor key out of the browser.
+# Relative to this file's base directory, so it resolves to app/netlify/functions.
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # --- caching -------------------------------------------------------------
 # The HTML shell must never be cached: a stale index.html pointing at new
 # module filenames is the classic way a deploy "doesn't work".
@@ -71,6 +79,23 @@
   from = "/app"
   to = "/app.html"
   status = 200
+
+# The tester page. Declared before the catch-all so /tester does not land on
+# the app shell.
+
+[[redirects]]
+  from = "/tester"
+  to = "/tester.html"
+  status = 200
+
+# The vendor proxy. Browsers call /api/sign/*, the function attaches the key.
+# force = true so a future asset at that path can never shadow it.
+
+[[redirects]]
+  from = "/api/sign/*"
+  to = "/.netlify/functions/sign/:splat"
+  status = 200
+  force = true
 
 # The app is a single page; every unknown path lands on it rather than a
 # Netlify 404.

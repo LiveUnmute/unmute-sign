@@ -95,7 +95,11 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
 
     try {
       if (!stream) {
-        const cam = await openCamera({ maxClipMs: config?.maxClipMs });
+        const cam = await openCamera({
+          maxClipMs: config?.maxClipMs,
+          width: config?.captureWidth,
+          height: config?.captureHeight,
+        });
         stream = cam.stream;
       }
       set({ phase: "ready", note: "", error: "" });
@@ -155,7 +159,10 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
 
     const clipMs = config?.maxClipMs || 8000;
 
-    recorder = createRecorder(stream, { maxMs: clipMs });
+    recorder = createRecorder(stream, {
+      maxMs: clipMs,
+      bitsPerSecond: config?.videoBitsPerSecond,
+    });
     s.msLeft = clipMs;
     set({ phase: "recording", note: "Recording — tap the hand again when the patient finishes.", error: "" });
 

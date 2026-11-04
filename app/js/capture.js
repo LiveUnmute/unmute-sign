@@ -47,7 +47,7 @@ function pickMimeType() {
  * `video` only — we are not recording the clinician's voice here, and asking
  * for an unused microphone permission is one more prompt to explain.
  */
-export async function openCamera({ maxClipMs = 8000 } = {}) {
+export async function openCamera({ maxClipMs = 8000, width = 1280, height = 720 } = {}) {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error("CAMERA_UNSUPPORTED");
   }
@@ -55,8 +55,8 @@ export async function openCamera({ maxClipMs = 8000 } = {}) {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: {
       facingMode: "user",
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
+      width: { ideal: width },
+      height: { ideal: height },
     },
     audio: false,
   });
@@ -74,9 +74,17 @@ export async function openCamera({ maxClipMs = 8000 } = {}) {
  * @param {MediaStream} stream
  * @param {{ maxMs?: number, timesliceMs?: number }} opts
  */
-export function createRecorder(stream, { maxMs = 8000 } = {}) {
+export function createRecorder(stream, { maxMs = 8000, bitsPerSecond } = {}) {
   const mimeType = pickMimeType();
-  const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+  // The bitrate is not a quality knob here, it is a size guarantee. Through the
+  // proxy a clip must stay under 6 MB (Lambda's request ceiling), so the
+  // recorder is told what to spend rather than left to guess.
+  const options = {};
+  if (mimeType) options.mimeType = mimeType;
+  if (bitsPerSecond) options.videoBitsPerSecond = bitsPerSecond;
+
+  const recorder = new MediaRecorder(stream, Object.keys(options).length ? options : undefined);
   const chunks = [];
 
   let settled = false;
