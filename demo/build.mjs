@@ -12,7 +12,7 @@ import { join } from "node:path";
 const SRC = ".";
 const DIST = "dist";
 
-const COPY_FILES = ["index.html", "onepager.html"];
+const COPY_FILES = ["index.html", "live.html", "onepager.html"];
 const COPY_DIRS = ["css", "js"];
 
 async function dirSize(dir) {
