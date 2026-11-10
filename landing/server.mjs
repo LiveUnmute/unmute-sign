@@ -48,14 +48,42 @@ const server = createServer(async (req, res) => {
         await stat(html);
         file = html;
       } catch {
-        /* fall through to the 404 below */
+        /* fall through below */
       }
     }
 
-    const info = await stat(file);
-    if (info.isDirectory()) {
-      res.writeHead(404, { "Cache-Control": "no-store" }).end("Not found");
-      return;
+    let info;
+    try {
+      info = await stat(file);
+    } catch {
+      info = null;
+    }
+
+    // A directory with an index.html is a page, not a 404. Netlify does this
+    // for /demo; without it the folder-style routes only work in production.
+    if (info && info.isDirectory()) {
+      const index = join(file, "index.html");
+      try {
+        await stat(index);
+        file = index;
+        info = await stat(index);
+      } catch {
+        res.writeHead(404, { "Cache-Control": "no-store" }).end("Not found");
+        return;
+      }
+    }
+
+    // /demo has no extension and is not demo.html, so it is still unresolved.
+    if (!info) {
+      try {
+        const index = join(file, "index.html");
+        await stat(index);
+        file = index;
+        info = await stat(index);
+      } catch {
+        res.writeHead(404, { "Cache-Control": "no-store" }).end("Not found");
+        return;
+      }
     }
 
     const body = await readFile(file);
