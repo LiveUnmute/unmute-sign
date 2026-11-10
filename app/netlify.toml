@@ -97,6 +97,23 @@
   status = 200
   force = true
 
+# The pitch video. This MUST stay above the catch-all below: "/demo" is not a
+# file, so without an explicit rule the catch-all rewrites it to the app home
+# and the URL silently shows the wrong page. force = true so a future asset at
+# /demo can never shadow it either.
+
+[[redirects]]
+  from = "/demo"
+  to = "/demo/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/demo/"
+  to = "/demo/index.html"
+  status = 200
+  force = true
+
 # The app is a single page; every unknown path lands on it rather than a
 # Netlify 404.
 

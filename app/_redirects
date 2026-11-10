@@ -1,0 +1,15 @@
+# Deploy-time redirects. Mirrors netlify.toml exactly.
+#
+# Netlify does not document which of the two files wins when both exist, so
+# both carry the same rules in the same order. Whichever is read, the result
+# is identical — and /* stays last in both.
+
+/app                    /app.html               200
+/tester                 /tester.html            200
+/api/sign/*             /.netlify/functions/sign/:splat   200
+
+# The pitch video. Above the catch-all or /demo renders the app home.
+/demo                   /demo/index.html        200
+/demo/                  /demo/index.html        200
+
+/*                      /index.html             200
