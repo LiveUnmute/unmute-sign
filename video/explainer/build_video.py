@@ -526,9 +526,14 @@ def render(out_path):
         "-f", "rawvideo", "-vcodec", "rawvideo",
         "-s", f"{W}x{H}", "-pix_fmt", "rgb24",
         "-r", str(FPS), "-i", "-",
-        "-an",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+        # -an is tempting (the piece is silent) but Google Drive's player
+        # refuses a file with no audio stream. Encode silence instead.
+        "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+        "-shortest",
+        "-c:v", "libx264", "-profile:v", "main", "-level", "4.0",
+        "-preset", "medium", "-crf", "20",
         "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        "-c:a", "aac", "-b:a", "96k", "-ar", "44100",
         str(out_path),
     ]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE,

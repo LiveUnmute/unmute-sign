@@ -36,6 +36,20 @@ it. This is typography and data, built frame by frame.
 A real product walkthrough has to be captured by hand on a phone — see
 `SCREEN-RECORDING.md`.
 
+## Drive will not play a file with no audio track
+
+The first upload failed in Drive's player — "an unexpected error occurred" — on a
+perfectly valid H.264 file. It had **no audio stream**, because the render passed
+`-an`. Google's player expects one. Encode silence:
+
+```bash
+ffmpeg -i in.mp4 -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 \
+  -shortest -c:v libx264 -profile:v main -level 4.0 -pix_fmt yuv420p \
+  -c:a aac -b:a 96k -movflags +faststart out.mp4
+```
+
+High → Main profile costs nothing on flat graphics and widens player support.
+
 ## The trap that cost the most time
 
 `fit_font` initially measured single words, so "HAS TO BE BOOKED." passed the
