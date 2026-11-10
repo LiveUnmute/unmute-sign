@@ -15,6 +15,10 @@ const DIST = "dist";
 const COPY_FILES = ["index.html", "live.html", "onepager.html"];
 const COPY_DIRS = ["css", "js"];
 
+// Source dir → path on the published site. The pitch page lives in ./pitch
+// but has to answer at /demo, so it is copied under a different name.
+const COPY_RENAMED = [["pitch", "demo"]];
+
 async function dirSize(dir) {
   let total = 0;
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -37,6 +41,11 @@ for (const f of COPY_FILES) {
 for (const d of COPY_DIRS) {
   if (!existsSync(d)) throw new Error(`Missing ${d}/`);
   await cp(d, join(DIST, d), { recursive: true });
+}
+
+for (const [from, to] of COPY_RENAMED) {
+  if (!existsSync(from)) throw new Error(`Missing ${from}/`);
+  await cp(from, join(DIST, to), { recursive: true });
 }
 
 // The test directory lives inside js/ only if someone put it there; keep the

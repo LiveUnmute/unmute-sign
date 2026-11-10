@@ -178,3 +178,24 @@ stays the authority regardless of how good the model gets.
 | `js/questions.js` | The clinical intake and its per-question vocabularies |
 | `onepager.html` | Printable A4 leave-behind |
 | `HOSPITAL_VISIT_PLAYBOOK.md` | What to say, what not to say, who to ask for |
+
+---
+
+## `/demo` — the pitch video
+
+`pitch/index.html` is published at **`/demo`** on the app site. It embeds the
+iDICE Demo Day video from Google Drive with Drive's own player, so the 87 MB
+file is never rehosted here.
+
+`build.mjs` copies `pitch/` to `dist/demo/` — the source folder is named for
+what it is, the published path is named for the URL. If you rename one, change
+`COPY_RENAMED` in `build.mjs` or the URL 404s while the source still builds.
+
+The page is deliberately self-contained: inline SVG favicon, data-URI only,
+Google Fonts from the CDN. The app build does not copy `/assets`, so a relative
+image reference would 404 on the deployed site. `test/pitch-page.test.mjs`
+enforces that.
+
+**The video has no captions.** The page says so in the transcript section rather
+than leaving the gap silent. When a transcript exists, replace the `.gap`
+paragraphs and the `Captions` fact, and delete the "being prepared" wording.
