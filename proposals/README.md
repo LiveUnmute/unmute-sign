@@ -69,3 +69,57 @@ Check that before shipping any edit. The catalog also declares `Lang = en-GB`.
 
 `contact@liveunmute.com` · `+234 904 282 0707` · `liveunmute.com` · Abuja, Nigeria.
 Phone number supplied by the founder, Oct 2026.
+
+---
+
+# The two proposals and the LOI
+
+| File | Pages | For |
+|---|---|---|
+| `Unmute-Proposal-Hospital-Partnership-2026.pdf` | 4 | Hospital leadership |
+| `Unmute-Proposal-ASLIN-2026.pdf` | 4 | ASLIN |
+| `Unmute-Letter-of-Intent-2026.pdf` | 1 | Print, tick, sign, hand over |
+
+```bash
+/home/user/venv_deck/bin/python proposals/build_proposals.py
+/home/user/venv_deck/bin/python proposals/build_loi.py
+```
+
+## The hospital proposal is the founder's text, word for word
+
+Sections 1–10 are transcribed into `content.py` unchanged. **Do not edit for
+style.** A test-style check used during the build confirms all 108 blocks appear
+in the PDF text layer exactly:
+
+```bash
+python - <<'PY'
+import pymupdf, re, sys; sys.path.insert(0,'proposals')
+import content as C
+flat = re.sub(r"\s+"," "," ".join(p.get_text() for p in
+        pymupdf.open("proposals/Unmute-Proposal-Hospital-Partnership-2026.pdf")))
+missing = [b for b in C.HOSPITAL
+           if (b[2].upper() if b[0]=="h" else b[1] if b[0]=="s" else
+               b[2] if b[0]=="n" else b[1]).upper() not in flat.upper()]
+print("missing:", missing)
+PY
+```
+
+## The ASLIN proposal shares sections 1, 2, 3 and 10 — and rewrites 4–9
+
+Those four describe the problem and the product, so they are identical. The
+middle sections are written for ASLIN, because an interpreter body asks
+different questions of a tool like this than a hospital does: where ASL and
+Nigerian Sign Language diverge, what the product should do when a sign is
+unsupported, who gets credited, and how ASLIN's involvement is described in
+public. Section 6 states plainly that no partnership or endorsement exists until
+one is signed.
+
+## The LOI is the paper version of landing/loi.html
+
+The web form uses dropdowns. A printout cannot show which option was chosen and
+a `<select>` has no place on a clipboard, so every fixed-choice question is a row
+of 9pt tick boxes and the open questions are ruled lines. All 28 option labels
+from the web form are present.
+
+The build asserts the output is **one page** — two pages means the back of the
+sheet falls off the clipboard.
