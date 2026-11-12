@@ -1,0 +1,4 @@
+# Source photographs of the founder — kept out of a public repository.
+src/
+# Build output; regenerate with build_evidence.py
+*.pdf
