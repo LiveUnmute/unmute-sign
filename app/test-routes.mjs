@@ -66,10 +66,16 @@ ok("all demo page URLs revalidate after a deploy", () => {
   }
 });
 
-ok("the pitch page exists in the app site", () => {
+ok("the pitch page exists in the app site with the clean custom player", () => {
   assert.ok(existsSync(join(APP, "demo/index.html")), "app/demo/index.html is missing");
   const html = read("demo/index.html");
-  assert.match(html, /drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/preview/);
+  assert.match(html, /id="watch-screen"/);
+  assert.match(html, /id="toggle-play"/);
+  assert.match(html, /id="seek"/);
+  assert.match(html, /id="fullscreen"/);
+  assert.match(html, /drive\.usercontent\.google\.com\/download/);
+  assert.doesNotMatch(html, /<iframe\b/i, "Drive's unstyleable controls must not be embedded");
+  assert.doesNotMatch(html, /<video[^>]+\bcontrols\b/i, "mobile browser controls must not overlay the video");
 });
 
 console.log(`\n${pass} passed`);

@@ -27,14 +27,18 @@ function page({ fullscreen = true, ios = false, playError = null } = {}) {
     beforeParse(window) {
       window.HTMLMediaElement.prototype.play = function () {
         calls.play++;
+        Object.defineProperty(this, "paused", { configurable: true, value: false });
         return playError ? Promise.reject(playError) : Promise.resolve();
       };
-      window.HTMLMediaElement.prototype.pause = function () { calls.pause++; };
+      window.HTMLMediaElement.prototype.pause = function () {
+        calls.pause++;
+        Object.defineProperty(this, "paused", { configurable: true, value: true });
+      };
       window.HTMLMediaElement.prototype.load = function () { calls.load++; };
       const nativeSetTimeout = window.setTimeout.bind(window);
       const nativeClearTimeout = window.clearTimeout.bind(window);
       window.setTimeout = (callback, delay, ...args) => {
-        if (delay === 12000) {
+        if (delay === 25000) {
           calls.loadingTimer = () => callback(...args);
           return 999999;
         }
@@ -94,43 +98,55 @@ await ok("the palette, fonts and hero image are available without a font CDN", (
   }
 });
 
-await ok("native source, fallback iframe and links all use the product video", () => {
+await ok("the custom player has no embedded Drive UI or browser control overlay", () => {
+  const { doc, close } = page();
+  const video = doc.querySelector("#video");
+  assert.equal(doc.querySelectorAll("iframe").length, 0);
+  assert.equal(video.hasAttribute("controls"), false);
+  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Play video");
+  assert.equal(doc.querySelector("#seek").type, "range");
+  assert.equal(doc.querySelector("#seek").getAttribute("aria-label"), "Seek video");
+  assert.equal(doc.querySelector("#fullscreen").getAttribute("aria-controls"), "watch-screen");
+  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-controls"), "video");
+  assert.ok(doc.querySelector("#exit-fullscreen"));
+  assert.equal(doc.querySelector(".player").contains(doc.querySelector("#transport")), false);
+  close();
+});
+
+await ok("the native source and every Drive link use the product video", () => {
   const { doc, close } = page();
   const video = doc.querySelector("#video");
   const direct = new URL(video.dataset.src);
   assert.equal(direct.hostname, "drive.usercontent.google.com");
   assert.equal(direct.searchParams.get("id"), VIDEO_ID);
   assert.equal(direct.searchParams.get("confirm"), "t");
-  const frame = doc.querySelector("#drive-player");
-  assert.equal(frame.dataset.src, `https://drive.google.com/file/d/${VIDEO_ID}/preview`);
-  assert.ok(frame.title.length > 10);
-  assert.ok(frame.hasAttribute("allowfullscreen"));
-  assert.match(frame.getAttribute("allow"), /fullscreen/);
+  assert.ok(doc.querySelector("#playback-error").textContent.includes("Google Drive"));
   for (const link of doc.querySelectorAll('a[href*="drive.google.com"]')) {
-    assert.match(link.href, new RegExp(`/file/d/${VIDEO_ID}/view`));
+    assert.equal(link.href, `https://drive.google.com/file/d/${VIDEO_ID}/view`);
     assert.equal(link.target, "_blank");
     assert.match(link.rel, /noopener/);
   }
   close();
 });
 
-await ok("initial state has one cover, no loaded player and a no-JS fallback", () => {
+await ok("initial state has one branded cover, no loaded media and a no-JS Drive link", () => {
   const noJs = new JSDOM(html, { url: "https://app.liveunmute.com/demo/" });
   const doc = noJs.window.document;
+  const video = doc.querySelector("#video");
   assert.equal(doc.querySelectorAll("#play-demo").length, 1);
   assert.equal(doc.querySelector("#play-demo").getAttribute("href"), `https://drive.google.com/file/d/${VIDEO_ID}/view`);
-  assert.ok(doc.querySelector("#video").hidden);
-  assert.ok(doc.querySelector("#drive-player").hidden);
+  assert.ok(video.hidden);
+  assert.ok(doc.querySelector("#transport").hidden);
+  assert.ok(doc.querySelector("#playback-error").hidden);
   assert.ok(doc.querySelector("#fullscreen").hidden);
-  assert.equal(doc.querySelector("#video").getAttribute("src"), null);
-  assert.equal(doc.querySelector("#drive-player").getAttribute("src"), null);
-  assert.equal(doc.querySelector("#video").getAttribute("preload"), "none");
-  assert.ok(doc.querySelector("#video").hasAttribute("playsinline"));
-  assert.ok(doc.querySelector("#video").hasAttribute("controls"));
+  assert.equal(video.getAttribute("src"), null);
+  assert.equal(video.getAttribute("preload"), "none");
+  assert.ok(video.hasAttribute("playsinline"));
+  assert.equal(video.hasAttribute("controls"), false);
   noJs.window.close();
 });
 
-await ok("play opens one native player with focus and no Drive overlay", () => {
+await ok("play opens one native player and the custom controls sit below the video", () => {
   const { doc, calls, close } = page();
   const poster = doc.querySelector("#play-demo");
   const video = doc.querySelector("#video");
@@ -139,45 +155,70 @@ await ok("play opens one native player with focus and no Drive overlay", () => {
   assert.equal(calls.play, 1);
   assert.ok(poster.hidden);
   assert.ok(!video.hidden);
+  assert.ok(!doc.querySelector("#transport").hidden);
   assert.equal(doc.activeElement, video);
   assert.equal(video.src, video.dataset.src);
-  assert.ok(doc.querySelector("#drive-player").hidden);
-  assert.equal(doc.querySelector("#drive-player").getAttribute("src"), null);
+  assert.equal(doc.querySelectorAll("iframe").length, 0);
   video.dispatchEvent(new doc.defaultView.Event("playing"));
-  assert.match(doc.querySelector("#video-status").textContent, /pause or seek/);
+  assert.match(doc.querySelector("#video-status").textContent, /controls are below/);
+  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Pause video");
   close();
 });
 
-await ok("native failure falls back to the same Drive video without trapping focus", () => {
+await ok("timeline follows the loaded media and remains keyboard/touch seekable", () => {
+  const { doc, close } = page();
+  doc.querySelector("#play-demo").click();
+  const video = doc.querySelector("#video");
+  let current = 0;
+  Object.defineProperty(video, "duration", { configurable: true, value: 327 });
+  Object.defineProperty(video, "currentTime", {
+    configurable: true,
+    get: () => current,
+    set: (value) => { current = Number(value); },
+  });
+  video.dispatchEvent(new doc.defaultView.Event("loadedmetadata"));
+  const seek = doc.querySelector("#seek");
+  assert.equal(seek.disabled, false);
+  assert.equal(seek.max, "327");
+  assert.equal(doc.querySelector("#total-time").textContent, "5:27");
+  seek.value = "60";
+  seek.dispatchEvent(new doc.defaultView.Event("input", { bubbles: true }));
+  assert.equal(video.currentTime, 60);
+  assert.equal(doc.querySelector("#current-time").textContent, "1:00");
+  close();
+});
+
+await ok("stream failure shows a branded message instead of an embedded Drive player", () => {
   const { doc, close } = page();
   const video = doc.querySelector("#video");
-  const frame = doc.querySelector("#drive-player");
   doc.querySelector("#play-demo").focus();
   doc.querySelector("#play-demo").click();
   video.dispatchEvent(new doc.defaultView.Event("error"));
   assert.ok(video.hidden);
   assert.equal(video.getAttribute("src"), null);
-  assert.ok(!frame.hidden);
-  assert.equal(frame.src, frame.dataset.src);
-  assert.equal(doc.activeElement, frame);
-  assert.match(doc.querySelector("#video-status").textContent, /Google Drive player/);
+  assert.ok(doc.querySelector("#transport").hidden);
+  assert.ok(!doc.querySelector("#playback-error").hidden);
+  assert.ok(doc.querySelector("#fullscreen").hidden);
+  assert.equal(doc.querySelectorAll("iframe").length, 0);
+  assert.equal(doc.activeElement, doc.querySelector("#fallback-drive-link"));
+  assert.match(doc.querySelector("#video-status").textContent, /Inline playback failed/);
   close();
 });
 
-await ok("a slow stream offers the Drive player and cancels the native download", () => {
+await ok("a stalled stream shows a clean Drive link and allows an inline retry", () => {
   const { doc, calls, close } = page();
   doc.querySelector("#play-demo").click();
-  assert.ok(doc.querySelector("#use-drive-player").hidden);
+  assert.ok(doc.querySelector("#playback-error").hidden);
   calls.loadingTimer();
-  const fallback = doc.querySelector("#use-drive-player");
-  assert.ok(!fallback.hidden);
-  fallback.focus();
-  fallback.click();
-  assert.ok(fallback.hidden);
+  assert.ok(!doc.querySelector("#playback-error").hidden);
   assert.equal(calls.pause, 1);
   assert.equal(calls.load, 1);
-  assert.equal(doc.activeElement, doc.querySelector("#drive-player"));
-  assert.ok(!doc.querySelector("#drive-player").hidden);
+  assert.equal(doc.querySelectorAll("iframe").length, 0);
+  assert.equal(doc.querySelector("#fallback-drive-link").target, "_blank");
+  doc.querySelector("#retry-playback").click();
+  assert.equal(calls.play, 2);
+  assert.ok(doc.querySelector("#playback-error").hidden);
+  assert.ok(!doc.querySelector("#transport").hidden);
   close();
 });
 
@@ -186,35 +227,28 @@ await ok("autoplay denial asks for a tap rather than reporting a broken file", a
   doc.querySelector("#play-demo").click();
   await Promise.resolve();
   assert.ok(!doc.querySelector("#video").hidden);
-  assert.ok(doc.querySelector("#drive-player").hidden);
-  assert.match(doc.querySelector("#video-status").textContent, /Tap play/);
+  assert.ok(!doc.querySelector("#transport").hidden);
+  assert.ok(doc.querySelector("#playback-error").hidden);
+  assert.match(doc.querySelector("#video-status").textContent, /Tap the play button below/);
   close();
 });
 
-await ok("full screen starts playback, fills the player and has a working exit", () => {
+await ok("full screen starts playback, includes controls and has a working exit", () => {
   const { doc, calls, close } = page();
   const button = doc.querySelector("#fullscreen");
   const exit = doc.querySelector("#exit-fullscreen");
   assert.ok(!button.hidden);
+  button.focus();
   button.click();
   assert.equal(calls.play, 1);
-  assert.deepEqual(calls.enter, ["player"]);
+  assert.deepEqual(calls.enter, ["watch-screen"]);
   assert.ok(!exit.hidden);
+  assert.equal(doc.activeElement, exit);
   exit.focus();
   exit.click();
   assert.equal(calls.exit, 1);
   assert.ok(exit.hidden);
   assert.equal(doc.activeElement, button);
-  close();
-});
-
-await ok("the Drive fallback can also enter full screen", () => {
-  const { doc, calls, close } = page();
-  doc.querySelector("#play-demo").click();
-  doc.querySelector("#video").dispatchEvent(new doc.defaultView.Event("error"));
-  doc.querySelector("#fullscreen").click();
-  assert.deepEqual(calls.enter, ["player"]);
-  assert.ok(!doc.querySelector("#exit-fullscreen").hidden);
   close();
 });
 
@@ -225,7 +259,7 @@ await ok("iPhone video fullscreen and unsupported-browser fallback are handled",
   assert.equal(iphone.calls.ios, 1);
   iphone.doc.querySelector("#video").dispatchEvent(new iphone.doc.defaultView.Event("error"));
   assert.ok(iphone.doc.querySelector("#fullscreen").hidden);
-  assert.ok(!iphone.doc.querySelector("#drive-player").hidden);
+  assert.ok(!iphone.doc.querySelector("#playback-error").hidden);
   iphone.close();
   const unsupported = page({ fullscreen: false });
   assert.ok(unsupported.doc.querySelector("#fullscreen").hidden);

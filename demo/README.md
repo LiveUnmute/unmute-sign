@@ -188,14 +188,17 @@ colours and typefaces, with local assets under `pitch/assets/`. The cover image
 is the same as the landing page. Fonts are distributed with their licences.
 
 The 5:27 product walkthrough stays in Google Drive. When a visitor plays it,
-the page first tries a native HTML video player using Drive's public download
-endpoint; this has one set of browser controls and a clearly labelled full-screen
-button. Drive is not a dedicated video host: the direct endpoint can return an
-error or be throttled, and seeking can be unreliable. If native playback fails,
-the page loads Drive's preview player instead, with an "Open in Drive" link
-available throughout. Drive's own controls cannot be styled by this page. For
-a more reliable long-term native player, host the MP4 on a video CDN or as a
-fast-start MP4 on the site and update the `data-src` on `#video`.
+the page requests the public download endpoint as an inline HTML video. The
+portrait video has no browser-supplied overlay: a compact, accessible play,
+pause and seek bar sits below it, and the page's full-screen button expands the
+video and its controls together. The Drive preview iframe is deliberately not
+embedded because its controls cannot be styled and covered the video on mobile.
+
+Drive is not a dedicated video host: its direct endpoint can return an error,
+be throttled, or seek unreliably. If the stream fails, the page shows a branded
+message with an inline retry and an "Open in Drive" link rather than placing
+Drive's cluttered player inside the page. For reliable inline playback, host a
+fast-start MP4 on a video CDN or the site and update the `data-src` on `#video`.
 
 `build.mjs` copies `pitch/` to `dist/demo/`. The app site also has a checked-in
 copy at `app/demo/` for deploys that use the app folder directly. After changing

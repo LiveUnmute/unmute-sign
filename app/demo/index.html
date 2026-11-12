@@ -162,10 +162,10 @@
       font-weight: 700;
       letter-spacing: .14em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .watch-title::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
     .watch-meta { display: flex; align-items: center; gap: 12px; }
-    .duration { color: var(--muted); font-size: 12px; font-weight: 700; }
     .fullscreen {
       display: inline-flex;
       align-items: center;
@@ -185,8 +185,9 @@
     .fullscreen:hover { border-color: var(--ink); background: var(--paper); }
     .fullscreen svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 
-    /* 720 × 1600 = 9:20, not 9:16. The initial cover has one play button;
-       a native video control bar replaces it only after playback is requested. */
+    /* The Drive iframe had its own unbrandable controls on phones. Keep the
+       video itself clean and put our compact, accessible transport below it. */
+    .watch-screen { width: 100%; }
     .player {
       position: relative;
       width: 100%;
@@ -195,7 +196,7 @@
       background: #101010;
       border-radius: 3px;
     }
-    .poster, .player video, .player iframe {
+    .poster, .player video {
       display: block;
       width: 100%;
       height: 100%;
@@ -247,13 +248,109 @@
       letter-spacing: .14em;
       text-transform: uppercase;
     }
-    .player video { object-fit: contain; background: #000; }
-    .player iframe { background: #000; }
+    .player video { object-fit: contain; background: #000; touch-action: manipulation; }
+    .playback-error {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      background: var(--paper);
+      color: var(--ink);
+      text-align: center;
+    }
+    .fallback-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.25; }
+    .fallback-copy { max-width: 24em; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .fallback-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+    .fallback-actions a, .fallback-actions button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 9px 14px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--ink);
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .fallback-actions button { background: transparent; color: var(--ink); }
+    .transport {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .transport-play {
+      flex: 0 0 44px;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .transport-play:hover { background: rgba(18,18,18,.06); }
+    .transport-play svg { width: 21px; height: 21px; fill: currentColor; }
+    .transport-play .icon-pause { display: none; }
+    .transport-play[data-playing="true"] .icon-play { display: none; }
+    .transport-play[data-playing="true"] .icon-pause { display: block; }
+    .timeline {
+      display: grid;
+      grid-template-columns: auto minmax(30px, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .time-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .seek {
+      width: 100%;
+      min-width: 30px;
+      height: 30px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--blue);
+      cursor: pointer;
+      touch-action: pan-x;
+    }
+    .seek::-webkit-slider-runnable-track { height: 3px; border-radius: 99px; background: rgba(18,18,18,.22); }
+    .seek::-webkit-slider-thumb {
+      width: 12px;
+      height: 12px;
+      margin-top: -4.5px;
+      appearance: none;
+      border: 0;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+    .seek::-moz-range-track { height: 3px; border-radius: 99px; background: rgba(18,18,18,.22); }
+    .seek::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--blue); }
     .exit-fullscreen {
       position: absolute;
       z-index: 2;
       top: max(12px, env(safe-area-inset-top));
       right: max(12px, env(safe-area-inset-right));
+      display: grid;
+      place-items: center;
       min-width: 44px;
       min-height: 44px;
       padding: 8px;
@@ -265,38 +362,60 @@
       cursor: pointer;
     }
     .exit-fullscreen:focus-visible { outline-color: white; }
-    .player:fullscreen,
-    .player:-webkit-full-screen {
+    .watch-screen:fullscreen,
+    .watch-screen:-webkit-full-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       width: 100vw;
       height: 100vh;
       height: 100dvh;
       max-width: none;
-      aspect-ratio: auto;
-      display: grid;
-      place-items: center;
+      padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+        max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
       border-radius: 0;
-      background: black;
+      background: #000;
+      overflow: hidden;
     }
-    .player:fullscreen video,
-    .player:-webkit-full-screen video { width: 100%; height: 100%; }
-    .player:fullscreen iframe,
-    .player:-webkit-full-screen iframe { width: min(100vw, 45vh); height: 100%; }
+    .watch-screen:fullscreen .player,
+    .watch-screen:-webkit-full-screen .player {
+      flex: 0 1 auto;
+      width: min(100vw, 39vh);
+      max-height: calc(100dvh - 84px);
+      aspect-ratio: 9 / 20;
+      border-radius: 0;
+    }
+    .watch-screen:fullscreen .transport,
+    .watch-screen:-webkit-full-screen .transport {
+      flex: 0 0 auto;
+      width: min(100vw, 39vh);
+      margin: 0;
+      color: white;
+    }
+    .watch-screen:fullscreen .transport-play,
+    .watch-screen:-webkit-full-screen .transport-play { color: white; }
+    .watch-screen:fullscreen .time-label,
+    .watch-screen:-webkit-full-screen .time-label { color: rgba(255,255,255,.78); }
     .watch-bottom { align-items: flex-start; margin-top: 12px; }
     .video-status { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
     .drive-link { flex-shrink: 0; font-size: 12px; font-weight: 700; text-underline-offset: 3px; }
     .drive-link:hover { color: var(--blue); }
-    .fallback-button {
-      margin-top: 12px;
-      padding: 8px 0;
-      border: 0;
-      background: transparent;
-      color: var(--blue);
-      font-size: 12px;
-      font-weight: 700;
-      text-align: left;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      cursor: pointer;
+    @media (orientation: landscape) {
+      .watch-screen:fullscreen .player,
+      .watch-screen:-webkit-full-screen .player { width: min(100vw, 35vh); }
+      .watch-screen:fullscreen .transport,
+      .watch-screen:-webkit-full-screen .transport { width: min(100vw, 35vh); }
+    }
+    @media (orientation: landscape) and (min-width: 700px) {
+      .watch-screen:fullscreen .player,
+      .watch-screen:-webkit-full-screen .player { width: min(100vw, 40vh); }
+      .watch-screen:fullscreen .transport,
+      .watch-screen:-webkit-full-screen .transport { width: min(100vw, 40vh); }
     }
 
     .accessibility {
@@ -380,38 +499,55 @@
           <div class="watch-bar">
             <span class="watch-title">Demo video</span>
             <div class="watch-meta">
-              <span class="duration">05:27</span>
-              <button class="fullscreen" id="fullscreen" type="button" hidden>
+              <button class="fullscreen" id="fullscreen" type="button" aria-controls="watch-screen" hidden>
                 <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg>
                 <span>Full screen</span>
               </button>
             </div>
           </div>
 
-          <div class="player" id="player">
-            <!-- The link is also the no-JavaScript fallback. -->
-            <a class="poster" id="play-demo"
-               href="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/view"
-               target="_blank" rel="noopener" aria-label="Play the Unmute product demo, 5 minutes 27 seconds">
-              <img src="/demo/assets/demo-poster.jpg" width="768" height="1376" alt="">
-              <span class="poster-play">
-                <span class="play-disc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 2.8v18.4L21 12z"/></svg></span>
-                <span class="play-label">Play video</span>
-              </span>
-              <span class="poster-caption"><span>Unmute</span><span>Product demo</span></span>
-            </a>
-            <!-- Drive's download URL can return HTML or be throttled. If it
-                 cannot play as media, the script switches to Drive's preview. -->
-            <video id="video" controls playsinline preload="none" hidden
-              data-src="https://drive.usercontent.google.com/download?id=1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn&amp;export=download&amp;confirm=t"
-              aria-label="Unmute product demo" tabindex="0">
-            </video>
-            <iframe id="drive-player" hidden
-              data-src="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/preview"
-              title="Unmute product demo — Google Drive player"
-              allow="autoplay; encrypted-media; fullscreen" allowfullscreen
-              referrerpolicy="strict-origin-when-cross-origin"></iframe>
-            <button class="exit-fullscreen" id="exit-fullscreen" type="button" aria-label="Exit full screen" hidden>×</button>
+          <div class="watch-screen" id="watch-screen">
+            <div class="player" id="player">
+              <!-- The link is also the no-JavaScript fallback. -->
+              <a class="poster" id="play-demo"
+                 href="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/view"
+                 target="_blank" rel="noopener" aria-label="Play the Unmute product demo, 5 minutes 27 seconds">
+                <img src="/demo/assets/demo-poster.jpg" width="768" height="1376" alt="">
+                <span class="poster-play">
+                  <span class="play-disc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 2.8v18.4L21 12z"/></svg></span>
+                  <span class="play-label">Play video</span>
+                </span>
+                <span class="poster-caption"><span>Unmute</span><span>Product demo</span></span>
+              </a>
+              <!-- No native controls: Android's built-in overlay covered the
+                   portrait video. Branded controls sit beneath the image. -->
+              <video id="video" playsinline preload="none" hidden
+                data-src="https://drive.usercontent.google.com/download?id=1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn&amp;export=download&amp;confirm=t"
+                aria-label="Unmute product demo" tabindex="0">
+              </video>
+              <div class="playback-error" id="playback-error" role="group" aria-labelledby="fallback-title" hidden>
+                <p class="fallback-title" id="fallback-title">Video couldn’t play here</p>
+                <p class="fallback-copy">Google Drive isn’t providing a stream this browser can play. Open the original video in Drive or try the inline player again.</p>
+                <div class="fallback-actions">
+                  <button id="retry-playback" type="button">Try again</button>
+                  <a id="fallback-drive-link" href="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/view"
+                     target="_blank" rel="noopener">Open in Drive ↗</a>
+                </div>
+              </div>
+              <button class="exit-fullscreen" id="exit-fullscreen" type="button" aria-label="Exit full screen" aria-controls="watch-screen" hidden>×</button>
+            </div>
+
+            <div class="transport" id="transport" hidden>
+              <button class="transport-play" id="toggle-play" type="button" aria-label="Play video" aria-controls="video" data-playing="false">
+                <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5v17L20 12z"/></svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h5v16H5zM14 4h5v16h-5z"/></svg>
+              </button>
+              <div class="timeline">
+                <span class="time-label" id="current-time">0:00</span>
+                <input class="seek" id="seek" type="range" min="0" max="327" step="0.1" value="0" aria-label="Seek video" aria-controls="video">
+                <span class="time-label" id="total-time">5:27</span>
+              </div>
+            </div>
           </div>
 
           <div class="watch-bottom">
@@ -419,7 +555,6 @@
             <a class="drive-link" href="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/view"
                target="_blank" rel="noopener">Open in Drive ↗</a>
           </div>
-          <button class="fallback-button" id="use-drive-player" type="button" hidden>Use the Drive player instead</button>
           <a class="intro-link mobile-link" href="/">Try the Unmute demo <span aria-hidden="true">&nbsp;↗</span></a>
         </div>
       </section>
@@ -438,116 +573,213 @@
 
   <script>
     (() => {
+      const screen = document.getElementById('watch-screen');
       const player = document.getElementById('player');
       const poster = document.getElementById('play-demo');
       const video = document.getElementById('video');
-      const drive = document.getElementById('drive-player');
       const status = document.getElementById('video-status');
       const fullscreen = document.getElementById('fullscreen');
       const exit = document.getElementById('exit-fullscreen');
-      const fallback = document.getElementById('use-drive-player');
-      const canElementFullscreen = typeof player.requestFullscreen === 'function' ||
-        typeof player.webkitRequestFullscreen === 'function';
+      const transport = document.getElementById('transport');
+      const togglePlay = document.getElementById('toggle-play');
+      const seek = document.getElementById('seek');
+      const currentTime = document.getElementById('current-time');
+      const totalTime = document.getElementById('total-time');
+      const playbackError = document.getElementById('playback-error');
+      const retry = document.getElementById('retry-playback');
+      const fallbackLink = document.getElementById('fallback-drive-link');
+      const canElementFullscreen = typeof screen.requestFullscreen === 'function' ||
+        typeof screen.webkitRequestFullscreen === 'function';
       const canVideoFullscreen = typeof video.webkitEnterFullscreen === 'function';
+      const knownDuration = 327;
       let mode = 'poster';
-      let loadingTimer;
+      let loadingTimer = null;
 
       // With JavaScript disabled, the poster remains a working link to Drive.
       // Hide our full-screen button when the browser exposes no such API.
       fullscreen.hidden = !(canElementFullscreen || canVideoFullscreen);
 
-      function useDrivePlayer() {
-        if (mode === 'drive') return;
-        mode = 'drive';
-        window.clearTimeout(loadingTimer);
-        const moveFocus = document.activeElement === video || document.activeElement === fallback;
+      function clearLoadingTimer() {
+        if (loadingTimer !== null) window.clearTimeout(loadingTimer);
+        loadingTimer = null;
+      }
+
+      function formatTime(value) {
+        const seconds = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainder = String(seconds % 60).padStart(2, '0');
+        return hours
+          ? `${hours}:${String(minutes).padStart(2, '0')}:${remainder}`
+          : `${minutes}:${remainder}`;
+      }
+
+      function updateTimeline() {
+        const duration = Number.isFinite(video.duration) && video.duration > 0
+          ? video.duration
+          : knownDuration;
+        const now = Math.max(0, Math.min(Number(video.currentTime) || 0, duration));
+        seek.max = String(duration);
+        seek.value = String(now);
+        seek.disabled = !(Number.isFinite(video.duration) && video.duration > 0);
+        currentTime.textContent = formatTime(now);
+        totalTime.textContent = formatTime(duration);
+        seek.setAttribute('aria-valuetext', `${currentTime.textContent} of ${totalTime.textContent}`);
+      }
+
+      function setPlaying(playing) {
+        togglePlay.dataset.playing = String(playing);
+        togglePlay.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
+      }
+
+      function showPlaybackError() {
+        if (mode !== 'native') return;
+        mode = 'fallback';
+        clearLoadingTimer();
+        const shouldMoveFocus = [video, togglePlay, seek, fullscreen].includes(document.activeElement);
         video.pause();
         video.hidden = true;
         video.removeAttribute('src');
-        video.load(); // cancel any ongoing native download before opening Drive
-        fallback.hidden = true;
-        drive.hidden = false;
-        drive.src = drive.dataset.src;
-        if (moveFocus) drive.focus({ preventScroll: true });
-        status.textContent = 'Native playback is unavailable. The Google Drive player is shown instead.';
-        if (!canElementFullscreen) fullscreen.hidden = true;
+        video.load();
+        transport.hidden = true;
+        playbackError.hidden = false;
+        fullscreen.hidden = true;
+        setPlaying(false);
+        status.textContent = 'Inline playback failed. Open the video in Google Drive or try again.';
+        if (shouldMoveFocus) fallbackLink.focus({ preventScroll: true });
       }
 
-      function playDemo() {
-        if (mode !== 'poster') return;
-        mode = 'native';
-        const posterHadFocus = document.activeElement === poster;
-        poster.hidden = true;
-        video.hidden = false;
-        if (posterHadFocus) video.focus({ preventScroll: true });
-        status.textContent = 'Loading video…';
-        // Set the source and call play in the same user gesture for mobile.
-        video.src = video.dataset.src;
+      function requestPlayback() {
         let attempt;
         try {
           attempt = video.play();
         } catch {
-          useDrivePlayer();
+          showPlaybackError();
           return;
         }
         if (attempt && typeof attempt.catch === 'function') {
           attempt.catch((error) => {
             if (mode !== 'native') return;
-            if (error.name === 'NotAllowedError') {
-              status.textContent = 'Tap play in the video to start.';
-            } else if (error.name !== 'AbortError') {
-              useDrivePlayer();
+            if (error?.name === 'NotAllowedError') {
+              clearLoadingTimer();
+              status.textContent = 'Tap the play button below to start the video.';
+            } else if (error?.name !== 'AbortError') {
+              showPlaybackError();
             }
           });
         }
+      }
+
+      function playDemo({ focusVideo = false } = {}) {
+        if (mode !== 'poster') return;
+        mode = 'native';
+        const moveFocus = focusVideo || document.activeElement === poster;
+        poster.hidden = true;
+        playbackError.hidden = true;
+        video.hidden = false;
+        transport.hidden = false;
+        if (moveFocus) video.focus({ preventScroll: true });
+        status.textContent = 'Loading video…';
+        setPlaying(false);
+        updateTimeline();
+        // Set the source and call play in the same user gesture for mobile.
+        video.src = video.dataset.src;
+        requestPlayback();
         loadingTimer = window.setTimeout(() => {
-          if (mode === 'native' && video.readyState < 2) {
-            status.textContent = 'Still loading? Try the Drive player instead.';
-            fallback.hidden = false;
-          }
-        }, 12000);
+          if (mode === 'native' && video.readyState < 2) showPlaybackError();
+        }, 25000);
+      }
+
+      function togglePlayback() {
+        if (mode !== 'native') return;
+        if (video.paused) requestPlayback();
+        else video.pause();
       }
 
       video.addEventListener('playing', () => {
-        window.clearTimeout(loadingTimer);
-        if (document.activeElement === fallback) video.focus({ preventScroll: true });
-        fallback.hidden = true;
-        status.textContent = 'Use the player controls to pause or seek.';
+        clearLoadingTimer();
+        setPlaying(true);
+        status.textContent = 'Video playing. Playback controls are below the video.';
       });
-      video.addEventListener('error', useDrivePlayer);
-      fallback.addEventListener('click', useDrivePlayer);
+      video.addEventListener('pause', () => {
+        setPlaying(false);
+        if (mode === 'native' && !video.ended) status.textContent = 'Video paused.';
+      });
+      video.addEventListener('ended', () => {
+        setPlaying(false);
+        status.textContent = 'Video finished.';
+        updateTimeline();
+      });
+      video.addEventListener('timeupdate', updateTimeline);
+      video.addEventListener('loadedmetadata', updateTimeline);
+      video.addEventListener('durationchange', updateTimeline);
+      video.addEventListener('error', showPlaybackError);
+      video.addEventListener('click', togglePlayback);
+      video.addEventListener('keydown', (event) => {
+        if (event.code === 'Space' || event.key === 'Enter') {
+          event.preventDefault();
+          togglePlayback();
+        }
+      });
+      togglePlay.addEventListener('click', togglePlayback);
+      seek.addEventListener('input', () => {
+        if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+        video.currentTime = Number(seek.value);
+        updateTimeline();
+      });
       poster.addEventListener('click', (event) => {
         // Preserve normal new-tab and download gestures on the fallback link.
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         playDemo();
       });
+      retry.addEventListener('click', () => {
+        if (mode !== 'fallback') return;
+        const moveFocus = playbackError.contains(document.activeElement);
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        mode = 'poster';
+        playbackError.hidden = true;
+        video.hidden = true;
+        transport.hidden = true;
+        poster.hidden = false;
+        fullscreen.hidden = !(canElementFullscreen || canVideoFullscreen);
+        playDemo({ focusVideo: moveFocus });
+      });
 
       function isFullscreen() {
-        return (document.fullscreenElement || document.webkitFullscreenElement) === player;
+        return (document.fullscreenElement || document.webkitFullscreenElement) === screen;
       }
       function onFullscreenChange() {
+        const entered = isFullscreen();
         const wasFocused = document.activeElement === exit;
-        exit.hidden = !isFullscreen();
-        if (exit.hidden && wasFocused) fullscreen.focus({ preventScroll: true });
+        exit.hidden = !entered;
+        if (entered && document.activeElement === fullscreen) {
+          exit.focus({ preventScroll: true });
+        } else if (exit.hidden && wasFocused) {
+          const destination = fullscreen.hidden ? retry : fullscreen;
+          destination.focus({ preventScroll: true });
+        }
       }
       document.addEventListener('fullscreenchange', onFullscreenChange);
       document.addEventListener('webkitfullscreenchange', onFullscreenChange);
       fullscreen.addEventListener('click', () => {
         if (mode === 'poster') playDemo();
+        if (mode !== 'native') return;
         try {
           if (canElementFullscreen) {
-            const request = player.requestFullscreen || player.webkitRequestFullscreen;
-            const result = request.call(player);
+            const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
+            const result = request.call(screen);
             if (result && typeof result.catch === 'function') {
-              result.catch(() => { status.textContent = 'Full screen was unavailable. You can open the video in Drive.'; });
+              result.catch(() => { status.textContent = 'Full screen is unavailable in this browser.'; });
             }
-          } else if (mode === 'native' && canVideoFullscreen) {
-            // iPhone Safari fullscreens the video element rather than a div.
+          } else if (canVideoFullscreen) {
+            // iPhone Safari may provide fullscreen only for the video element.
             video.webkitEnterFullscreen();
           }
         } catch {
-          status.textContent = 'Full screen was unavailable. You can open the video in Drive.';
+          status.textContent = 'Full screen is unavailable in this browser.';
         }
       });
       exit.addEventListener('click', () => {
