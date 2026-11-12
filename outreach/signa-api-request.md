@@ -100,3 +100,51 @@ contact@liveunmute.com · app.liveunmute.com
 
 Then the composite provider routes `textToSign` → Signa, `signToText` →
 Sign-Speak, each failing independently.
+
+---
+
+# Reply received — 11 November 2026
+
+**From:** Support Team `support@usesigna.org`
+**Thread:** `1a1c00210163bb10`
+
+They said yes to a trial key and offered a custom usage-based monthly
+arrangement around 110,000 characters rather than the standard Pro plan.
+They will look at clinical vocabulary coverage. They asked two questions:
+integration architecture, and which clinical scenarios come first.
+
+## What they did not answer
+
+**Whether English → ASL is production-quality or secondary to Kinyarwanda →
+RSL.** This was question 2 in the original email and the most consequential
+one. Their reply discusses ASL support and then says they would want to
+"understand your specific requirements and evaluate the expected vocabulary
+and signing accuracy before making production-level commitments" — which is
+reasonable, but it is not an answer.
+
+Signa is a Rwandan company whose documented strength is Kinyarwanda and RSL.
+An ASL pipeline that is second-class would be worse than useless in a
+Nigerian hospital, and would fail in front of a clinician rather than in a
+test harness. **Do not build against the API until the 20-clip test in the
+draft reply has been run and shown to an ASL signer.**
+
+## Reply drafted
+
+Draft `r-6484002114579792047` in the thread. It:
+
+1. Answers the architecture question with what actually exists — static
+   browser app, Netlify Function proxy, key server-side. This is stronger
+   than the client tokens they recommended, so say so rather than adopting
+   a weaker pattern out of politeness.
+2. Gives the real clinical phrase list from `app/js/media.js`.
+3. Names the vocabulary that actually carries risk: milligrams, dosage,
+   twice a day, NPO, penicillin, allergies — and asks whether the API can
+   refuse an unsupported term rather than sign something approximate.
+4. Proposes a 20-clip production-settings test as the go/no-go gate.
+5. Declines to sign a monthly commitment pre-revenue, and asks for a written
+   quote plus a 30–60 day capped trial instead.
+
+## Before sending
+
+- [ ] Confirm 110,000 characters/month is still the right estimate
+- [ ] Decide whether to name a call slot or leave it open
