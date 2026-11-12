@@ -103,28 +103,42 @@ await ok("the page uses Unmute's dark palette and local type assets", () => {
   }
 });
 
-await ok("the custom player has no embedded Drive UI or browser control overlay", () => {
+await ok("Drive's unstyleable player stays unloaded until full-screen fallback is requested", () => {
   const { doc, close } = page();
   const video = doc.querySelector("#video");
-  assert.equal(doc.querySelectorAll("iframe").length, 0);
+  const drive = doc.querySelector("#drive-player");
+  assert.equal(doc.querySelectorAll("iframe").length, 1);
+  assert.ok(drive.hidden);
+  assert.equal(drive.getAttribute("src"), null);
+  assert.equal(doc.querySelectorAll("iframe:not([hidden])").length, 0);
   assert.equal(video.hasAttribute("controls"), false);
   assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Play video");
   assert.equal(doc.querySelector("#seek").type, "range");
   assert.equal(doc.querySelector("#seek").getAttribute("aria-label"), "Seek video");
   assert.equal(doc.querySelector("#fullscreen").getAttribute("aria-controls"), "watch-screen");
+  assert.equal(doc.querySelector("#drive-player-fullscreen").getAttribute("aria-controls"), "watch-screen");
   assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-controls"), "video");
   assert.ok(doc.querySelector("#exit-fullscreen"));
   assert.equal(doc.querySelector(".player").contains(doc.querySelector("#transport")), false);
+  assert.match(html, /\.player\.has-error\s*\{[^}]*aspect-ratio:\s*auto/s);
   close();
 });
 
-await ok("the native source and every Drive link use the product video", () => {
+await ok("native and full-screen Drive fallbacks point to the same product video", () => {
   const { doc, close } = page();
   const video = doc.querySelector("#video");
   const direct = new URL(video.dataset.src);
   assert.equal(direct.hostname, "drive.usercontent.google.com");
   assert.equal(direct.searchParams.get("id"), VIDEO_ID);
   assert.equal(direct.searchParams.get("confirm"), "t");
+  const drive = doc.querySelector("#drive-player");
+  const preview = new URL(drive.dataset.src);
+  assert.equal(preview.hostname, "drive.google.com");
+  assert.equal(preview.pathname, `/file/d/${VIDEO_ID}/preview`);
+  assert.equal(preview.searchParams.get("autoplay"), "1");
+  assert.ok(drive.title.includes("full-screen"));
+  assert.ok(drive.hasAttribute("allowfullscreen"));
+  assert.match(drive.getAttribute("allow"), /fullscreen/);
   assert.ok(doc.querySelector("#playback-error").textContent.includes("Google Drive"));
   for (const link of doc.querySelectorAll('a[href*="drive.google.com"]')) {
     assert.equal(link.href, `https://drive.google.com/file/d/${VIDEO_ID}/view`);
@@ -138,9 +152,12 @@ await ok("initial state has one branded cover, no loaded media and a no-JS Drive
   const noJs = new JSDOM(html, { url: "https://app.liveunmute.com/demo/" });
   const doc = noJs.window.document;
   const video = doc.querySelector("#video");
+  const drive = doc.querySelector("#drive-player");
   assert.equal(doc.querySelectorAll("#play-demo").length, 1);
   assert.equal(doc.querySelector("#play-demo").getAttribute("href"), `https://drive.google.com/file/d/${VIDEO_ID}/view`);
   assert.ok(video.hidden);
+  assert.ok(drive.hidden);
+  assert.equal(drive.getAttribute("src"), null);
   assert.ok(doc.querySelector("#transport").hidden);
   assert.ok(doc.querySelector("#playback-error").hidden);
   assert.ok(doc.querySelector("#fullscreen").hidden);
@@ -163,7 +180,8 @@ await ok("play opens one native player and the custom controls sit below the vid
   assert.ok(!doc.querySelector("#transport").hidden);
   assert.equal(doc.activeElement, video);
   assert.equal(video.src, video.dataset.src);
-  assert.equal(doc.querySelectorAll("iframe").length, 0);
+  assert.ok(doc.querySelector("#drive-player").hidden);
+  assert.equal(doc.querySelector("#drive-player").getAttribute("src"), null);
   video.dispatchEvent(new doc.defaultView.Event("playing"));
   assert.match(doc.querySelector("#video-status").textContent, /controls are below/);
   assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Pause video");
@@ -193,9 +211,10 @@ await ok("timeline follows the loaded media and remains keyboard/touch seekable"
   close();
 });
 
-await ok("stream failure shows a branded message instead of an embedded Drive player", () => {
+await ok("stream failure becomes a compact error card with a full-screen Drive fallback", () => {
   const { doc, close } = page();
   const video = doc.querySelector("#video");
+  const drive = doc.querySelector("#drive-player");
   doc.querySelector("#play-demo").focus();
   doc.querySelector("#play-demo").click();
   video.dispatchEvent(new doc.defaultView.Event("error"));
@@ -203,14 +222,40 @@ await ok("stream failure shows a branded message instead of an embedded Drive pl
   assert.equal(video.getAttribute("src"), null);
   assert.ok(doc.querySelector("#transport").hidden);
   assert.ok(!doc.querySelector("#playback-error").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
   assert.ok(doc.querySelector("#fullscreen").hidden);
-  assert.equal(doc.querySelectorAll("iframe").length, 0);
-  assert.equal(doc.activeElement, doc.querySelector("#fallback-drive-link"));
-  assert.match(doc.querySelector("#video-status").textContent, /Inline playback failed/);
+  assert.ok(drive.hidden);
+  assert.equal(drive.getAttribute("src"), null);
+  assert.equal(doc.activeElement, doc.querySelector("#drive-player-fullscreen"));
+  assert.match(doc.querySelector("#video-status").textContent, /full-screen Drive player/i);
   close();
 });
 
-await ok("a stalled stream shows a clean Drive link and allows an inline retry", () => {
+await ok("the Drive player loads only on demand, enters full screen, then unloads on exit", () => {
+  const { doc, calls, close } = page();
+  const video = doc.querySelector("#video");
+  const drive = doc.querySelector("#drive-player");
+  doc.querySelector("#play-demo").click();
+  video.dispatchEvent(new doc.defaultView.Event("error"));
+  assert.ok(drive.hidden);
+  doc.querySelector("#drive-player-fullscreen").focus();
+  doc.querySelector("#drive-player-fullscreen").click();
+  assert.deepEqual(calls.enter, ["watch-screen"]);
+  assert.ok(!drive.hidden);
+  assert.equal(drive.src, drive.dataset.src);
+  assert.ok(doc.querySelector("#playback-error").hidden);
+  assert.ok(!doc.querySelector("#exit-fullscreen").hidden);
+  doc.querySelector("#exit-fullscreen").click();
+  assert.equal(calls.exit, 1);
+  assert.ok(drive.hidden);
+  assert.equal(drive.getAttribute("src"), null);
+  assert.ok(!doc.querySelector("#playback-error").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.equal(doc.activeElement, doc.querySelector("#drive-player-fullscreen"));
+  close();
+});
+
+await ok("a stalled stream offers retry and the full-screen Drive fallback", () => {
   const { doc, calls, close } = page();
   doc.querySelector("#play-demo").click();
   assert.ok(doc.querySelector("#playback-error").hidden);
@@ -218,12 +263,13 @@ await ok("a stalled stream shows a clean Drive link and allows an inline retry",
   assert.ok(!doc.querySelector("#playback-error").hidden);
   assert.equal(calls.pause, 1);
   assert.equal(calls.load, 1);
-  assert.equal(doc.querySelectorAll("iframe").length, 0);
-  assert.equal(doc.querySelector("#fallback-drive-link").target, "_blank");
+  assert.ok(doc.querySelector("#drive-player").hidden);
+  assert.equal(doc.querySelector(".drive-link").target, "_blank");
   doc.querySelector("#retry-playback").click();
   assert.equal(calls.play, 2);
   assert.ok(doc.querySelector("#playback-error").hidden);
   assert.ok(!doc.querySelector("#transport").hidden);
+  assert.ok(!doc.querySelector("#player").classList.contains("has-error"));
   close();
 });
 
@@ -264,7 +310,9 @@ await ok("iPhone video fullscreen and unsupported-browser fallback are handled",
   assert.equal(iphone.calls.ios, 1);
   iphone.doc.querySelector("#video").dispatchEvent(new iphone.doc.defaultView.Event("error"));
   assert.ok(iphone.doc.querySelector("#fullscreen").hidden);
+  assert.ok(iphone.doc.querySelector("#drive-player-fullscreen").hidden);
   assert.ok(!iphone.doc.querySelector("#playback-error").hidden);
+  assert.match(iphone.doc.querySelector("#fallback-copy").textContent, /Open the video in Drive/);
   iphone.close();
   const unsupported = page({ fullscreen: false });
   assert.ok(unsupported.doc.querySelector("#fullscreen").hidden);

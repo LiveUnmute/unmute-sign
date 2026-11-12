@@ -188,8 +188,8 @@
     .fullscreen:hover { border-color: var(--ink); background: var(--paper); }
     .fullscreen svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 
-    /* The Drive iframe had its own unbrandable controls on phones. Keep the
-       video itself clean and put our compact, accessible transport below it. */
+    /* Keep the branded, native video clean. Drive's unstyleable iframe is
+       never loaded inline; it is a deliberate full-screen fallback only. */
     .watch-screen { width: 100%; }
     .player {
       position: relative;
@@ -199,7 +199,12 @@
       background: #101010;
       border-radius: 3px;
     }
-    .poster, .player video {
+    .player.has-error {
+      aspect-ratio: auto;
+      height: clamp(300px, 50vh, 460px);
+      height: clamp(300px, 50svh, 460px);
+    }
+    .poster, .player video, .player iframe {
       display: block;
       width: 100%;
       height: 100%;
@@ -252,6 +257,7 @@
       text-transform: uppercase;
     }
     .player video { object-fit: contain; background: #000; touch-action: manipulation; }
+    .player iframe { background: #000; }
     .playback-error {
       position: absolute;
       inset: 0;
@@ -284,7 +290,7 @@
       text-decoration: none;
       cursor: pointer;
     }
-    .fallback-actions button { background: transparent; color: var(--ink); }
+    .fallback-actions #retry-playback { background: transparent; color: var(--ink); }
     .transport {
       display: flex;
       align-items: center;
@@ -528,13 +534,22 @@
                 data-src="https://drive.usercontent.google.com/download?id=1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn&amp;export=download&amp;confirm=t"
                 aria-label="Unmute product demo" tabindex="0">
               </video>
+              <!-- The Drive player is cross-origin and cannot be styled. Keep
+                   it unloaded/hidden in the page; only offer it after a native
+                   stream failure, in the user's requested full-screen view. -->
+              <iframe id="drive-player" hidden
+                data-src="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/preview?autoplay=1"
+                title="Unmute product demo — Google Drive full-screen player"
+                allow="autoplay; encrypted-media; fullscreen" allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin" tabindex="0"></iframe>
               <div class="playback-error" id="playback-error" role="group" aria-labelledby="fallback-title" hidden>
-                <p class="fallback-title" id="fallback-title">Video couldn’t play here</p>
-                <p class="fallback-copy">Google Drive isn’t providing a stream this browser can play. Open the original video in Drive or try the inline player again.</p>
+                <p class="fallback-title" id="fallback-title">Video couldn’t play inline.</p>
+                <p class="fallback-copy" id="fallback-copy">Google Drive’s stream isn’t playing in this browser. Try its player full screen, or retry the inline stream.</p>
                 <div class="fallback-actions">
+                  <button class="drive-player-fullscreen" id="drive-player-fullscreen" type="button" aria-controls="watch-screen">
+                    Play in full screen
+                  </button>
                   <button id="retry-playback" type="button">Try again</button>
-                  <a id="fallback-drive-link" href="https://drive.google.com/file/d/1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn/view"
-                     target="_blank" rel="noopener">Open in Drive ↗</a>
                 </div>
               </div>
               <button class="exit-fullscreen" id="exit-fullscreen" type="button" aria-label="Exit full screen" aria-controls="watch-screen" hidden>×</button>
@@ -580,8 +595,11 @@
       const player = document.getElementById('player');
       const poster = document.getElementById('play-demo');
       const video = document.getElementById('video');
+      const drive = document.getElementById('drive-player');
       const status = document.getElementById('video-status');
       const fullscreen = document.getElementById('fullscreen');
+      const driveFullscreen = document.getElementById('drive-player-fullscreen');
+      const driveLink = document.querySelector('.drive-link');
       const exit = document.getElementById('exit-fullscreen');
       const transport = document.getElementById('transport');
       const togglePlay = document.getElementById('toggle-play');
@@ -589,8 +607,8 @@
       const currentTime = document.getElementById('current-time');
       const totalTime = document.getElementById('total-time');
       const playbackError = document.getElementById('playback-error');
+      const fallbackCopy = document.getElementById('fallback-copy');
       const retry = document.getElementById('retry-playback');
-      const fallbackLink = document.getElementById('fallback-drive-link');
       const canElementFullscreen = typeof screen.requestFullscreen === 'function' ||
         typeof screen.webkitRequestFullscreen === 'function';
       const canVideoFullscreen = typeof video.webkitEnterFullscreen === 'function';
@@ -601,6 +619,7 @@
       // With JavaScript disabled, the poster remains a working link to Drive.
       // Hide our full-screen button when the browser exposes no such API.
       fullscreen.hidden = !(canElementFullscreen || canVideoFullscreen);
+      driveFullscreen.hidden = !canElementFullscreen;
 
       function clearLoadingTimer() {
         if (loadingTimer !== null) window.clearTimeout(loadingTimer);
@@ -646,10 +665,69 @@
         video.load();
         transport.hidden = true;
         playbackError.hidden = false;
+        drive.hidden = true;
+        driveFullscreen.hidden = !canElementFullscreen;
+        fallbackCopy.textContent = canElementFullscreen
+          ? 'Google Drive’s stream isn’t playing in this browser. Try its player full screen, or retry the inline stream.'
+          : 'Google Drive’s stream isn’t playing in this browser. Open the video in Drive, or retry the inline stream.';
+        player.classList.add('has-error');
         fullscreen.hidden = true;
         setPlaying(false);
-        status.textContent = 'Inline playback failed. Open the video in Google Drive or try again.';
-        if (shouldMoveFocus) fallbackLink.focus({ preventScroll: true });
+        status.textContent = canElementFullscreen
+          ? 'Inline playback failed. Use the full-screen Drive player or open in Drive.'
+          : 'Inline playback failed. Open the video in Drive or try again.';
+        if (shouldMoveFocus) {
+          (driveFullscreen.hidden ? driveLink : driveFullscreen).focus({ preventScroll: true });
+        }
+      }
+
+      function closeDrivePreview() {
+        if (mode !== 'drive') return;
+        mode = 'fallback';
+        drive.hidden = true;
+        drive.removeAttribute('src');
+        playbackError.hidden = false;
+        player.classList.add('has-error');
+        driveFullscreen.hidden = !canElementFullscreen;
+        status.textContent = 'Drive player closed. Open it again or use the link below.';
+      }
+
+      function requestElementFullscreen() {
+        const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
+        if (typeof request !== 'function') return false;
+        try {
+          const result = request.call(screen);
+          if (result && typeof result.catch === 'function') {
+            result.catch(() => {
+              if (mode === 'drive') closeDrivePreview();
+              status.textContent = 'Full screen is unavailable. Open the video in Drive instead.';
+            });
+          }
+          return true;
+        } catch {
+          if (mode === 'drive') closeDrivePreview();
+          status.textContent = 'Full screen is unavailable. Open the video in Drive instead.';
+          return false;
+        }
+      }
+
+      function useDrivePreview({ enterFullscreen = false } = {}) {
+        if (mode !== 'fallback') return;
+        clearLoadingTimer();
+        video.pause();
+        video.hidden = true;
+        video.removeAttribute('src');
+        video.load();
+        transport.hidden = true;
+        playbackError.hidden = true;
+        player.classList.remove('has-error');
+        fullscreen.hidden = true;
+        mode = 'drive';
+        drive.hidden = false;
+        drive.src = drive.dataset.src;
+        status.textContent = 'Opening the Google Drive player. Tap its play control if the video does not start.';
+        if (enterFullscreen) requestElementFullscreen();
+        else drive.focus({ preventScroll: true });
       }
 
       function requestPlayback() {
@@ -744,6 +822,9 @@
         video.load();
         mode = 'poster';
         playbackError.hidden = true;
+        drive.hidden = true;
+        drive.removeAttribute('src');
+        player.classList.remove('has-error');
         video.hidden = true;
         transport.hidden = true;
         poster.hidden = false;
@@ -758,26 +839,37 @@
         const entered = isFullscreen();
         const wasFocused = document.activeElement === exit;
         exit.hidden = !entered;
-        if (entered && document.activeElement === fullscreen) {
+        if (!entered && mode === 'drive') {
+          closeDrivePreview();
+          (driveFullscreen.hidden ? driveLink : driveFullscreen).focus({ preventScroll: true });
+          return;
+        }
+        if (entered && [fullscreen, driveFullscreen].includes(document.activeElement)) {
           exit.focus({ preventScroll: true });
         } else if (exit.hidden && wasFocused) {
-          const destination = fullscreen.hidden ? retry : fullscreen;
+          const destination = mode === 'fallback'
+            ? (driveFullscreen.hidden ? driveLink : driveFullscreen)
+            : fullscreen;
           destination.focus({ preventScroll: true });
         }
       }
       document.addEventListener('fullscreenchange', onFullscreenChange);
       document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+      driveFullscreen.addEventListener('click', () => useDrivePreview({ enterFullscreen: true }));
       fullscreen.addEventListener('click', () => {
+        if (mode === 'fallback') {
+          useDrivePreview({ enterFullscreen: true });
+          return;
+        }
+        if (mode === 'drive') {
+          requestElementFullscreen();
+          return;
+        }
         if (mode === 'poster') playDemo();
         if (mode !== 'native') return;
         try {
-          if (canElementFullscreen) {
-            const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
-            const result = request.call(screen);
-            if (result && typeof result.catch === 'function') {
-              result.catch(() => { status.textContent = 'Full screen is unavailable in this browser.'; });
-            }
-          } else if (canVideoFullscreen) {
+          if (canElementFullscreen) requestElementFullscreen();
+          else if (canVideoFullscreen) {
             // iPhone Safari may provide fullscreen only for the video element.
             video.webkitEnterFullscreen();
           }
