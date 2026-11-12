@@ -80,7 +80,7 @@ await ok("the Unmute logo and both favicons are the actual brand assets", () => 
   const { doc, close } = page();
   assert.equal(doc.querySelector(".brand img").getAttribute("src"), "/demo/assets/unmute-logo.png");
   assert.equal(doc.querySelector(".brand img").getAttribute("alt"), "Unmute");
-  assert.ok(readFileSync("pitch/assets/unmute-logo.png").equals(readFileSync("../app/assets/unmute-logo-trimmed.png")));
+  assert.ok(readFileSync("pitch/assets/unmute-logo.png").equals(readFileSync("../landing/assets/img/unmute-logo-white.png")));
   assert.ok(readFileSync("pitch/assets/favicon-32.png").equals(readFileSync("../landing/assets/img/favicon-32.png")));
   assert.ok(readFileSync("pitch/assets/favicon-192.png").equals(readFileSync("../landing/assets/img/favicon-192.png")));
   for (const size of ["32x32", "192x192"]) {
@@ -89,10 +89,15 @@ await ok("the Unmute logo and both favicons are the actual brand assets", () => 
   close();
 });
 
-await ok("the palette, fonts and hero image are available without a font CDN", () => {
-  assert.match(html, /#E3E1DC/i);
-  assert.match(html, /#006AFE/i);
-  assert.match(html, /#121212/i);
+await ok("the page uses Unmute's dark palette and local type assets", () => {
+  assert.match(html, /name="theme-color" content="#0B0D10"/i);
+  assert.match(html, /name="color-scheme" content="dark"/i);
+  assert.match(html, /color-scheme:\s*dark/i);
+  assert.match(html, /--bone:\s*#0B0D10/i);
+  assert.match(html, /--paper:\s*#171A20/i);
+  assert.match(html, /--ink:\s*#F3F4F6/i);
+  assert.match(html, /--blue:\s*#006AFE/i);
+  assert.match(html, /--blue-light:\s*#78ACFF/i);
   for (const name of ["demo-poster.jpg", "syncopate-latin-400.woff2", "Pretendard-Regular.subset.91.woff2", "Pretendard-Medium.subset.91.woff2", "Pretendard-Bold.subset.91.woff2", "SYNCOPATE-LICENSE.txt", "PRETENDARD-LICENSE.txt"]) {
     assert.ok(existsSync(`pitch/assets/${name}`), `${name} missing`);
   }

@@ -73,6 +73,9 @@ ok("the pitch page exists in the app site with the clean custom player", () => {
   assert.match(html, /id="toggle-play"/);
   assert.match(html, /id="seek"/);
   assert.match(html, /id="fullscreen"/);
+  assert.match(html, /name="theme-color" content="#0B0D10"/i);
+  assert.match(html, /--bone:\s*#0B0D10/i);
+  assert.match(html, /--paper:\s*#171A20/i);
   assert.match(html, /drive\.usercontent\.google\.com\/download/);
   assert.doesNotMatch(html, /<iframe\b/i, "Drive's unstyleable controls must not be embedded");
   assert.doesNotMatch(html, /<video[^>]+\bcontrols\b/i, "mobile browser controls must not overlay the video");

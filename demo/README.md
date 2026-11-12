@@ -183,9 +183,10 @@ stays the authority regardless of how good the model gets.
 
 ## `/demo` — the product video
 
-`pitch/index.html` is the source for **`/demo`**. It uses Unmute's logo, icon,
-colours and typefaces, with local assets under `pitch/assets/`. The cover image
-is the same as the landing page. Fonts are distributed with their licences.
+`pitch/index.html` is the source for **`/demo`**. It uses Unmute's official
+white logo variant, icon, brand-blue accent and typefaces in a dark presentation,
+with local assets under `pitch/assets/`. The cover image is the same as the
+landing page. Fonts are distributed with their licences.
 
 The 5:27 product walkthrough stays in Google Drive. When a visitor plays it,
 the page requests the public download endpoint as an inline HTML video. The
