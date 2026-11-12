@@ -1,0 +1,10 @@
+# Keep the clean demo URLs and their HTML fresh on manual static deploys too.
+# netlify.toml repeats these rules for Git-connected builds.
+/demo
+  Cache-Control: no-store, must-revalidate
+
+/demo/
+  Cache-Control: no-store, must-revalidate
+
+/demo/index.html
+  Cache-Control: no-store, must-revalidate

@@ -103,9 +103,9 @@ inside the Arena preview iframe.
 npm test
 ```
 
-29 checks across three files: classifier behaviour on synthetic hand landmarks,
-the full tap-mode walkthrough in a real DOM, and the embedded-frame permission
-path that blocks the camera in previews.
+The suite covers classifier behaviour on synthetic hand landmarks, the tap-mode
+walkthrough, embedded-frame permissions, layout, live-provider behaviour and
+the branded product-demo page. It also checks that the app copy is in sync.
 
 ---
 
@@ -181,21 +181,32 @@ stays the authority regardless of how good the model gets.
 
 ---
 
-## `/demo` — the pitch video
+## `/demo` — the product video
 
-`pitch/index.html` is published at **`/demo`** on the app site. It embeds the
-iDICE Demo Day video from Google Drive with Drive's own player, so the 87 MB
-file is never rehosted here.
+`pitch/index.html` is the source for **`/demo`**. It uses Unmute's logo, icon,
+colours and typefaces, with local assets under `pitch/assets/`. The cover image
+is the same as the landing page. Fonts are distributed with their licences.
 
-`build.mjs` copies `pitch/` to `dist/demo/` — the source folder is named for
-what it is, the published path is named for the URL. If you rename one, change
-`COPY_RENAMED` in `build.mjs` or the URL 404s while the source still builds.
+The 5:27 product walkthrough stays in Google Drive. When a visitor plays it,
+the page first tries a native HTML video player using Drive's public download
+endpoint; this has one set of browser controls and a clearly labelled full-screen
+button. Drive is not a dedicated video host: the direct endpoint can return an
+error or be throttled, and seeking can be unreliable. If native playback fails,
+the page loads Drive's preview player instead, with an "Open in Drive" link
+available throughout. Drive's own controls cannot be styled by this page. For
+a more reliable long-term native player, host the MP4 on a video CDN or as a
+fast-start MP4 on the site and update the `data-src` on `#video`.
 
-The page is deliberately self-contained: inline SVG favicon, data-URI only,
-Google Fonts from the CDN. The app build does not copy `/assets`, so a relative
-image reference would 404 on the deployed site. `test/pitch-page.test.mjs`
-enforces that.
+`build.mjs` copies `pitch/` to `dist/demo/`. The app site also has a checked-in
+copy at `app/demo/` for deploys that use the app folder directly. After changing
+the page or any assets, run:
 
-**The video has no captions.** The page says so in the transcript section rather
-than leaving the gap silent. When a transcript exists, replace the `.gap`
-paragraphs and the `Captions` fact, and delete the "being prepared" wording.
+```bash
+node tools/sync-pitch-page.mjs
+node tools/sync-pitch-page.mjs --check
+```
+
+The page states that captions and a written transcript are not yet available.
+Add accurate captions and a transcript when they exist; don't claim they are
+available in the meantime. `test/pitch-page.test.mjs` checks the branding,
+player, fallback and full-screen paths.

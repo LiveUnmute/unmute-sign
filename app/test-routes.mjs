@@ -53,6 +53,19 @@ ok("_redirects still carries every rule netlify.toml has", () => {
   }
 });
 
+ok("all demo page URLs revalidate after a deploy", () => {
+  const headers = read("_headers").split(/\n(?=\/)/);
+  for (const path of ["/demo", "/demo/", "/demo/index.html"]) {
+    const blocks = toml.split("[[headers]]");
+    const block = blocks.find((b) => b.includes(`for = "${path}"`));
+    assert.ok(block, `no cache headers in netlify.toml for ${path}`);
+    assert.match(block, /Cache-Control\s*=\s*"no-store, must-revalidate"/);
+    const staticBlock = headers.find((b) => b.split("\n")[0] === path);
+    assert.ok(staticBlock, `no cache headers in _headers for ${path}`);
+    assert.match(staticBlock, /Cache-Control:\s*no-store, must-revalidate/);
+  }
+});
+
 ok("the pitch page exists in the app site", () => {
   assert.ok(existsSync(join(APP, "demo/index.html")), "app/demo/index.html is missing");
   const html = read("demo/index.html");

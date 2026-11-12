@@ -36,6 +36,23 @@
   [headers.values]
     Cache-Control = "no-store, must-revalidate"
 
+# Both clean demo URLs rewrite to the page. Revalidate them explicitly so a
+# browser that visited an older version picks up changes after a redeploy.
+[[headers]]
+  for = "/demo"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+[[headers]]
+  for = "/demo/"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+[[headers]]
+  for = "/demo/index.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
 # JS and CSS are loaded as ES modules and change together. Short cache so a
 # redeploy is picked up without a hard refresh.
 
