@@ -185,23 +185,14 @@ stays the authority regardless of how good the model gets.
 
 `pitch/index.html` is the source for **`/demo`**. It uses Unmute's official
 white logo variant, icon, brand-blue accent and typefaces in a dark presentation,
-with local assets under `pitch/assets/`. The cover image is the same as the
-landing page. Fonts are distributed with their licences.
+with local assets under `pitch/assets/`. Fonts are distributed with their
+licences.
 
-The 5:27 product walkthrough stays in Google Drive. The page first requests
-Drive's public download endpoint as an inline HTML video. When that works, the
-portrait video has no browser-supplied overlay: a compact, accessible play,
-pause and seek bar sits below it, and the page's full-screen button expands the
-video and controls together.
-
-Drive is not a dedicated video host: its direct endpoint can return an error,
-be throttled, or seek unreliably. If inline streaming fails, the oversized video
-frame collapses to a short branded error card. On browsers with full-screen
-support, the visitor can deliberately open Drive's preview player in full
-screen; its iframe is never loaded in the normal page layout. The "Open in
-Drive" link remains available if full screen is unsupported. For reliable
-custom inline playback, host a fast-start MP4 on a video CDN or the site and
-update the `data-src` on `#video`.
+The IDICE pitch video is embedded from Vimeo, using video `1239775906` and the
+portrait 9:20 frame from the supplied embed. Vimeo supplies the playback,
+caption (when available), and full-screen controls. The page also offers a
+branded full-screen action and a direct "Open on Vimeo" link. The old Google
+Drive stream and its fallback player have been removed.
 
 `build.mjs` copies `pitch/` to `dist/demo/`. The app site also has a checked-in
 copy at `app/demo/` for deploys that use the app folder directly. After changing

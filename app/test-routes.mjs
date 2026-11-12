@@ -66,20 +66,19 @@ ok("all demo page URLs revalidate after a deploy", () => {
   }
 });
 
-ok("the pitch page exists in the app site with the clean custom player", () => {
+ok("the app /demo page embeds the IDICE Vimeo player", () => {
   assert.ok(existsSync(join(APP, "demo/index.html")), "app/demo/index.html is missing");
   const html = read("demo/index.html");
   assert.match(html, /id="watch-screen"/);
-  assert.match(html, /id="toggle-play"/);
-  assert.match(html, /id="seek"/);
   assert.match(html, /id="fullscreen"/);
+  assert.match(html, /id="vimeo-player"/);
+  assert.match(html, /player\.vimeo\.com\/video\/1239775906\?/);
   assert.match(html, /name="theme-color" content="#0B0D10"/i);
   assert.match(html, /--bone:\s*#0B0D10/i);
   assert.match(html, /--paper:\s*#171A20/i);
-  assert.match(html, /drive\.usercontent\.google\.com\/download/);
-  assert.match(html, /<iframe id="drive-player" hidden\s+data-src=/i, "Drive fallback iframe must start hidden and lazy");
-  assert.doesNotMatch(html, /<iframe id="drive-player"[^>]+\ssrc=/i, "Drive's video must not load before the user requests its full-screen player");
-  assert.doesNotMatch(html, /<video[^>]+\bcontrols\b/i, "mobile browser controls must not overlay the video");
+  assert.match(html, /player\.vimeo\.com\/api\/player\.js/);
+  assert.doesNotMatch(html, /drive\.google\.com|drive\.usercontent\.google\.com/i);
+  assert.doesNotMatch(html, /<video\b/i, "old Drive/native-video player must be removed");
 });
 
 console.log(`\n${pass} passed`);

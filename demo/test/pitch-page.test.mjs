@@ -1,13 +1,12 @@
-// Regression checks for the branded /demo page. Its source is copied into the
-// app and the demo build; the Drive video is intentionally loaded only when a
-// visitor asks to play it.
+// Regression checks for the branded /demo page and its Vimeo player.
 
 import { readFileSync, existsSync } from "node:fs";
 import { strict as assert } from "node:assert";
 import { JSDOM } from "jsdom";
 
 const SRC = "./pitch/index.html";
-const VIDEO_ID = "1uEhWk72tQQtbQfzMFaQRp6FBe4NLPTcn";
+const VIDEO_ID = "1239775906";
+const PLAYER_URL = `https://player.vimeo.com/video/${VIDEO_ID}?badge=0&autopause=0&player_id=0&app_id=58479&muted=1`;
 const html = readFileSync(SRC, "utf8");
 let pass = 0;
 
@@ -16,35 +15,15 @@ async function ok(name, run) {
   catch (error) { console.log(`FAIL  ${name} — ${error.stack || error.message}`); process.exitCode = 1; }
 }
 
-// No external resource is fetched by JSDOM. We stub the browser media and
-// fullscreen APIs, then exercise the real inline page script and DOM events.
-function page({ fullscreen = true, ios = false, playError = null } = {}) {
-  const calls = { play: 0, pause: 0, load: 0, enter: [], exit: 0, ios: 0, loadingTimer: null };
+// JSDOM does not fetch external pages. Stub the containing-page fullscreen API
+// and exercise the actual inline script and its DOM event handlers.
+function page({ fullscreen = true } = {}) {
+  const calls = { enter: [], exit: 0 };
   let currentFullscreen = null;
   const dom = new JSDOM(html, {
     url: "https://app.liveunmute.com/demo/",
     runScripts: "dangerously",
     beforeParse(window) {
-      window.HTMLMediaElement.prototype.play = function () {
-        calls.play++;
-        Object.defineProperty(this, "paused", { configurable: true, value: false });
-        return playError ? Promise.reject(playError) : Promise.resolve();
-      };
-      window.HTMLMediaElement.prototype.pause = function () {
-        calls.pause++;
-        Object.defineProperty(this, "paused", { configurable: true, value: true });
-      };
-      window.HTMLMediaElement.prototype.load = function () { calls.load++; };
-      const nativeSetTimeout = window.setTimeout.bind(window);
-      const nativeClearTimeout = window.clearTimeout.bind(window);
-      window.setTimeout = (callback, delay, ...args) => {
-        if (delay === 25000) {
-          calls.loadingTimer = () => callback(...args);
-          return 999999;
-        }
-        return nativeSetTimeout(callback, delay, ...args);
-      };
-      window.clearTimeout = (id) => { if (id !== 999999) nativeClearTimeout(id); };
       Object.defineProperty(window.document, "fullscreenElement", {
         configurable: true,
         get: () => currentFullscreen,
@@ -62,9 +41,6 @@ function page({ fullscreen = true, ios = false, playError = null } = {}) {
           window.document.dispatchEvent(new window.Event("fullscreenchange"));
           return Promise.resolve();
         };
-      }
-      if (ios) {
-        window.HTMLVideoElement.prototype.webkitEnterFullscreen = function () { calls.ios++; };
       }
     },
   });
@@ -98,232 +74,87 @@ await ok("the page uses Unmute's dark palette and local type assets", () => {
   assert.match(html, /--ink:\s*#F3F4F6/i);
   assert.match(html, /--blue:\s*#006AFE/i);
   assert.match(html, /--blue-light:\s*#78ACFF/i);
-  for (const name of ["demo-poster.jpg", "syncopate-latin-400.woff2", "Pretendard-Regular.subset.91.woff2", "Pretendard-Medium.subset.91.woff2", "Pretendard-Bold.subset.91.woff2", "SYNCOPATE-LICENSE.txt", "PRETENDARD-LICENSE.txt"]) {
+  for (const name of ["syncopate-latin-400.woff2", "Pretendard-Regular.subset.91.woff2", "Pretendard-Medium.subset.91.woff2", "Pretendard-Bold.subset.91.woff2", "SYNCOPATE-LICENSE.txt", "PRETENDARD-LICENSE.txt"]) {
     assert.ok(existsSync(`pitch/assets/${name}`), `${name} missing`);
   }
 });
 
-await ok("Drive's unstyleable player stays unloaded until full-screen fallback is requested", () => {
+await ok("the exact IDICE Vimeo embed and all player permissions are present", () => {
   const { doc, close } = page();
-  const video = doc.querySelector("#video");
-  const drive = doc.querySelector("#drive-player");
-  assert.equal(doc.querySelectorAll("iframe").length, 1);
-  assert.ok(drive.hidden);
-  assert.equal(drive.getAttribute("src"), null);
-  assert.equal(doc.querySelectorAll("iframe:not([hidden])").length, 0);
-  assert.equal(video.hasAttribute("controls"), false);
-  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Play video");
-  assert.equal(doc.querySelector("#seek").type, "range");
-  assert.equal(doc.querySelector("#seek").getAttribute("aria-label"), "Seek video");
-  assert.equal(doc.querySelector("#fullscreen").getAttribute("aria-controls"), "watch-screen");
-  assert.equal(doc.querySelector("#drive-player-fullscreen").getAttribute("aria-controls"), "watch-screen");
-  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-controls"), "video");
-  assert.ok(doc.querySelector("#exit-fullscreen"));
-  assert.equal(doc.querySelector(".player").contains(doc.querySelector("#transport")), false);
-  assert.match(html, /\.player\.has-error\s*\{[^}]*aspect-ratio:\s*auto/s);
+  const iframe = doc.querySelector("#vimeo-player");
+  assert.ok(iframe);
+  assert.equal(iframe.src, PLAYER_URL);
+  assert.equal(iframe.title, "Unmute Pitch Video —IDICE");
+  assert.equal(iframe.getAttribute("allow"), "autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share");
+  assert.equal(iframe.getAttribute("referrerpolicy"), "strict-origin-when-cross-origin");
+  assert.ok(iframe.hasAttribute("allowfullscreen"));
+  assert.equal(iframe.hidden, false);
+  assert.ok(doc.querySelector(".player").contains(iframe));
+  assert.match(html, /aspect-ratio:\s*9\s*\/\s*20/);
+  const sdk = doc.querySelector('script[src="https://player.vimeo.com/api/player.js"]');
+  assert.ok(sdk, "Vimeo player SDK missing");
+  assert.ok(sdk.hasAttribute("defer"));
+  assert.doesNotMatch(html, /drive\.google\.com|drive\.usercontent\.google\.com/i);
+  assert.equal(doc.querySelectorAll("video").length, 0);
   close();
 });
 
-await ok("native and full-screen Drive fallbacks point to the same product video", () => {
+await ok("the page has a direct Vimeo link and no hard-coded old video metadata", () => {
   const { doc, close } = page();
-  const video = doc.querySelector("#video");
-  const direct = new URL(video.dataset.src);
-  assert.equal(direct.hostname, "drive.usercontent.google.com");
-  assert.equal(direct.searchParams.get("id"), VIDEO_ID);
-  assert.equal(direct.searchParams.get("confirm"), "t");
-  const drive = doc.querySelector("#drive-player");
-  const preview = new URL(drive.dataset.src);
-  assert.equal(preview.hostname, "drive.google.com");
-  assert.equal(preview.pathname, `/file/d/${VIDEO_ID}/preview`);
-  assert.equal(preview.searchParams.get("autoplay"), "1");
-  assert.ok(drive.title.includes("full-screen"));
-  assert.ok(drive.hasAttribute("allowfullscreen"));
-  assert.match(drive.getAttribute("allow"), /fullscreen/);
-  assert.ok(doc.querySelector("#playback-error").textContent.includes("Google Drive"));
-  for (const link of doc.querySelectorAll('a[href*="drive.google.com"]')) {
-    assert.equal(link.href, `https://drive.google.com/file/d/${VIDEO_ID}/view`);
-    assert.equal(link.target, "_blank");
-    assert.match(link.rel, /noopener/);
-  }
+  const link = doc.querySelector(".video-link");
+  assert.equal(link.href, `https://vimeo.com/${VIDEO_ID}`);
+  assert.equal(link.target, "_blank");
+  assert.match(link.rel, /noopener/);
+  assert.match(doc.title, /IDICE pitch video/i);
+  assert.doesNotMatch(doc.body.textContent, /114 MB|5:27|Wi-Fi recommended/i);
   close();
 });
 
-await ok("initial state has one branded cover, no loaded media and a no-JS Drive link", () => {
+await ok("Vimeo playback is immediately available, including without JavaScript", () => {
   const noJs = new JSDOM(html, { url: "https://app.liveunmute.com/demo/" });
   const doc = noJs.window.document;
-  const video = doc.querySelector("#video");
-  const drive = doc.querySelector("#drive-player");
-  assert.equal(doc.querySelectorAll("#play-demo").length, 1);
-  assert.equal(doc.querySelector("#play-demo").getAttribute("href"), `https://drive.google.com/file/d/${VIDEO_ID}/view`);
-  assert.ok(video.hidden);
-  assert.ok(drive.hidden);
-  assert.equal(drive.getAttribute("src"), null);
-  assert.ok(doc.querySelector("#transport").hidden);
-  assert.ok(doc.querySelector("#playback-error").hidden);
+  assert.equal(doc.querySelector("#vimeo-player").src, PLAYER_URL);
+  assert.equal(doc.querySelector("#vimeo-player").hidden, false);
   assert.ok(doc.querySelector("#fullscreen").hidden);
-  assert.equal(video.getAttribute("src"), null);
-  assert.equal(video.getAttribute("preload"), "none");
-  assert.ok(video.hasAttribute("playsinline"));
-  assert.equal(video.hasAttribute("controls"), false);
+  assert.ok(doc.querySelector(".video-link"));
   noJs.window.close();
 });
 
-await ok("play opens one native player and the custom controls sit below the video", () => {
+await ok("the branded full-screen button and exit wrap the Vimeo embed", () => {
   const { doc, calls, close } = page();
-  const poster = doc.querySelector("#play-demo");
-  const video = doc.querySelector("#video");
-  poster.focus();
-  poster.click();
-  assert.equal(calls.play, 1);
-  assert.ok(poster.hidden);
-  assert.ok(!video.hidden);
-  assert.ok(!doc.querySelector("#transport").hidden);
-  assert.equal(doc.activeElement, video);
-  assert.equal(video.src, video.dataset.src);
-  assert.ok(doc.querySelector("#drive-player").hidden);
-  assert.equal(doc.querySelector("#drive-player").getAttribute("src"), null);
-  video.dispatchEvent(new doc.defaultView.Event("playing"));
-  assert.match(doc.querySelector("#video-status").textContent, /controls are below/);
-  assert.equal(doc.querySelector("#toggle-play").getAttribute("aria-label"), "Pause video");
-  close();
-});
-
-await ok("timeline follows the loaded media and remains keyboard/touch seekable", () => {
-  const { doc, close } = page();
-  doc.querySelector("#play-demo").click();
-  const video = doc.querySelector("#video");
-  let current = 0;
-  Object.defineProperty(video, "duration", { configurable: true, value: 327 });
-  Object.defineProperty(video, "currentTime", {
-    configurable: true,
-    get: () => current,
-    set: (value) => { current = Number(value); },
-  });
-  video.dispatchEvent(new doc.defaultView.Event("loadedmetadata"));
-  const seek = doc.querySelector("#seek");
-  assert.equal(seek.disabled, false);
-  assert.equal(seek.max, "327");
-  assert.equal(doc.querySelector("#total-time").textContent, "5:27");
-  seek.value = "60";
-  seek.dispatchEvent(new doc.defaultView.Event("input", { bubbles: true }));
-  assert.equal(video.currentTime, 60);
-  assert.equal(doc.querySelector("#current-time").textContent, "1:00");
-  close();
-});
-
-await ok("stream failure becomes a compact error card with a full-screen Drive fallback", () => {
-  const { doc, close } = page();
-  const video = doc.querySelector("#video");
-  const drive = doc.querySelector("#drive-player");
-  doc.querySelector("#play-demo").focus();
-  doc.querySelector("#play-demo").click();
-  video.dispatchEvent(new doc.defaultView.Event("error"));
-  assert.ok(video.hidden);
-  assert.equal(video.getAttribute("src"), null);
-  assert.ok(doc.querySelector("#transport").hidden);
-  assert.ok(!doc.querySelector("#playback-error").hidden);
-  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
-  assert.ok(doc.querySelector("#fullscreen").hidden);
-  assert.ok(drive.hidden);
-  assert.equal(drive.getAttribute("src"), null);
-  assert.equal(doc.activeElement, doc.querySelector("#drive-player-fullscreen"));
-  assert.match(doc.querySelector("#video-status").textContent, /full-screen Drive player/i);
-  close();
-});
-
-await ok("the Drive player loads only on demand, enters full screen, then unloads on exit", () => {
-  const { doc, calls, close } = page();
-  const video = doc.querySelector("#video");
-  const drive = doc.querySelector("#drive-player");
-  doc.querySelector("#play-demo").click();
-  video.dispatchEvent(new doc.defaultView.Event("error"));
-  assert.ok(drive.hidden);
-  doc.querySelector("#drive-player-fullscreen").focus();
-  doc.querySelector("#drive-player-fullscreen").click();
-  assert.deepEqual(calls.enter, ["watch-screen"]);
-  assert.ok(!drive.hidden);
-  assert.equal(drive.src, drive.dataset.src);
-  assert.ok(doc.querySelector("#playback-error").hidden);
-  assert.ok(!doc.querySelector("#exit-fullscreen").hidden);
-  doc.querySelector("#exit-fullscreen").click();
-  assert.equal(calls.exit, 1);
-  assert.ok(drive.hidden);
-  assert.equal(drive.getAttribute("src"), null);
-  assert.ok(!doc.querySelector("#playback-error").hidden);
-  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
-  assert.equal(doc.activeElement, doc.querySelector("#drive-player-fullscreen"));
-  close();
-});
-
-await ok("a stalled stream offers retry and the full-screen Drive fallback", () => {
-  const { doc, calls, close } = page();
-  doc.querySelector("#play-demo").click();
-  assert.ok(doc.querySelector("#playback-error").hidden);
-  calls.loadingTimer();
-  assert.ok(!doc.querySelector("#playback-error").hidden);
-  assert.equal(calls.pause, 1);
-  assert.equal(calls.load, 1);
-  assert.ok(doc.querySelector("#drive-player").hidden);
-  assert.equal(doc.querySelector(".drive-link").target, "_blank");
-  doc.querySelector("#retry-playback").click();
-  assert.equal(calls.play, 2);
-  assert.ok(doc.querySelector("#playback-error").hidden);
-  assert.ok(!doc.querySelector("#transport").hidden);
-  assert.ok(!doc.querySelector("#player").classList.contains("has-error"));
-  close();
-});
-
-await ok("autoplay denial asks for a tap rather than reporting a broken file", async () => {
-  const { doc, close } = page({ playError: { name: "NotAllowedError" } });
-  doc.querySelector("#play-demo").click();
-  await Promise.resolve();
-  assert.ok(!doc.querySelector("#video").hidden);
-  assert.ok(!doc.querySelector("#transport").hidden);
-  assert.ok(doc.querySelector("#playback-error").hidden);
-  assert.match(doc.querySelector("#video-status").textContent, /Tap the play button below/);
-  close();
-});
-
-await ok("full screen starts playback, includes controls and has a working exit", () => {
-  const { doc, calls, close } = page();
+  const screen = doc.querySelector("#watch-screen");
   const button = doc.querySelector("#fullscreen");
   const exit = doc.querySelector("#exit-fullscreen");
+  assert.equal(button.getAttribute("aria-controls"), "watch-screen");
   assert.ok(!button.hidden);
+  assert.ok(exit.hidden);
   button.focus();
   button.click();
-  assert.equal(calls.play, 1);
   assert.deepEqual(calls.enter, ["watch-screen"]);
   assert.ok(!exit.hidden);
   assert.equal(doc.activeElement, exit);
-  exit.focus();
   exit.click();
   assert.equal(calls.exit, 1);
   assert.ok(exit.hidden);
   assert.equal(doc.activeElement, button);
+  assert.equal(screen.querySelector("#vimeo-player").src, PLAYER_URL);
   close();
 });
 
-await ok("iPhone video fullscreen and unsupported-browser fallback are handled", () => {
-  const iphone = page({ fullscreen: false, ios: true });
-  assert.ok(!iphone.doc.querySelector("#fullscreen").hidden);
-  iphone.doc.querySelector("#fullscreen").click();
-  assert.equal(iphone.calls.ios, 1);
-  iphone.doc.querySelector("#video").dispatchEvent(new iphone.doc.defaultView.Event("error"));
-  assert.ok(iphone.doc.querySelector("#fullscreen").hidden);
-  assert.ok(iphone.doc.querySelector("#drive-player-fullscreen").hidden);
-  assert.ok(!iphone.doc.querySelector("#playback-error").hidden);
-  assert.match(iphone.doc.querySelector("#fallback-copy").textContent, /Open the video in Drive/);
-  iphone.close();
-  const unsupported = page({ fullscreen: false });
-  assert.ok(unsupported.doc.querySelector("#fullscreen").hidden);
-  assert.ok(unsupported.doc.querySelector(".drive-link"));
-  unsupported.close();
+await ok("browsers without the Fullscreen API can use Vimeo's own full-screen control", () => {
+  const { doc, close } = page({ fullscreen: false });
+  assert.ok(doc.querySelector("#fullscreen").hidden);
+  assert.ok(doc.querySelector("#vimeo-player").hasAttribute("allowfullscreen"));
+  assert.ok(doc.querySelector("#vimeo-player").getAttribute("allow").includes("fullscreen"));
+  assert.ok(doc.querySelector(".video-link"));
+  close();
 });
 
-await ok("captions and transcript availability are stated accurately", () => {
+await ok("captions are described without claiming they are available", () => {
   const { doc, close } = page();
   assert.equal(doc.querySelectorAll("h1").length, 1);
-  assert.match(doc.querySelector(".accessibility").textContent, /captions and a written transcript are not yet available/i);
+  assert.match(doc.querySelector(".accessibility").textContent, /CC control if captions are available/i);
+  assert.match(doc.querySelector(".accessibility").textContent, /written transcript is not provided/i);
   close();
 });
 
