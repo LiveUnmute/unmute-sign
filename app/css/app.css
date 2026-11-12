@@ -368,6 +368,57 @@ a { color: inherit; }
   object-position: center center;
 }
 
+/* The patient's own camera. Mirrored, because a person expects to see
+   themselves the way a mirror shows them, not the way a lens does — and an
+   unmirrored feed makes people think the app is broken. */
+.stage-media--cam {
+  transform: scaleX(-1);
+  background: #0C0C0C;
+}
+
+/* Held card while the lens is closed. This replaces the stock photograph that
+   used to sit here: showing a stranger's face while asking permission to film
+   is the wrong moment for a picture of a person. */
+.cam-standby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 44px 132px;
+  text-align: center;
+}
+
+.cam-standby-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid #303030;
+  color: #6E6C66;
+  margin-bottom: 20px;
+}
+
+.cam-standby-title {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin: 0 0 9px;
+}
+
+.cam-standby-body {
+  font-family: var(--body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  max-width: 232px;
+  margin: 0;
+  color: #8C8A84;
+}
+
 .stage.is-flash .stage-media {
   animation: flash 620ms ease-out;
 }

@@ -33,6 +33,16 @@ export const ICONS = {
   mic: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.6" width="6" height="10.6" rx="3"/><path d="M5.6 11a6.4 6.4 0 0 0 12.8 0"/><path d="M12 17.4v3.2"/></svg>`,
 
   play: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px"><path d="M8 4.8c0-.9 1-1.5 1.8-1l9 6.4a1.7 1.7 0 0 1 0 2.8l-9 6.4c-.8.5-1.8-.1-1.8-1V4.8Z"/></svg>`,
+
+  camera: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.2 8.4h2.9l1.5-2.1h6.8l1.5 2.1h2.9a1.4 1.4 0 0 1 1.4 1.4v7.4a1.4 1.4 0 0 1-1.4 1.4H3.2a1.4 1.4 0 0 1-1.4-1.4V9.8a1.4 1.4 0 0 1 1.4-1.4Z"/>
+    <circle cx="12" cy="13.4" r="3.2"/>
+  </svg>`,
+
+  lock: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4.4" y="10.4" width="15.2" height="10.2" rx="1.2"/>
+    <path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>
+  </svg>`,
 };
 
 
@@ -126,6 +136,48 @@ export const renderHome = () => `
            A repeat control sits at the top of the sheet.
    ------------------------------------------------------------ */
 
+/* ------------------------------------------------------------
+   The stage before the camera is up.
+
+   It used to show a stock photograph of a patient while the app waited —
+   which is exactly the wrong thing to show someone who is about to be
+   asked for permission to film. A held card is honest: the lens is not
+   open, and the screen says so.
+   ------------------------------------------------------------ */
+
+function standByMarkup(phase, live, ready) {
+  let icon = ICONS.camera;
+  let title = "Camera off";
+  let body = "Tap the hand to film the patient.";
+
+  if (!ready) {
+    title = "Starting the camera";
+    body = "One moment.";
+  } else if (phase === "consent") {
+    icon = ICONS.camera;
+    title = "Camera off";
+    body = "The patient agrees before the lens opens.";
+  } else if (phase === "blocked") {
+    icon = ICONS.lock;
+    title = "Capture declined";
+    body = "No recording without consent. The demo poses are still here.";
+  } else if (phase === "error") {
+    icon = ICONS.lock;
+    title = "Camera unavailable";
+    body = live?.error || "The camera could not be opened.";
+  } else if (phase === "sending") {
+    title = "Reading signs";
+    body = "This takes a moment.";
+  }
+
+  return `
+    <div class="cam-standby">
+      <span class="cam-standby-icon">${icon}</span>
+      <p class="cam-standby-title">${title}</p>
+      <p class="cam-standby-body">${body}</p>
+    </div>`;
+}
+
 export const renderSign = (state = {}) => {
   const mode = state.mode || "sign";
   const entry = state.entry || {};
@@ -143,7 +195,16 @@ export const renderSign = (state = {}) => {
   // themselves for the rest of the conversation.
   // Whenever the camera is open it is also visible. A lens that is on while the
   // screen shows something else is exactly the thing patients do not trust.
-  const camLive = !speaking && live && live.consent === "granted" && phase !== "consent";
+  const camUp =
+    !speaking &&
+    Boolean(live) &&
+    live.consent === "granted" &&
+    ["ready", "recording", "sending", "confirm", "spoken"].includes(phase);
+
+  // Scripted poses are a fallback, not the default. They appear only when the
+  // patient declined capture, when no session could be built, or on the
+  // clinician side where the patient is deliberately not shown.
+  const scripted = speaking || live?.consent === "declined" || Boolean(state.bootFailed);
 
   const signed = speaking ? live?.signing : null;
 
@@ -157,7 +218,9 @@ export const renderSign = (state = {}) => {
     ? `Recording`
     : sending
     ? `Reading signs`
-    : `Patient <b>signed</b>`;
+    : phase === "ready"
+    ? `Camera <b>on</b>`
+    : `Patient <b>signs</b>`;
 
   const caption = confirming ? live?.transcript || "" : state.caption || entry.text || "";
 
@@ -166,9 +229,11 @@ export const renderSign = (state = {}) => {
 
   const stageMarkup = signed?.videoUrl
     ? `<video class="stage-media" src="${signed.videoUrl}" autoplay muted loop playsinline data-sign-video></video>`
-    : camLive
-    ? `<video class="stage-media" data-cam autoplay muted playsinline></video>`
-    : mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "");
+    : camUp
+    ? `<video class="stage-media stage-media--cam" data-cam autoplay muted playsinline></video>`
+    : scripted
+    ? mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")
+    : standByMarkup(phase, live, state.ready);
 
   const isLive = Boolean(live && !live.isMock);
   const chip = isLive ? "Live" : "Demo";
@@ -208,9 +273,13 @@ export const renderSign = (state = {}) => {
     ${consenting ? `
     <div class="consent" data-consent>
       <p class="consent-body">
-        The patient is filmed so their signs can be read. If a live engine is
-        configured, <b>that video is sent to ${live?.vendor || "the translation provider"}</b>
-        to be translated. This app does not store it.
+        The patient is filmed so their signs can be read.
+        ${live && !live.isMock
+          ? `That video is sent to <b>${live.vendor || "the translation provider"}</b>
+             to be translated. This app does not store it.`
+          : `No translation engine is configured in this build, so the clip stays
+             on this device and is never uploaded. The reply that comes back is
+             <b>scripted for the demo</b> — the filming is real, the reading is not.`}
       </p>
       <div class="consent-actions">
         <button class="btn-quiet" data-consent-no>Not now</button>

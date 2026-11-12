@@ -5,13 +5,20 @@
 //   app.html   — the app, framed on desktop
 //
 // ── What is real and what is scripted ─────────────────────────────────────
-// REAL     the microphone permission prompt, the audio stream, the live input
-//          level meter. If the browser exposes SpeechRecognition, the
-//          transcript underneath is genuinely your speech.
-// SCRIPTED the conversation itself. There is no sign-recognition model, so the
-//          patient's phrases come from the pre-arranged script in media.js and
-//          the signer media is a still image per phrase.
-// The UI says which one you are getting rather than leaving it ambiguous.
+// REAL     the camera, the consent gate, the recording, and the clip itself.
+//          The patient in front of the lens is the patient you see. Also real:
+//          the microphone permission prompt, the audio stream and the level
+//          meter, and — where the browser exposes SpeechRecognition — the
+//          transcript of the clinician's speech.
+// SCRIPTED the reading of those signs. No recognition engine is configured in
+//          this build, so the transcript comes from media.js and is labelled
+//          Demo. The filming is real; the translation is not.
+//
+// That split is deliberate and it is the whole reason the camera is not gated
+// on a vendor key. A hospital evaluating this needs to see the capture flow
+// working with a real person, not a stock photograph of somebody else.
+//
+// The UI says which half you are getting rather than leaving it ambiguous.
 
 import { renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
 import { SCRIPT, TRANSLATOR_SIGNS, resolveStep } from "./media.js";
@@ -48,6 +55,7 @@ const state = {
   // instant when there is no key and one dynamic import when there is.
   live: null,
   liveReady: false,
+  bootFailed: false,
 };
 
 /* ------------------------------------------------------------
@@ -73,11 +81,26 @@ function signState() {
     note: state.note,
     confidence: state.confidence,
     live: state.live,
+    ready: state.liveReady,
+    bootFailed: state.bootFailed,
   };
 }
 
 /** True only when a real engine is configured and answered. */
 const isLiveEngine = () => Boolean(state.live && !state.live.isMock);
+
+/**
+ * True when a tap on the hand should open the camera rather than advance the
+ * scripted poses.
+ *
+ * The camera is not a feature of the recognition engine. It is how the
+ * patient's signs get into the app at all, and there is no version of this
+ * product where a clinician is shown a stock photograph instead of the person
+ * in front of them. With no engine configured the transcript is scripted and
+ * labelled Demo — but the patient is still filmed, and consent is still asked.
+ */
+const cameraFlow = () =>
+  Boolean(state.liveReady && session && state.live?.consent !== "declined");
 
 /* ------------------------------------------------------------
    The app shell
@@ -144,12 +167,14 @@ function wire() {
 
 function armSignScreen() {
   if (state.mode === "patient") {
-    // With a real engine the camera comes up; without one the scripted poses
-    // carry the demo exactly as before.
-    if (isLiveEngine() || state.live?.phase === "consent") {
+    if (cameraFlow()) {
       armPatient();
+    } else if (state.live?.consent === "declined") {
+      // The patient said no. Fall back to the poses rather than leaving a dead
+      // screen — but never quietly reopen the lens.
+      showPatient(state.patientIndex, "Camera off — using the demo poses.");
     } else {
-      showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+      paint();
     }
   } else {
     showClinician(state.clinicianIndex, "Tap the speech button and talk.");
@@ -159,7 +184,8 @@ function armSignScreen() {
 /** Bring the camera up, or explain why we cannot. */
 function armPatient() {
   if (!state.liveReady) {
-    state.note = "Starting the engine…";
+    // The screen already shows a held card saying the camera is starting.
+    // Writing a note as well would put two contradictory messages on screen.
     paint();
     return;
   }
@@ -183,10 +209,12 @@ function setMode(mode) {
   state.note = "";
 
   if (next === "patient") {
-    if (isLiveEngine() || state.live?.phase === "consent") {
+    if (cameraFlow()) {
       armPatient();
+    } else if (state.live?.consent === "declined") {
+      showPatient(state.patientIndex, "Camera off — using the demo poses.");
     } else {
-      showPatient(state.patientIndex, "Tap the hand when the patient signs.");
+      paint();
     }
   } else {
     // The patient must never be visible on the clinician page — and the camera
@@ -214,14 +242,20 @@ function showPatient(index, note = "") {
 
 /** One tap does both jobs: start the take, or end it. */
 function onHandTap() {
-  if (!isLiveEngine() && state.live?.phase !== "consent") {
+  // Declined capture, or no session at all: the poses still carry the demo.
+  if (!cameraFlow()) {
+    if (!state.liveReady && session === null) return;
     nextPatient();
     return;
   }
-  if (!state.liveReady || !session) return;
 
-  if (state.live.phase === "recording") session.stop();
-  else if (state.live.phase === "sending") return;
+  const phase = state.live?.phase;
+
+  if (phase === "recording") session.stop();
+  else if (phase === "sending") return;
+  // A transcript is on screen waiting for a yes or a no. A stray tap must not
+  // throw it away and start filming again.
+  else if (phase === "confirm") return;
   else session.record();
 }
 
@@ -514,6 +548,7 @@ async function bootLive() {
   } catch (err) {
     console.warn("[unmute] live engine failed to start:", err?.message);
     state.liveReady = false;
+    state.bootFailed = true;
     paint();
   }
 }
