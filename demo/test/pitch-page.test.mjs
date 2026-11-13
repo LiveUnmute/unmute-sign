@@ -15,15 +15,47 @@ async function ok(name, run) {
   catch (error) { console.log(`FAIL  ${name} — ${error.stack || error.message}`); process.exitCode = 1; }
 }
 
-// JSDOM does not fetch external pages. Stub the containing-page fullscreen API
-// and exercise the actual inline script and its DOM event handlers.
-function page({ fullscreen = true } = {}) {
-  const calls = { enter: [], exit: 0 };
+async function flushPromises() {
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+// JSDOM does not fetch Vimeo. Stub Vimeo.Player, its loaded/error events, the
+// timeout, and the containing-page fullscreen API while exercising the page's
+// actual script.
+function installVimeo(window, calls, vimeo) {
+  window.Vimeo = {
+    Player: class {
+      constructor(iframe) { calls.player = iframe; }
+      on(name, callback) { calls[`${name}Handler`] = callback; }
+      ready() {
+        return vimeo === "reject"
+          ? Promise.reject(new Error("Vimeo player failed"))
+          : Promise.resolve();
+      }
+      getVideoId() {
+        return Promise.resolve(vimeo === "wrong-id" ? "987654321" : VIDEO_ID);
+      }
+    },
+  };
+}
+
+function page({ fullscreen = true, fullscreenReject = false, vimeo = "ready" } = {}) {
+  const calls = { enter: [], exit: 0, loadTimeout: null, player: null, errorHandler: null, loadedHandler: null };
   let currentFullscreen = null;
   const dom = new JSDOM(html, {
     url: "https://app.liveunmute.com/demo/",
     runScripts: "dangerously",
     beforeParse(window) {
+      const nativeSetTimeout = window.setTimeout.bind(window);
+      const nativeClearTimeout = window.clearTimeout.bind(window);
+      window.setTimeout = (callback, delay, ...args) => {
+        if (delay === 12000) {
+          calls.loadTimeout = () => callback(...args);
+          return 777777;
+        }
+        return nativeSetTimeout(callback, delay, ...args);
+      };
+      window.clearTimeout = (id) => { if (id !== 777777) nativeClearTimeout(id); };
       Object.defineProperty(window.document, "fullscreenElement", {
         configurable: true,
         get: () => currentFullscreen,
@@ -31,6 +63,7 @@ function page({ fullscreen = true } = {}) {
       if (fullscreen) {
         window.HTMLElement.prototype.requestFullscreen = function () {
           calls.enter.push(this.id);
+          if (fullscreenReject) return Promise.reject(new Error("Fullscreen permission denied"));
           currentFullscreen = this;
           window.document.dispatchEvent(new window.Event("fullscreenchange"));
           return Promise.resolve();
@@ -42,9 +75,16 @@ function page({ fullscreen = true } = {}) {
           return Promise.resolve();
         };
       }
+      if (vimeo !== "missing") installVimeo(window, calls, vimeo);
     },
   });
-  return { dom, doc: dom.window.document, calls, close: () => dom.window.close() };
+  return {
+    dom,
+    doc: dom.window.document,
+    calls,
+    installVimeo: (mode = "ready") => installVimeo(dom.window, calls, mode),
+    close: () => dom.window.close(),
+  };
 }
 
 await ok("the build publishes pitch/ at /demo", () => {
@@ -79,7 +119,7 @@ await ok("the page uses Unmute's dark palette and local type assets", () => {
   }
 });
 
-await ok("the exact IDICE Vimeo embed and all player permissions are present", () => {
+await ok("the exact IDICE Vimeo embed and player permissions are present", () => {
   const { doc, close } = page();
   const iframe = doc.querySelector("#vimeo-player");
   assert.ok(iframe);
@@ -88,40 +128,125 @@ await ok("the exact IDICE Vimeo embed and all player permissions are present", (
   assert.equal(iframe.getAttribute("allow"), "autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share");
   assert.equal(iframe.getAttribute("referrerpolicy"), "strict-origin-when-cross-origin");
   assert.ok(iframe.hasAttribute("allowfullscreen"));
+  assert.equal(iframe.getAttribute("tabindex"), "-1");
+  assert.equal(iframe.getAttribute("aria-hidden"), "true");
   assert.equal(iframe.hidden, false);
   assert.ok(doc.querySelector(".player").contains(iframe));
   assert.match(html, /aspect-ratio:\s*9\s*\/\s*20/);
   const sdk = doc.querySelector('script[src="https://player.vimeo.com/api/player.js"]');
   assert.ok(sdk, "Vimeo player SDK missing");
   assert.ok(sdk.hasAttribute("defer"));
+  assert.equal(sdk.parentElement.tagName, "HEAD", "the deferred SDK element must exist before the inline script runs");
+  assert.ok(doc.querySelector("#vimeo-state").contains(doc.querySelector(".vimeo-open")));
+  assert.ok(doc.querySelector("#fullscreen-status"));
+  assert.doesNotMatch(html, /getElementById\(['"]video-status['"]\)/);
   assert.doesNotMatch(html, /drive\.google\.com|drive\.usercontent\.google\.com/i);
   assert.equal(doc.querySelectorAll("video").length, 0);
   close();
 });
 
-await ok("the page has a direct Vimeo link and no hard-coded old video metadata", () => {
-  const { doc, close } = page();
-  const link = doc.querySelector(".video-link");
+await ok("the embed has a branded loading/error state and direct Vimeo link", () => {
+  const { doc, close } = page({ vimeo: "missing" });
+  const state = doc.querySelector("#vimeo-state");
+  const link = doc.querySelector(".vimeo-open");
+  assert.ok(!state.hidden);
   assert.equal(link.href, `https://vimeo.com/${VIDEO_ID}`);
   assert.equal(link.target, "_blank");
   assert.match(link.rel, /noopener/);
+  assert.ok(doc.querySelector("#vimeo-contact").hidden, "report link is reserved for an error state");
   assert.match(doc.title, /IDICE pitch video/i);
   assert.doesNotMatch(doc.body.textContent, /114 MB|5:27|Wi-Fi recommended/i);
   close();
 });
 
-await ok("Vimeo playback is immediately available, including without JavaScript", () => {
-  const noJs = new JSDOM(html, { url: "https://app.liveunmute.com/demo/" });
-  const doc = noJs.window.document;
-  assert.equal(doc.querySelector("#vimeo-player").src, PLAYER_URL);
-  assert.equal(doc.querySelector("#vimeo-player").hidden, false);
+await ok("the player stays covered until Vimeo reports the video loaded", async () => {
+  const { doc, calls, close } = page();
+  await flushPromises();
+  const iframe = doc.querySelector("#vimeo-player");
+  assert.equal(calls.player, iframe);
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.equal(iframe.getAttribute("tabindex"), "-1");
   assert.ok(doc.querySelector("#fullscreen").hidden);
-  assert.ok(doc.querySelector(".video-link"));
-  noJs.window.close();
+  assert.equal(typeof calls.loadedHandler, "function");
+  calls.loadedHandler();
+  assert.ok(doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("is-ready"));
+  assert.equal(iframe.getAttribute("tabindex"), "0");
+  assert.equal(iframe.hasAttribute("aria-hidden"), false);
+  assert.ok(!doc.querySelector("#fullscreen").hidden);
+  close();
 });
 
-await ok("the branded full-screen button and exit wrap the Vimeo embed", () => {
+await ok("a deferred Vimeo SDK load connects after the page script has registered its listener", async () => {
+  const { dom, doc, calls, installVimeo, close } = page({ vimeo: "missing" });
+  installVimeo();
+  doc.querySelector("#vimeo-sdk").dispatchEvent(new dom.window.Event("load"));
+  await flushPromises();
+  calls.loadedHandler();
+  assert.ok(doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("is-ready"));
+  close();
+});
+
+await ok("a Vimeo SDK network error immediately exposes the direct-link fallback", () => {
+  const { dom, doc, close } = page({ vimeo: "missing" });
+  doc.querySelector("#vimeo-sdk").dispatchEvent(new dom.window.Event("error"));
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.ok(doc.querySelector(".vimeo-open"));
+  close();
+});
+
+await ok("an unexpected Vimeo video ID is not exposed as the requested pitch", async () => {
+  const { doc, close } = page({ vimeo: "wrong-id" });
+  await flushPromises();
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.ok(doc.querySelector("#fullscreen").hidden);
+  close();
+});
+
+await ok("an unavailable Vimeo player leaves a compact branded fallback, not a blank white frame", async () => {
+  const { doc, close } = page({ vimeo: "reject" });
+  await flushPromises();
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.equal(doc.querySelector("#vimeo-player").getAttribute("tabindex"), "-1");
+  assert.equal(doc.querySelector("#vimeo-player").getAttribute("aria-hidden"), "true");
+  assert.ok(!doc.querySelector("#vimeo-state-title").textContent.includes("Loading"));
+  assert.match(doc.querySelector("#vimeo-state-copy").textContent, /availability or privacy settings/);
+  assert.ok(doc.querySelector("#fullscreen").hidden);
+  assert.ok(doc.querySelector(".vimeo-open"));
+  assert.ok(!doc.querySelector("#vimeo-contact").hidden);
+  assert.equal(doc.querySelector("#vimeo-contact").getAttribute("href").split("?")[0], "mailto:contact@liveunmute.com");
+  close();
+});
+
+await ok("a Vimeo video that never finishes loading times out to the direct-link fallback", async () => {
   const { doc, calls, close } = page();
+  await flushPromises();
+  assert.ok(!doc.querySelector("#vimeo-state").hidden, "a ready API without loaded video stays covered");
+  calls.loadTimeout();
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.ok(doc.querySelector(".vimeo-open"));
+  close();
+});
+
+await ok("a Vimeo player error switches to the direct-link fallback", async () => {
+  const { doc, calls, close } = page();
+  await flushPromises();
+  calls.errorHandler();
+  assert.ok(!doc.querySelector("#vimeo-state").hidden);
+  assert.ok(doc.querySelector("#player").classList.contains("has-error"));
+  assert.ok(doc.querySelector("#fullscreen").hidden);
+  close();
+});
+
+await ok("the branded full-screen button and exit wrap the ready Vimeo embed", async () => {
+  const { doc, calls, close } = page();
+  await flushPromises();
+  calls.loadedHandler();
   const screen = doc.querySelector("#watch-screen");
   const button = doc.querySelector("#fullscreen");
   const exit = doc.querySelector("#exit-fullscreen");
@@ -141,12 +266,26 @@ await ok("the branded full-screen button and exit wrap the Vimeo embed", () => {
   close();
 });
 
-await ok("browsers without the Fullscreen API can use Vimeo's own full-screen control", () => {
-  const { doc, close } = page({ fullscreen: false });
+await ok("a denied full-screen request explains how to use Vimeo's own control", async () => {
+  const { doc, calls, close } = page({ fullscreenReject: true });
+  await flushPromises();
+  calls.loadedHandler();
+  doc.querySelector("#fullscreen").click();
+  await flushPromises();
+  const status = doc.querySelector("#fullscreen-status");
+  assert.ok(!status.hidden);
+  assert.match(status.textContent, /Use the Vimeo player’s full-screen control/);
+  close();
+});
+
+await ok("browsers without the Fullscreen API can use Vimeo's own full-screen control", async () => {
+  const { doc, calls, close } = page({ fullscreen: false });
+  await flushPromises();
+  calls.loadedHandler();
   assert.ok(doc.querySelector("#fullscreen").hidden);
   assert.ok(doc.querySelector("#vimeo-player").hasAttribute("allowfullscreen"));
   assert.ok(doc.querySelector("#vimeo-player").getAttribute("allow").includes("fullscreen"));
-  assert.ok(doc.querySelector(".video-link"));
+  assert.ok(doc.querySelector(".vimeo-open"));
   close();
 });
 

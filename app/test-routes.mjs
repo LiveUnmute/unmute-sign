@@ -72,6 +72,8 @@ ok("the app /demo page embeds the IDICE Vimeo player", () => {
   assert.match(html, /id="watch-screen"/);
   assert.match(html, /id="fullscreen"/);
   assert.match(html, /id="vimeo-player"/);
+  assert.match(html, /id="vimeo-state"/);
+  assert.match(html, /class="vimeo-open" href="https:\/\/vimeo\.com\/1239775906"/);
   assert.match(html, /player\.vimeo\.com\/video\/1239775906\?/);
   assert.match(html, /name="theme-color" content="#0B0D10"/i);
   assert.match(html, /--bone:\s*#0B0D10/i);

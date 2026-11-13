@@ -13,6 +13,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/demo/assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/demo/assets/favicon-192.png">
   <link rel="apple-touch-icon" href="/demo/assets/favicon-192.png">
+  <script id="vimeo-sdk" src="https://player.vimeo.com/api/player.js" defer></script>
 
   <style>
     /* Unmute's blue accent and type, presented in a dark palette. The official
@@ -187,6 +188,7 @@
     }
     .fullscreen:hover { border-color: var(--ink); background: var(--paper); }
     .fullscreen svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+    .fullscreen-status { margin: 8px 0; color: var(--muted); font-size: 12px; }
 
     /* Vimeo provides the controls, captions and full-screen action in its
        own player. Keep the portrait embed at the supplied 9:20 ratio. */
@@ -194,10 +196,14 @@
     .player {
       position: relative;
       width: 100%;
-      aspect-ratio: 9 / 20;
+      height: clamp(300px, 48vh, 420px);
       overflow: hidden;
       background: #000;
       border-radius: 4px;
+    }
+    .player.is-ready {
+      height: auto;
+      aspect-ratio: 9 / 20;
     }
     .player iframe {
       position: absolute;
@@ -208,6 +214,40 @@
       border: 0;
       background: #000;
     }
+    .vimeo-state {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      background: var(--paper);
+      color: var(--ink);
+      text-align: center;
+    }
+    .vimeo-state h2 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.25; }
+    .vimeo-state p { max-width: 24em; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .vimeo-open {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      margin-top: 4px;
+      padding: 9px 16px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--bone);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .vimeo-open:hover { background: var(--blue); border-color: var(--blue); color: white; }
+    .vimeo-contact { margin-top: 2px; color: var(--muted); font-size: 12px; text-underline-offset: 3px; }
+    .vimeo-contact:hover { color: var(--blue-light); }
     .exit-fullscreen {
       position: absolute;
       z-index: 2;
@@ -255,10 +295,6 @@
     .watch-screen:-webkit-full-screen .exit-fullscreen {
       position: absolute;
     }
-    .watch-bottom { align-items: flex-start; margin-top: 12px; }
-    .video-status { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
-    .video-link { flex-shrink: 0; font-size: 12px; font-weight: 700; text-underline-offset: 3px; }
-    .video-link:hover { color: var(--blue-light); }
     @media (orientation: landscape) {
       .watch-screen:fullscreen .player,
       .watch-screen:-webkit-full-screen .player { width: min(100vw, 35vh); }
@@ -355,22 +391,24 @@
               </button>
             </div>
           </div>
+          <p class="fullscreen-status" id="fullscreen-status" role="status" aria-live="polite" hidden></p>
 
           <div class="watch-screen" id="watch-screen">
             <div class="player" id="player">
-              <iframe id="vimeo-player"
+              <iframe id="vimeo-player" tabindex="-1" aria-hidden="true"
                 src="https://player.vimeo.com/video/1239775906?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;muted=1"
                 title="Unmute Pitch Video —IDICE"
                 allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                 referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen></iframe>
+              <div class="vimeo-state" id="vimeo-state" role="status" aria-live="polite">
+                <h2 id="vimeo-state-title">Loading Vimeo video…</h2>
+                <p id="vimeo-state-copy">Connecting to the video player.</p>
+                <a class="vimeo-open" href="https://vimeo.com/1239775906" target="_blank" rel="noopener">Open on Vimeo ↗</a>
+                <a class="vimeo-contact" id="vimeo-contact" href="mailto:contact@liveunmute.com?subject=IDICE%20pitch%20video%20not%20playing" hidden>Report a playback problem</a>
+              </div>
             </div>
             <button class="exit-fullscreen" id="exit-fullscreen" type="button" aria-label="Exit full screen" aria-controls="watch-screen" hidden>×</button>
-          </div>
-
-          <div class="watch-bottom">
-            <p class="video-status" id="video-status" role="status" aria-live="polite">Use the Vimeo player controls to play or enter full screen.</p>
-            <a class="video-link" href="https://vimeo.com/1239775906" target="_blank" rel="noopener">Open on Vimeo ↗</a>
           </div>
           <a class="intro-link mobile-link" href="/">Try the Unmute demo <span aria-hidden="true">&nbsp;↗</span></a>
         </div>
@@ -391,23 +429,96 @@
   <script>
     (() => {
       const screen = document.getElementById('watch-screen');
+      const playerFrame = document.getElementById('player');
+      const iframe = document.getElementById('vimeo-player');
+      const state = document.getElementById('vimeo-state');
+      const stateTitle = document.getElementById('vimeo-state-title');
+      const stateCopy = document.getElementById('vimeo-state-copy');
+      const contact = document.getElementById('vimeo-contact');
       const fullscreen = document.getElementById('fullscreen');
+      const fullscreenStatus = document.getElementById('fullscreen-status');
       const exit = document.getElementById('exit-fullscreen');
-      const status = document.getElementById('video-status');
+      const sdk = document.getElementById('vimeo-sdk');
       const canFullscreen = typeof screen.requestFullscreen === 'function' ||
         typeof screen.webkitRequestFullscreen === 'function';
+      let vimeoPlayer = null;
 
-      // The Vimeo iframe remains usable without this script; its own controls
-      // include full screen. This page-level button expands the branded frame.
-      fullscreen.hidden = !canFullscreen;
+      // Keep the embed covered until Vimeo confirms the video is available.
+      // If the embed is blocked or this SDK cannot connect, the compact fallback
+      // offers a direct Vimeo link instead of leaving a blank white frame.
+      fullscreen.hidden = true;
+
+      function showFallback() {
+        window.clearTimeout(loadTimer);
+        playerFrame.classList.remove('is-ready');
+        playerFrame.classList.add('has-error');
+        stateTitle.textContent = 'Vimeo can’t play this video';
+        stateCopy.textContent = 'Vimeo isn’t loading this video. If it also fails on Vimeo, its availability or privacy settings may need updating.';
+        contact.hidden = false;
+        iframe.setAttribute('tabindex', '-1');
+        iframe.setAttribute('aria-hidden', 'true');
+        state.hidden = false;
+        fullscreen.hidden = true;
+      }
+
+      function showPlayer() {
+        window.clearTimeout(loadTimer);
+        playerFrame.classList.remove('has-error');
+        playerFrame.classList.add('is-ready');
+        iframe.setAttribute('tabindex', '0');
+        iframe.removeAttribute('aria-hidden');
+        state.hidden = true;
+        fullscreen.hidden = !canFullscreen;
+      }
+
+      function connectVimeo() {
+        if (vimeoPlayer) return;
+        if (!window.Vimeo || typeof window.Vimeo.Player !== 'function') {
+          showFallback();
+          return;
+        }
+        try {
+          let apiReady = false;
+          let videoLoaded = false;
+          vimeoPlayer = new window.Vimeo.Player(iframe);
+          vimeoPlayer.on('error', showFallback);
+          vimeoPlayer.on('loaded', () => {
+            videoLoaded = true;
+            if (apiReady) showPlayer();
+          });
+          Promise.resolve(vimeoPlayer.ready())
+            .then(() => vimeoPlayer.getVideoId())
+            .then((videoId) => {
+              if (String(videoId) !== '1239775906') throw new Error('Unexpected Vimeo video ID');
+              apiReady = true;
+              if (videoLoaded) showPlayer();
+            })
+            .catch(showFallback);
+        } catch {
+          showFallback();
+        }
+      }
+
+      const loadTimer = window.setTimeout(() => {
+        if (!playerFrame.classList.contains('is-ready')) showFallback();
+      }, 12000);
+      sdk.addEventListener('load', connectVimeo, { once: true });
+      sdk.addEventListener('error', showFallback, { once: true });
+      if (window.Vimeo && window.Vimeo.Player) connectVimeo();
 
       function isFullscreen() {
         return (document.fullscreenElement || document.webkitFullscreenElement) === screen;
       }
 
+      function showFullscreenFallback() {
+        fullscreenStatus.textContent = 'Full screen isn’t available here. Use the Vimeo player’s full-screen control.';
+        fullscreenStatus.hidden = false;
+      }
+
       function onFullscreenChange() {
         const entered = isFullscreen();
         const exitHadFocus = document.activeElement === exit;
+        if (entered) fullscreenStatus.hidden = true;
         exit.hidden = !entered;
         if (entered && document.activeElement === fullscreen) {
           exit.focus({ preventScroll: true });
@@ -419,15 +530,14 @@
       document.addEventListener('fullscreenchange', onFullscreenChange);
       document.addEventListener('webkitfullscreenchange', onFullscreenChange);
       fullscreen.addEventListener('click', () => {
+        if (!playerFrame.classList.contains('is-ready')) return;
         const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
         if (!request) return;
         try {
           const result = request.call(screen);
-          if (result && typeof result.catch === 'function') {
-            result.catch(() => { status.textContent = 'Use the full-screen control inside the Vimeo player.'; });
-          }
+          if (result && typeof result.catch === 'function') result.catch(showFullscreenFallback);
         } catch {
-          status.textContent = 'Use the full-screen control inside the Vimeo player.';
+          showFullscreenFallback();
         }
       });
       exit.addEventListener('click', () => {
@@ -438,6 +548,5 @@
       });
     })();
   </script>
-  <script src="https://player.vimeo.com/api/player.js" defer></script>
 </body>
 </html>

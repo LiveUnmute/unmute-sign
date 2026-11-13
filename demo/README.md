@@ -190,9 +190,12 @@ licences.
 
 The IDICE pitch video is embedded from Vimeo, using video `1239775906` and the
 portrait 9:20 frame from the supplied embed. Vimeo supplies the playback,
-caption (when available), and full-screen controls. The page also offers a
-branded full-screen action and a direct "Open on Vimeo" link. The old Google
-Drive stream and its fallback player have been removed.
+caption (when available), and full-screen controls. The Vimeo SDK confirms that
+the embed loaded; if it is blocked or unavailable, the tall frame collapses to
+a compact branded message with a direct "Open on Vimeo" link and a report
+contact. If the Vimeo page fails too, its availability or privacy settings may
+need attention. The page also offers a branded full-screen action. The old
+Google Drive stream and its fallback player have been removed.
 
 `build.mjs` copies `pitch/` to `dist/demo/`. The app site also has a checked-in
 copy at `app/demo/` for deploys that use the app folder directly. After changing
