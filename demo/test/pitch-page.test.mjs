@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 
 const SRC = "./pitch/index.html";
 const VIDEO_ID = "1239775906";
-const PLAYER_URL = `https://player.vimeo.com/video/${VIDEO_ID}?badge=0&autopause=0&player_id=0&app_id=58479&muted=1`;
+const PLAYER_URL = `https://player.vimeo.com/video/${VIDEO_ID}?badge=0&autopause=0&player_id=0&app_id=58479&muted=0`;
 const html = readFileSync(SRC, "utf8");
 let pass = 0;
 
