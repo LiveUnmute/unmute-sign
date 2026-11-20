@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch video | Unmute</title>
+<meta name="description" content="Unmute at iDICE Demo Day 2026 — a one-minute-eighteen pitch for two-way sign-language communication in healthcare.">
+<meta name="theme-color" content="#121212">
+<meta name="build" content="20261110a">
+
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bone:   #E3E1DC;
+  --paper:  #EFEDE8;
+  --ink:    #121212;
+  --blue:   #006AFE;
+  --muted:  #6B6A64;
+  --line:   rgba(18, 18, 18, 0.16);
+  --display: 'Syncopate', sans-serif;
+  --body: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- chrome ---------- */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(20px, 5vw, 48px);
+  border-bottom: 1.5px solid var(--ink);
+}
+.wordmark {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.wordmark span { color: var(--blue); }
+.back {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  padding-bottom: 2px;
+}
+.back:hover,
+.back:focus-visible { border-bottom-color: var(--blue); color: var(--blue); }
+
+/* ---------- layout ---------- */
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(32px, 6vw, 72px) clamp(20px, 5vw, 48px) 80px;
+  display: grid;
+  gap: clamp(32px, 5vw, 72px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  main {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    align-items: start;
+  }
+  .col-a { position: sticky; top: 40px; }
+}
+
+.eyebrow {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin: 0 0 22px;
+}
+
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(30px, 6vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 26px;
+  text-transform: uppercase;
+}
+h1 .accent { color: var(--blue); }
+
+.standfirst {
+  font-size: clamp(15px, 2vw, 18px);
+  color: #3A3A36;
+  max-width: 46ch;
+  margin: 0 0 34px;
+}
+
+/* metadata table */
+.facts {
+  border-top: 1.5px solid var(--ink);
+  margin: 0 0 34px;
+  max-width: 460px;
+}
+.fact {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.fact dt {
+  font-family: var(--display);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+.fact dd { margin: 0; font-size: 14.5px; }
+
+/* buttons */
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 15px 22px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  background: transparent;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.btn:hover,
+.btn:focus-visible { background: var(--ink); color: var(--bone); }
+.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-primary:hover,
+.btn-primary:focus-visible { background: var(--ink); border-color: var(--ink); }
+
+/* ---------- player ---------- */
+
+.col-b { justify-self: center; width: 100%; }
+
+.player {
+  position: relative;
+  width: min(100%, 380px);
+  margin: 0 auto;
+  aspect-ratio: 9 / 16;
+  border: 2px solid var(--ink);
+  background: #0b0b0b;
+}
+/* the brutalist offset block */
+.player::after {
+  content: "";
+  position: absolute;
+  inset: 14px -14px -14px 14px;
+  background: var(--blue);
+  z-index: -1;
+}
+.player iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.player-note {
+  width: min(100%, 380px);
+  margin: 26px auto 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-align: center;
+}
+.player-note a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.player-note a:hover { color: var(--blue); }
+
+/* ---------- transcript ---------- */
+
+.transcript {
+  grid-column: 1 / -1;
+  border-top: 1.5px solid var(--ink);
+  padding-top: 28px;
+  margin-top: 8px;
+  max-width: 68ch;
+}
+.transcript h2 {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.transcript p { margin: 0 0 14px; font-size: 15px; }
+.transcript .pending { color: var(--muted); font-style: italic; }
+
+footer {
+  border-top: 1.5px solid var(--ink);
+  padding: 26px clamp(20px, 5vw, 48px) 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+footer a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+footer a:hover { color: var(--blue); border-bottom-color: var(--blue); }
+
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="wordmark" href="/">UNM<span>U</span>TE</a>
+  <a class="back" href="/">← Back to liveunmute.com</a>
+</header>
+
+<main>
+  <div class="col-a">
+    <p class="eyebrow">Pitch video · iDICE Demo Day 2026</p>
+
+    <h1>One minute<br>eighteen<br><span class="accent">seconds.</span></h1>
+
+    <p class="standfirst">
+      Unmute makes two-way sign-language communication possible in a hospital
+      room, on the phone a nurse already carries. This is the pitch as it was
+      given.
+    </p>
+
+    <dl class="facts">
+      <div class="fact"><dt>Length</dt><dd>1 min 18 sec</dd></div>
+      <div class="fact"><dt>Recorded</dt><dd>iDICE Demo Day 2026</dd></div>
+      <div class="fact"><dt>Format</dt><dd>Vertical, 1080 × 1920</dd></div>
+      <div class="fact"><dt>Captions</dt><dd>Not yet available</dd></div>
+    </dl>
+
+    <div class="actions">
+      <a class="btn btn-primary"
+         href="https://drive.google.com/file/d/1Ic4Yhtm3QB1zh2N7ogCVkuc-MVNdOJNK/view"
+         target="_blank" rel="noopener">Watch in Drive ↗</a>
+      <a class="btn" href="/#waitlist">Join the waitlist</a>
+    </div>
+  </div>
+
+  <div class="col-b">
+    <div class="player">
+      <iframe
+        src="https://drive.google.com/file/d/1Ic4Yhtm3QB1zh2N7ogCVkuc-MVNdOJNK/preview"
+        title="Unmute pitch video — iDICE Demo Day 2026"
+        allow="autoplay; encrypted-media; fullscreen"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+    <p class="player-note">
+      If the player does not load, <a
+      href="https://drive.google.com/file/d/1Ic4Yhtm3QB1zh2N7ogCVkuc-MVNdOJNK/view"
+      target="_blank" rel="noopener">open it in Google Drive</a>.
+    </p>
+  </div>
+
+  <section class="transcript" id="transcript" aria-labelledby="transcript-heading">
+    <h2 id="transcript-heading">Transcript</h2>
+    <p class="pending" id="transcriptBody">
+      A written transcript is being prepared and will be published here.
+      Until then the video is not fully accessible to Deaf and hard-of-hearing
+      visitors, and that is a gap worth naming rather than hiding.
+    </p>
+  </section>
+</main>
+
+<footer>
+  <span>Unmute — every voice deserves to be heard.</span>
+  <span>
+    <a href="/">liveunmute.com</a> ·
+    <a href="mailto:contact@liveunmute.com">contact@liveunmute.com</a>
+  </span>
+</footer>
+
+</body>
+</html>

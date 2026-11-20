@@ -1,0 +1,1093 @@
+/* ============================================================
+   UNMUTE — app screens
+   Design language taken from liveunmute.com, not invented here:
+     bone #E3E1DC · ink #121212 · blue #006AFE
+     Syncopate (tracked, uppercase) + Pretendard (body)
+     pill buttons, hairline rules, square cards
+   ============================================================ */
+
+:root {
+  --bone:     #E3E1DC;
+  --paper:    #F7F6F3;
+  --ink:      #121212;
+  --ink-70:   #454540;
+  --ink-45:   #7A7871;
+  --rule:     rgba(18, 18, 18, 0.13);
+  --rule-soft:rgba(18, 18, 18, 0.07);
+
+  --blue:     #006AFE;
+  --blue-deep:#0056CC;
+  --blue-lo:  #E6F0FF;
+
+  --display: 'Syncopate', sans-serif;
+  --body:    'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --device-w: 292px;
+  --device-h: 606px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--body);
+  background: var(--bone);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+
+/* ------------------------------------------------------------
+   device
+   ------------------------------------------------------------ */
+
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  background: var(--bone);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+/* Every screen is a centred column. The background still runs edge to edge,
+   but text stops at a readable measure — the same restraint the landing page
+   uses, which is what makes it read as a product rather than a stretched
+   phone screenshot. */
+.screen > * { --gutter: clamp(20px, 6vw, 64px); }
+
+/* home indicator -------------------------------------------- */
+
+.home-bar {
+  flex: none;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bone);
+  position: relative;
+  z-index: 6;
+}
+.home-bar span {
+  width: 92px;
+  height: 3.5px;
+  border-radius: 99px;
+  background: rgba(18, 18, 18, 0.22);
+  display: block;
+}
+.home-bar.is-on-dark { background: transparent; }
+.home-bar.is-on-dark span { background: rgba(255, 255, 255, 0.6); }
+
+/* shared type ----------------------------------------------- */
+
+.kicker {
+  font-family: var(--display);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.rule { height: 1px; background: var(--rule); border: 0; margin: 0; }
+
+/* ============================================================
+   01 — HOME
+   ============================================================ */
+
+.appbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 20px 13px;
+  padding-top: calc(22px + env(safe-area-inset-top, 0px));
+}
+
+.wordmark { height: 19px; width: auto; display: block; }
+.brandmark { height: 22px; width: auto; display: block; }
+
+.appbar-note {
+  font-family: var(--display);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  text-align: right;
+  line-height: 1.7;
+}
+.appbar-note b { display: block; color: var(--ink); font-weight: 700; }
+
+.home-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 62px;
+  overflow: hidden;
+}
+
+/* dark hero — the deck's dark slide, scaled to a phone */
+
+.hero {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 150px;
+  background: var(--ink);
+  color: var(--bone);
+  padding: 20px 18px 18px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hero .kicker { color: rgba(227, 225, 220, 0.55); }
+
+.hero-title {
+  font-family: var(--display);
+  font-size: 17px;
+  line-height: 1.32;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 10px 0 0;
+  max-width: 200px;
+}
+
+.hero-sub {
+  margin-top: 10px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(227, 225, 220, 0.66);
+  max-width: 178px;
+}
+
+.hero-people {
+  position: absolute;
+  right: 18px;
+  bottom: 17px;
+  display: flex;
+}
+
+.hero-people .pip {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background-size: cover;
+  background-position: center 24%;
+  margin-left: -7px;
+}
+.hero-people .pip:first-child { margin-left: 0; }
+.hero-people .pip--a { background-image: url("../media/patient-02.jpg"); }
+.hero-people .pip--b { background-image: url("../media/translator-01.jpg"); }
+.hero-people .pip--c {
+  background: var(--bone);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-color: var(--ink);
+}
+
+/* the single entry action */
+
+.cta {
+  flex: none;
+  margin-top: 12px;
+  height: 46px;
+  border-radius: 9999px;
+  background: var(--blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 22px -12px rgba(0, 106, 254, 0.85);
+  transition: background 160ms ease, transform 120ms ease;
+}
+.cta:hover { background: var(--blue-deep); }
+.cta:active { transform: scale(0.985); }
+
+/* recent */
+
+.section-head {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 18px 0 4px;
+}
+.section-head .kicker { color: var(--ink); }
+.section-link {
+  font-family: var(--display);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.recent {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.recent:first-of-type { border-top: 0; }
+
+.thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  background-size: cover;
+  background-position: center 28%;
+  flex: none;
+}
+.thumb--a { background-image: url("../media/patient-02.jpg"); }
+.thumb--b { background-image: url("../media/patient-03.jpg"); }
+
+.recent-text { flex: 1; min-width: 0; }
+
+.recent-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-meta {
+  margin-top: 2px;
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--ink-45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-tag {
+  flex: none;
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  border: 1px solid rgba(0, 106, 254, 0.35);
+  border-radius: 99px;
+  padding: 3px 7px;
+}
+
+/* ============================================================
+   TAB BAR
+   ============================================================ */
+
+.tabbar {
+  position: absolute;
+  left: 0; right: 0; bottom: 14px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  background: var(--bone);
+  border-top: 1px solid var(--rule);
+  z-index: 7;
+  padding: 0 6px;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-45);
+  transition: color 160ms ease;
+}
+
+.tab svg { display: block; }
+
+.tab-label {
+  font-family: var(--display);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.tab.is-active { color: var(--ink); }
+.tab.is-active svg { color: var(--blue); }
+
+/* ============================================================
+   02 — SIGN  (the two-way screen)
+   ============================================================ */
+
+.screen--media { background: #0C0C0C; }
+
+.stage {
+  position: absolute;
+  inset: 0;
+  background: #0C0C0C;
+  overflow: hidden;
+}
+
+/* The signer fills the screen. object-position sits the subject high so the
+   hands stay above the caption sheet — cropping the sides only, never the
+   hands. Set data-fit="contain" on .stage if a clip needs letterboxing. */
+.stage-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 34%;
+  display: block;
+}
+
+.stage[data-fit="contain"] .stage-media {
+  object-fit: contain;
+  object-position: center center;
+}
+
+/* The patient's own camera. Mirrored, because a person expects to see
+   themselves the way a mirror shows them, not the way a lens does — and an
+   unmirrored feed makes people think the app is broken. */
+.stage-media--cam {
+  transform: scaleX(-1);
+  background: #0C0C0C;
+}
+
+/* Held card while the lens is closed. This replaces the stock photograph that
+   used to sit here: showing a stranger's face while asking permission to film
+   is the wrong moment for a picture of a person. */
+.cam-standby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 44px 132px;
+  text-align: center;
+}
+
+.cam-standby-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid #303030;
+  color: #6E6C66;
+  margin-bottom: 20px;
+}
+
+.cam-standby-title {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin: 0 0 9px;
+}
+
+.cam-standby-body {
+  font-family: var(--body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  max-width: 232px;
+  margin: 0;
+  color: #8C8A84;
+}
+
+.stage.is-flash .stage-media {
+  animation: flash 620ms ease-out;
+}
+
+@keyframes flash {
+  0%   { filter: brightness(1); }
+  18%  { filter: brightness(1.22); }
+  100% { filter: brightness(1); }
+}
+
+/* Softens the top for the status bar and the bottom for the sheet. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.60) 0%, rgba(8, 8, 8, 0) 24%),
+    linear-gradient(180deg,
+      rgba(8, 8, 8, 0) 40%,
+      rgba(8, 8, 8, 0.30) 62%,
+      rgba(8, 8, 8, 0.72) 100%);
+  z-index: 2;
+}
+
+/* On the media screen the tab bar is glass, not a solid slab:
+   it must not cut a white band across the footage. */
+.screen--media .tabbar {
+  background: linear-gradient(180deg, rgba(8, 8, 8, 0) 0%, rgba(8, 8, 8, 0.42) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.screen--media .tab { color: rgba(255, 255, 255, 0.5); }
+.screen--media .tab.is-active { color: #fff; }
+.screen--media .tab.is-active svg { color: #6FA8FF; }
+
+.screen--media .home-bar { background: transparent; }
+.screen--media .home-bar span { background: rgba(255, 255, 255, 0.55); }
+
+.demo-chip {
+  position: absolute;
+  top: 18px; right: 18px;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  z-index: 6;
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(10, 10, 10, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 9999px;
+  padding: 4px 9px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* tracking frame — only while the patient is the subject */
+
+.track {
+  position: absolute;
+  left: 50%;
+  top: 29%;
+  width: 118px;
+  height: 118px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  z-index: 3;
+}
+
+.track i {
+  position: absolute;
+  width: 11px; height: 11px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+}
+.track i:nth-child(1) { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.track i:nth-child(2) { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+.track i:nth-child(3) { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+.track i:nth-child(4) { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+.track-chip {
+  position: absolute;
+  left: 50%; bottom: -11px;
+  transform: translateX(-50%);
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* caption sheet */
+
+.sheet {
+  position: relative;
+  z-index: 5;
+  margin-top: auto;
+  background: transparent;
+  border-radius: 0;
+  padding: 15px 20px 68px;
+  flex: none;
+
+  /* Floating, not panelled: the text sits straight on the media.
+     A soft shadow keeps it legible over a bright frame. */
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sheet-kicker {
+  font-family: var(--display);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.sheet-kicker b { color: #6FA8FF; }
+
+/* Repeat — top of the clinician sheet. Replays the same translation. */
+.repeat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+  padding: 5px 10px 5px 8px;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(12, 12, 12, 0.38);
+  border-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: none;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.repeat:hover { background: #fff; border-color: #fff; color: var(--ink); }
+.repeat:active { transform: scale(0.96); }
+
+.caption-note {
+  margin: 5px 0 0;
+  font-size: 8.5px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.66);
+  min-height: 12px;
+}
+
+.caption {
+  font-size: 14.5px;
+  line-height: 1.34;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+  min-height: 39px;
+  margin: 0;
+}
+
+/* the two directions — equal weight, one engaged */
+
+.controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  padding: 13px 0 12px;
+}
+
+.dir {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Both directions are blue — one solid, one outlined. They read as a pair
+   of equal choices, and the engaged one is unmistakable. */
+.dir-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgba(12, 12, 12, 0.34);
+  border: 1.5px solid rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 130ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.dir-btn:active { transform: scale(0.94); }
+
+.dir-btn { --lvl: 0; }
+
+/* Real input level from the microphone, drawn as a ring.
+   It moves only while the mic is genuinely open. */
+.dir-btn.is-live {
+  box-shadow:
+    0 0 0 4px rgba(0, 106, 254, 0.16),
+    0 0 0 calc(4px + (var(--lvl) * 26px)) rgba(0, 106, 254, calc(0.10 + var(--lvl) * 0.22)),
+    0 10px 20px -10px rgba(0, 106, 254, 0.9);
+}
+
+.dir.is-on .dir-btn {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(0, 106, 254, 0.16), 0 10px 20px -10px rgba(0, 106, 254, 0.9);
+}
+
+.dir-label {
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 180ms ease;
+}
+.dir.is-on .dir-label { color: #fff; }
+
+/* ============================================================
+   03 — HISTORY
+   ============================================================ */
+
+.page-head {
+  flex: none;
+  padding: 24px 20px 16px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+}
+
+.page-title {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.page-sub {
+  margin-top: 7px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ink-45);
+  line-height: 1.5;
+}
+
+.list {
+  flex: 1;
+  padding: 0 20px 62px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.list::-webkit-scrollbar { display: none; }
+
+.list-group {
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  padding: 12px 0 7px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.row-main { flex: 1; min-width: 0; }
+
+.row-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-meta {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--ink-45);
+}
+
+.row-meta .dot {
+  width: 2.5px; height: 2.5px;
+  border-radius: 50%;
+  background: var(--ink-45);
+  flex: none;
+}
+
+.row-flag {
+  flex: none;
+  font-family: var(--display);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  padding: 3px 6px;
+}
+.row-flag.is-flag { color: var(--blue); border-color: rgba(0, 106, 254, 0.35); }
+
+/* ============================================================
+   04 — SETTINGS
+   ============================================================ */
+
+.settings {
+  flex: 1;
+  padding: 0 20px 62px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.settings::-webkit-scrollbar { display: none; }
+
+.group { padding-top: 12px; }
+
+.group-label {
+  font-family: var(--display);
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  padding-bottom: 6px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--rule-soft);
+  width: 100%;
+  text-align: left;
+}
+
+.item-main { flex: 1; min-width: 0; }
+
+.item-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.item-note {
+  margin-top: 3px;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--ink-45);
+  line-height: 1.45;
+}
+
+.item-value {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-45);
+  flex: none;
+}
+
+.item-value.is-accent { color: var(--blue); }
+
+/* toggle */
+
+.toggle {
+  flex: none;
+  width: 34px;
+  height: 20px;
+  border-radius: 9999px;
+  background: rgba(18, 18, 18, 0.16);
+  position: relative;
+  transition: background 180ms ease;
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2.5px; left: 2.5px;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.toggle.is-on { background: var(--blue); }
+.toggle.is-on::after { transform: translateX(14px); }
+
+
+/* ============================================================
+   THE SHELL — a web app, not a phone mockup
+   No frame, no backdrop, no board. Every screen fills the window.
+   ============================================================ */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bone);
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100dvh;
+  width: 100%;
+}
+
+/* ---- readable measure -------------------------------------
+   The background runs edge to edge; the content stops at a column.
+   Without this, a 1440px window gives 200-character lines. */
+
+.appbar,
+.home-body,
+.page-head,
+.list,
+.settings {
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.appbar { padding-inline: clamp(20px, 5vw, 40px); }
+.home-body,
+.page-head,
+.list,
+.settings { padding-inline: clamp(20px, 5vw, 40px); }
+
+/* The hero is the one block allowed to grow with the window. */
+.hero { min-height: clamp(150px, 22vh, 240px); }
+
+.hero-title {
+  font-size: clamp(17px, 2.2vw, 25px);
+  max-width: 26ch;
+}
+
+.hero-sub {
+  font-size: clamp(10.5px, 1.05vw, 13px);
+  max-width: 44ch;
+}
+
+.caption { font-size: clamp(14.5px, 1.7vw, 21px); }
+.cta { height: clamp(46px, 6vh, 56px); }
+
+/* ---- the sheet on the media screen ----------------------- */
+
+.sheet {
+  width: 100%;
+  max-width: 940px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 40px);
+}
+
+/* ---- tab bar ---------------------------------------------
+   Full width so it reads as app chrome, with the tabs themselves
+   clustered rather than smeared across 1900px. */
+
+.tabbar {
+  justify-content: center;
+  gap: clamp(4px, 3vw, 26px);
+  padding-inline: 12px;
+}
+
+.tab { flex: 0 0 auto; width: clamp(58px, 9vw, 110px); }
+.tab-label { font-size: clamp(6px, 0.62vw, 7.5px); }
+
+/* ---- the stored-art fills the frame ---------------------- */
+
+.stage-media { object-position: center 30%; }
+
+/* ---- desktop only ---------------------------------------- */
+
+@media (min-width: 641px) {
+  /* the iOS gesture bar has no meaning in a browser */
+  .home-bar { display: none; }
+
+  .screen { height: 100dvh; }
+  .tabbar { height: 58px; bottom: 0; border-top-color: var(--rule); }
+
+  .home-body,
+  .list,
+  .settings { padding-bottom: 74px; }
+
+  .sheet { padding-bottom: 74px; }
+
+  /* room for the tracking frame to sit in the upper third */
+  .track { width: clamp(118px, 13vw, 168px); height: clamp(118px, 13vw, 168px); top: 27%; }
+
+  .demo-chip { top: 20px; right: clamp(20px, 5vw, 40px); }
+}
+
+/* Keep the media from becoming a tiny band on very wide, short windows. */
+@media (min-width: 1200px) and (min-height: 780px) {
+  .home-body { max-width: 900px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ------------------------------------------------------------
+   Live capture
+   Camera stage, the consent gate and the patient-confirmation bar.
+   Everything sits on the media, like the rest of the sheet: no panels,
+   no cards — just type and two buttons.
+   ------------------------------------------------------------ */
+
+.stage-media[data-cam] {
+  /* Self-view reads as a mirror, as every camera app does. */
+  transform: scaleX(-1);
+}
+
+.stage[data-dim="on"] .stage-media {
+  filter: brightness(0.55) saturate(0.85);
+}
+
+/* A hairline that breathes while a clip is being recorded. */
+.screen--media.is-recording .stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 64, 64, 0.85);
+  animation: rec-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.demo-chip.is-live {
+  color: #fff;
+  background: var(--blue);
+  border-color: transparent;
+}
+
+/* --- consent ---------------------------------------------------------- */
+
+.consent {
+  margin: 2px 0 10px;
+  max-width: 46ch;
+}
+
+.consent-body {
+  margin: 0 0 12px;
+  font-size: clamp(12.5px, 1.5vw, 15px);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.consent-body b { font-weight: 700; color: #fff; }
+
+.consent-actions,
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-solid,
+.btn-quiet {
+  appearance: none;
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease, opacity 0.12s ease;
+}
+
+.btn-solid {
+  background: #fff;
+  color: var(--ink);
+  border: 0;
+}
+
+.btn-solid:hover { background: #fff; opacity: 0.9; }
+
+.btn-quiet {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.btn-quiet:hover { background: rgba(255, 255, 255, 0.16); }
+
+.btn-solid:active,
+.btn-quiet:active { transform: scale(0.97); }
+
+/* --- confirmation ----------------------------------------------------- */
+
+.confirm { margin: 0 0 8px; }
+
+.confirm .caption { margin-bottom: 6px; }
+
+.confirm-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.conf-pill {
+  font-family: var(--display);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+/* Below 80% the number is not a reassurance, it is a warning. */
+.conf-pill.is-low {
+  background: rgba(255, 176, 32, 0.22);
+  border-color: rgba(255, 176, 32, 0.75);
+  color: #FFD79A;
+}
+
+@media (max-width: 520px) {
+  .consent-body { font-size: 12px; }
+  .btn-solid, .btn-quiet { padding: 9px 14px; font-size: 11.5px; }
+}

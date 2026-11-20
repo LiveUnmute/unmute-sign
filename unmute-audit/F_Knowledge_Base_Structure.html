@@ -1,0 +1,146 @@
+<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.4} h1{font-size:20pt} h2{font-size:16pt} h3{font-size:13pt} table{border-collapse:collapse;width:100%;font-size:9pt} th{background:#f0f0f0;text-align:left}</style></head><body><h1>F — Recommended Authoritative Knowledge Base</h1>
+<p>A structure for maintaining the definitive Unmute record going forward.</p>
+<p><strong>No existing file has been moved, renamed, edited, or deleted.</strong> This is a proposal only.</p>
+<hr/>
+<h2>1. Proposed folder structure</h2>
+<p><code>`</code></p>
+<p>Unmute — Knowledge Base/</p>
+<p>│</p>
+<p>├── 00_READ_ME/</p>
+<p>│   ├── KB_Charter.md                  # what this KB is, who owns it, update rules</p>
+<p>│   ├── Glossary.md                    # Unmute, Unmute Sign, NSL, ASL, ASLIN, GDRI…</p>
+<p>│   └── Evidence_Standards.md          # the labelling scheme: fact / claim / plan / assumption</p>
+<p>│</p>
+<p>├── 01_STRATEGY/                       # authoritative, always current</p>
+<p>│   ├── Vision_and_Mission.md</p>
+<p>│   ├── One_Pager.md                   # canonical 1-page description — the single source of truth</p>
+<p>│   ├── Theory_of_Change.md</p>
+<p>│   └── Decision_Log.md                # dated decisions + rationale + what was rejected</p>
+<p>│</p>
+<p>├── 02_PRODUCT/</p>
+<p>│   ├── Product_Spec_v1.md             # MVP scope, one clinical scenario, sign inventory</p>
+<p>│   ├── Technical_Architecture.md      # on-device vs cloud, models, vendors, latency budget</p>
+<p>│   ├── Privacy_and_Data_Flow.md</p>
+<p>│   ├── Clinical_Safety_Boundaries.md</p>
+<p>│   ├── Roadmap.md                     # with dates, owners, dependencies</p>
+<p>│   └── Designs/                       # wireframes, avatar assets, user flows</p>
+<p>│</p>
+<p>├── 03_DATA_AND_AI/</p>
+<p>│   ├── Dataset_Register.csv           # every dataset: name, source, licence, size, language, status</p>
+<p>│   ├── How2Sign/                      # licence record + manifest</p>
+<p>│   ├── NSL_Corpus/</p>
+<p>│   │   ├── Collection_Protocol.md</p>
+<p>│   │   ├── Consent_Framework.md</p>
+<p>│   │   └── Annotation_Guidelines.md</p>
+<p>│   ├── Benchmarks/                    # accuracy results, dated, with test-set description</p>
+<p>│   └── Research_Notes/                # literature reviews, IJCAI paper, GDRI report</p>
+<p>│</p>
+<p>├── 04_EVIDENCE/</p>
+<p>│   ├── Citations_Master.md            # every external statistic with title, author, year, URL</p>
+<p>│   ├── Interview_Log.csv              # date, participant type, consent status, themes, link</p>
+<p>│   ├── Transcripts/                   # including the ASLIN interview</p>
+<p>│   └── Survey_Results/</p>
+<p>│</p>
+<p>├── 05_MARKET/</p>
+<p>│   ├── Market_Sizing.xlsx             # bottom-up: facilities × contract value</p>
+<p>│   ├── Competitive_Landscape.md       # named companies, not just categories</p>
+<p>│   ├── Buyer_Map.md                   # who signs, who budgets, who blocks</p>
+<p>│   └── Pricing.md</p>
+<p>│</p>
+<p>├── 06_COMMERCIAL/</p>
+<p>│   ├── Business_Model.md              # ONE chosen model, not four</p>
+<p>│   ├── Financial_Model.xlsx</p>
+<p>│   ├── Unit_Economics.md</p>
+<p>│   └── Pipeline.csv                   # hospital prospects, stage, next action</p>
+<p>│</p>
+<p>├── 07_TRACTION/</p>
+<p>│   ├── Payments_Evidence.md           # the 7 payments, reconstructed</p>
+<p>│   ├── Pilots/                        # agreements, MOUs, LOIs</p>
+<p>│   └── Metrics_Dashboard.md</p>
+<p>│</p>
+<p>├── 08_PROGRAMS/</p>
+<p>│   ├── Applications_Register.csv      # programme, date, status, claims used, outcome</p>
+<p>│   ├── Hackaholics_7.0/</p>
+<p>│   ├── iDICE_Founders_Lab_Cohort_2/</p>
+<p>│   └── Grants/                        # Base Grant and others</p>
+<p>│</p>
+<p>├── 09_BRAND/</p>
+<p>│   ├── Messaging_Guide.md             # approved language; banned claims</p>
+<p>│   ├── Boilerplate.md</p>
+<p>│   ├── Visual_Identity/</p>
+<p>│   └── Digital_Presence_Plan.md</p>
+<p>│</p>
+<p>├── 10_TEAM/</p>
+<p>│   ├── Founder_Profile.md</p>
+<p>│   ├── Advisors.md                    # with consent status</p>
+<p>│   ├── Roles_and_Gaps.md</p>
+<p>│   └── Cap_Table.xlsx</p>
+<p>│</p>
+<p>├── 11_LEGAL/</p>
+<p>│   ├── Entity_Documents/</p>
+<p>│   ├── IP_Assignment/</p>
+<p>│   ├── Privacy_Policy/</p>
+<p>│   └── Compliance/                    # NDPA, health data</p>
+<p>│</p>
+<p>├── 12_PITCH/</p>
+<p>│   ├── CURRENT/                       # exactly one live deck, one live one-pager</p>
+<p>│   ├── Archive/                       # dated versions, never deleted</p>
+<p>│   └── Claim_Substantiation.md        # every number in the deck → its source</p>
+<p>│</p>
+<p>└── 99_ARCHIVE/                        # superseded material, kept for history</p>
+<p><code>`</code></p>
+<hr/>
+<h2>2. What to do with existing documents</h2>
+<h3>Promote to authoritative (link into the KB, do not duplicate)</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Document</th><th>Destination</th><th>Action</th></tr></thead><tbody>
+<tr><td><code>Unmute-Pitch-Deck.pdf</code> (S1)</td><td><code>12_PITCH/CURRENT/</code></td><td>Keep as the single live deck; add to Drive as a shortcut inside the KB</td></tr>
+<tr><td><code>Unmute -Lean Canvas.pdf</code> (S3)</td><td><code>06_COMMERCIAL/</code></td><td>Canonical business model input</td></tr>
+<tr><td><code>Unmute_Value_Proposition_Canvas.pdf</code> (S4)</td><td><code>02_PRODUCT/</code></td><td>Canonical positioning input</td></tr>
+<tr><td><code>Unmute_Digital_Presence_Worksheet.pdf</code> (S5)</td><td><code>09_BRAND/</code></td><td>Convert its 5 targets into the Metrics Dashboard</td></tr>
+<tr><td><code>Unmute_Market_Research_Module_2.pdf</code> (S6)</td><td><code>05_MARKET/</code></td><td><strong>Highest-value analytical document.</strong> Extract its citations into <code>Citations_Master.md</code></td></tr>
+<tr><td><code>prince&#x27;s cv</code> (S11)</td><td><code>10_TEAM/Founder_Profile.md</code></td><td>Source for the founder section</td></tr>
+<tr><td><code>how2sign_realigned_train</code> (S13)</td><td><code>03_DATA_AND_AI/How2Sign/</code></td><td>Add licence record alongside it</td></tr>
+</tbody></table><br/>
+<h3>Archive (keep, clearly labelled superseded)</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Document</th><th>Reason</th></tr></thead><tbody>
+<tr><td><code>Unmute_Pitch_Deck.pdf</code> (S2, in Trash)</td><td>Textually identical to S1; restore to <code>12_PITCH/Archive/</code> or leave trashed — either is fine, but do not let it be mistaken for current</td></tr>
+<tr><td><code>Every-Voice-Deserves-to-Be-Heard</code> ×3 (S8, S9, S10)</td><td>July narrative. <strong>Historically important</strong> — it documents the domain change and the original framing. Keep one Doc + one PDF in <code>12_PITCH/Archive/</code>, discard the duplicate Doc.</td></tr>
+<tr><td><code>Unmute_Market_Reasearch.pdf</code> (S7)</td><td>Blank template. Keep only as a record that the module was assigned; otherwise discard.</td></tr>
+<tr><td><code>Module_1_Goal_Plan_Worksheet</code> (S18)</td><td>Blank. Either complete it or discard.</td></tr>
+</tbody></table><br/>
+<h3>Consolidate</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Fragmented topic</th><th>Consolidate into</th></tr></thead><tbody>
+<tr><td>Product description across S1, S3, S4</td><td><strong>One</strong> <code>01_STRATEGY/One_Pager.md</code> — all other documents point to it</td></tr>
+<tr><td>Statistics scattered across S1 and S6</td><td><strong>One</strong> <code>04_EVIDENCE/Citations_Master.md</code></td></tr>
+<tr><td>Roadmap in S1 + targets in S5</td><td><strong>One</strong> <code>02_PRODUCT/Roadmap.md</code> with dates</td></tr>
+<tr><td>Product scope (Sign vs Expression)</td><td><strong>One</strong> <code>01_STRATEGY/Decision_Log.md</code> entry</td></tr>
+</tbody></table><br/>
+<h3>Separate out — do not file under Unmute</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Document</th><th>Belongs to</th></tr></thead><tbody>
+<tr><td><code>Persat_Finance_Technical_Architecture</code></td><td>Persat Labs — separate KB</td></tr>
+<tr><td><code>Personal_Founder_Operating_Manual</code></td><td>Persat Labs / iHatch</td></tr>
+<tr><td><code>STOAN.pdf</code></td><td>STOAN — separate venture</td></tr>
+<tr><td><code>proxy_pitch_deck.pdf</code>, <code>Proxy_Deck.pdf</code>, proxy docs</td><td>Proxy — separate venture</td></tr>
+<tr><td><code>When AI Becomes a Confidant</code></td><td>Founder research — <code>10_TEAM/</code> or a personal research folder</td></tr>
+<tr><td>iHatch Cohort 5 materials</td><td>Persat Labs programmes</td></tr>
+</tbody></table><br/>
+<p><strong>Why this matters:</strong> the current Drive mixes four ventures in one root. Any reviewer, accelerator, or investor browsing it will see Persat&#x27;s sophisticated technical architecture next to Unmute&#x27;s canvases and may reasonably (but wrongly) attribute one to the other. Separation is a credibility safeguard, not mere tidiness.</p>
+<hr/>
+<h2>3. Maintenance rules to adopt</h2>
+<ol>
+<li><strong>One canonical description.</strong> <code>01_STRATEGY/One_Pager.md</code> is the only place the venture is described in full. Every deck, application, and bio links to or copies from it.</li>
+<li><strong>Every number has a source.</strong> No figure enters a deck unless it appears in <code>Citations_Master.md</code> with a title, year, and URL.</li>
+<li><strong>Dated decisions.</strong> Any reversal (Expression dropped; NSL claim narrowed; domain changed) gets a line in <code>Decision_Log.md</code> with the reason. This prevents the current situation, where a reader cannot tell whether Expression was abandoned or forgotten.</li>
+<li><strong>Version discipline.</strong> Decks are named <code>Unmute_Deck_YYYY-MM-DD.pdf</code>. No file is ever named &quot;final&quot; or left as <code>(1)</code>.</li>
+<li><strong>Status vocabulary.</strong> Every programme entry uses one of: <em>identified → contacted → applied → shortlisted → pitched → selected → funded</em>. Never &quot;engaged&quot; or &quot;partnered&quot; without a document.</li>
+<li><strong>Consent register.</strong> Any named individual — patient, interpreter, advisor, hospital contact — has a row in <code>04_EVIDENCE/Interview_Log.csv</code> recording consent status and permitted use.</li>
+<li><strong>Quarterly archive sweep.</strong> Superseded material moves to <code>99_ARCHIVE/</code>, never deleted; history is evidence.</li>
+</ol>
+<hr/>
+<h2>4. The three documents that would most improve this KB immediately</h2>
+<p>If nothing else is done, create these three:</p>
+<ol>
+<li><strong><code>01_STRATEGY/One_Pager.md</code></strong> — one page: what Unmute is, who it is for, what exists today, what does not, what the next milestone is. Forces resolution of the Sign/Expression and replace/complement contradictions.</li>
+<li><strong><code>04_EVIDENCE/Citations_Master.md</code></strong> — every statistic with its real source. Converts five second-hand claims into either citable evidence or known gaps.</li>
+<li><strong><code>02_PRODUCT/Technical_Architecture.md</code></strong> — even at one page: device, model, inference location, avatar method, latency budget. Makes the technical claims falsifiable and therefore fundable.</li>
+</ol></body></html>

@@ -1,0 +1,645 @@
+<html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.4} h1{font-size:20pt} h2{font-size:16pt} h3{font-size:13pt} table{border-collapse:collapse;width:100%;font-size:9pt} th{background:#f0f0f0;text-align:left}</style></head><body><h1>Unmute — Complete Knowledge Audit and Intelligence Report</h1>
+<p><strong>Prepared:</strong> 20 October 2026</p>
+<p><strong>Scope:</strong> All Google Drive material accessible to the account, searched and inspected for Unmute-related content</p>
+<p><strong>Auditor role:</strong> Research archivist / knowledge analyst</p>
+<p><strong>Status of underlying venture:</strong> Pre-seed, pre-MVP, single founder, Nigeria</p>
+<hr/>
+<h2>How to read this report</h2>
+<p>Every material statement carries an evidence label. These are used strictly:</p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Label</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><strong>DOCUMENTED FACT</strong></td><td>Stated in a file and consistent across sources, or verifiable from file metadata</td></tr>
+<tr><td><strong>FOUNDER CLAIM</strong></td><td>Asserted by the founder in a document, not independently evidenced in Drive</td></tr>
+<tr><td><strong>THIRD-PARTY RESEARCH</strong></td><td>Attributed in a file to an external study, report, or dataset</td></tr>
+<tr><td><strong>PROPOSED PLAN</strong></td><td>A stated intention, roadmap item, or target — not evidence of execution</td></tr>
+<tr><td><strong>UNVALIDATED ASSUMPTION</strong></td><td>A belief the documents themselves flag as untested, or that is stated without support</td></tr>
+<tr><td><strong>ANALYSIS</strong></td><td>My own inference or judgement, clearly not sourced from the files</td></tr>
+<tr><td><strong>UNKNOWN / NOT FOUND</strong></td><td>Absent from the accessible corpus</td></tr>
+</tbody></table><br/>
+<p>Source IDs (S1–S25) map to full filenames, links, and dates in <strong>B_Source_Register.md</strong>.</p>
+<h3>Important boundary on this audit</h3>
+<p>This is an audit of <strong>what the Drive contains</strong>, not of what Unmute has actually built. The Drive is unusually thin on engineering artefacts: there is <strong>no Unmute code repository, no technical architecture document, no model card, no API specification, no prototype recording, and no test results</strong> anywhere in the accessible corpus. The repository checked out for this session (<code>unmute-sign</code>) contains only a two-line <code>README.md</code> and an initial commit. That absence is itself a finding and is treated as such throughout.</p>
+<p>Three files could not be read for content and are disclosed in Section 8 and in the Source Register: the ASLIN interview audio (S15), the IDICE pitch video (S16), and the PDF export of the July deck (S10). One file (S6) was read with a gap in the middle caused by response-size truncation; the missing segment is identified.</p>
+<hr/>
+<h1>1. Executive summary</h1>
+<h2>One sentence</h2>
+<p><strong>Unmute is a pre-MVP Nigerian venture building an AI-powered, bidirectional sign-language interpretation tool for healthcare settings — turning a Deaf patient&#x27;s signing into text and speech for clinicians, and a clinician&#x27;s speech into text and an AI-generated signing avatar for the patient — intended to be sold to hospitals rather than to Deaf users themselves.</strong></p>
+<h2>Detailed explanation</h2>
+<p><strong>What it is.</strong> Unmute is described consistently across its three most recent strategy documents as &quot;an AI-powered sign-language communication platform designed to help Deaf people and hearing people communicate&quot; (S4), with healthcare in Nigeria as the entry market (S1, S4, S5, S6). The product concept has two translation directions:</p>
+<ul>
+<li><strong>Sign → text/speech.</strong> A camera captures the Deaf patient signing; a vision model recognises the signs; the output is text and synthesised speech for the clinician (S3, S4).</li>
+<li><strong>Speech/text → sign.</strong> The clinician speaks or types; the system converts the message into text and an <strong>AI-generated signing avatar</strong> (S1, S4).</li>
+</ul>
+<p><strong>What problem it addresses.</strong> Deaf sign-language users cannot reliably communicate with clinicians who do not sign. In Nigeria this is compounded by a shortage of qualified interpreters, cost, rural unavailability, and the absence of a structured Nigerian Sign Language (NSL) training corpus. The founder&#x27;s framing is that the barrier is <strong>structural</strong>, not attitudinal: &quot;Expecting every healthcare worker to learn sign language is unrealistic&quot; (S1).</p>
+<p><strong>Who experiences it.</strong> Primarily Deaf sign-language users in Nigeria, with hearing clinicians as the second party to every failed exchange. The market research document broadens the affected population to Deaf people interacting with schools and public services as well (S6).</p>
+<p><strong>How the proposed solution works.</strong> A mobile application. The patient signs to a camera; the clinician&#x27;s speech is captured by microphone; both are translated and displayed/voiced. The pitch deck promises under-2-second latency, offline capability in low-connectivity settings, multilingual support (NSL, ASL, &quot;and more&quot;), and on-device privacy (S1). <strong>None of these four properties is evidenced anywhere in the Drive as built or measured</strong> — they are product-positioning claims, not test results.</p>
+<p><strong>What makes it potentially valuable.</strong> Three things, in the documents&#x27; own logic:</p>
+<ol>
+<li>A genuinely severe, documented, and under-served problem at the intersection of disability access and clinical safety.</li>
+<li>A defensible data position <em>if</em> the promised NSL corpus is actually built — the deck explicitly names &quot;Nigeria has almost no structured Nigerian Sign Language dataset&quot; as the commercial opportunity (S1).</li>
+<li>An institutional buyer (hospitals, health networks, government) rather than a low-willingness-to-pay consumer segment (S3).</li>
+</ol>
+<p><strong>What stage the venture is actually at today.</strong> This is the single most important correction the audit makes to the venture&#x27;s own narrative. Unmute is at <strong>pre-prototype, pre-pilot, pre-revenue-definition stage</strong>, with:</p>
+<ul>
+<li><strong>No demonstrated working product</strong> in the Drive — no demo video of the system functioning, no screenshots of a running application, no repository, no accuracy figures.</li>
+<li><strong>No completed hospital pilot</strong>, no signed pilot agreement, no letter of intent.</li>
+<li><strong>No pricing, no financial model, no budget, no funding ask, and no market-size calculation</strong> (TAM/SAM/SOM) in any file.</li>
+<li><strong>Seven informal payments</strong> from people who want early access — the only revenue-adjacent signal in the corpus (S6). Amount, channel, and terms are not recorded.</li>
+<li><strong>A one-person team</strong>, with the founder simultaneously holding a CTO role at another venture and a product/research role at a third organisation (S11).</li>
+<li><strong>Strategy documents dated 18–19 October 2026</strong> — one and two days before this audit — indicating the business framing is being actively rewritten right now.</li>
+</ul>
+<p>The venture&#x27;s presentation layer (a polished narrative deck, a named victim story, a six-stage global roadmap) is roughly two to three stages ahead of its evidence layer. That gap is the central risk this report documents.</p>
+<hr/>
+<h1>2. Origin story and evolution</h1>
+<h2>2.1 The documented origin</h2>
+<p>The Drive contains <strong>two different origin accounts</strong>, and they do not contradict each other so much as operate at different levels.</p>
+<p><strong>Account A — the institutional origin (CV, S11).</strong></p>
+<p>Prince Michael worked as an <strong>Artificial Intelligence Research Intern at Robotics and Artificial Intelligence Nigeria (RAIN), Ibadan, April 2025 – August 2025</strong>. Under that role the CV lists: &quot;Developed Unmute, an AI-powered sign language translation system designed to improve communication accessibility for the deaf and hard-of-hearing community,&quot; plus &quot;Researched and implemented machine learning approaches for translating sign language into text and speech in real time,&quot; &quot;Worked with computer vision datasets and AI models to recognize and interpret sign language gestures,&quot; and &quot;Designed a 3D sign language representation system using digital modeling techniques.&quot;</p>
+<p>This is the <strong>only dated, institutional, third-party-contextualised statement of where Unmute came from</strong>. It places the technical origin in a research internship, working on computer-vision sign recognition and 3D signing representation — which is precisely the two-direction architecture the pitch deck later presents.</p>
+<p><strong>Account B — the narrative origin (deck, S1/S2/S8/S9).</strong></p>
+<p>The pitch opens not with the founder&#x27;s biography but with a patient: <strong>Zulaihatu Abdullahi, a 19-year-old Deaf woman who presented at a Nigerian hospital, could not communicate with her doctors, and died.</strong> &quot;Her death wasn&#x27;t caused by a lack of medicine. It was caused by a lack of communication.&quot;</p>
+<p><strong>This story has no citation anywhere in the corpus</strong> — no news article, no report, no case file, no interview transcript. It appears in four files, but three of them are copies of the same document (S8 and S9 are near-identical Google Docs; S1 and S2 are the same deck text). <strong>Repeat appearances across copies are not independent corroboration.</strong> It must be treated as an unverified founder claim until provenance is produced.</p>
+<p><strong>ANALYSIS:</strong> The two accounts are compatible — a research internship produced the technical capability, and a case (however sourced) supplied the mission. But the <em>documents never link them</em>. A reader of the deck would assume the founder witnessed the case; a reader of the CV would assume the project was an internship assignment. Which is true matters for how the venture is pitched to accelerators and to the Deaf community.</p>
+<h2>2.2 Evolution timeline</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Date</th><th>Artefact</th><th>What it shows about the venture&#x27;s stage</th></tr></thead><tbody>
+<tr><td>Apr–Aug 2025</td><td>RAIN internship (S11)</td><td>Technical origin: sign→text/speech recognition + 3D signing representation</td></tr>
+<tr><td>14 Jul 2026</td><td>&quot;Every-Voice-Deserves-to-Be-Heard&quot; deck (S8/S9/S10)</td><td>First full pitch narrative. Contact: <code>prince@unmute.ai</code>, <code>www.unmute.ai</code>. Pure healthcare framing.</td></tr>
+<tr><td>6 Aug 2026</td><td>&quot;Unmute Pitch Video — IDICE&quot; (S16)</td><td>Video produced for an iDICE-related pitch. <strong>Content not viewable in this audit.</strong></td></tr>
+<tr><td>16 Aug 2026</td><td>How2Sign dataset added (S13/S14)</td><td>Concrete technical step: ASL dataset acquired/loaded</td></tr>
+<tr><td>15 Sep 2026</td><td>ASLIN interview recorded (S15); blank market-research template (S7)</td><td>Primary qualitative research begins. <strong>Audio not transcribable in this audit.</strong></td></tr>
+<tr><td>30 Sep 2026</td><td>Market Research Module 2 (S6)</td><td>Most substantive analytical document. Introduces <strong>two products</strong>: Unmute Sign + <strong>Unmute Expression</strong></td></tr>
+<tr><td>14 Oct 2026</td><td>Hackaholics 7.0 Enugu submission (S17/S24); earlier deck (S2, later trashed)</td><td>Competition entry. Deck v1</td></tr>
+<tr><td>15 Oct 2026</td><td>Current pitch deck (S1)</td><td>Deck v2. Domain changed to <strong>liveunmute.com</strong> / <code>contact@liveunmute.com</code></td></tr>
+<tr><td>16 Oct 2026</td><td>Founders Lab Cohort 2 base-grant session (S25)</td><td>Grant track engaged</td></tr>
+<tr><td>18 Oct 2026</td><td>Value Proposition Canvas (S4)</td><td>Problem/solution/gain/pain formalised</td></tr>
+<tr><td>19 Oct 2026</td><td>Lean Canvas (S3) + Digital Presence Worksheet (S5)</td><td>Business model and go-to-market formalised</td></tr>
+<tr><td>20 Oct 2026</td><td>This audit</td><td>—</td></tr>
+</tbody></table><br/>
+<h2>2.3 Strategy changes that are documented</h2>
+<p><strong>Change 1 — domain and contact repositioning.</strong> July deck: <code>unmute.ai</code> / <code>prince@unmute.ai</code>. October deck: <code>liveunmute.com</code> / <code>contact@liveunmute.com</code>. <strong>DOCUMENTED FACT</strong> (S8 vs S1). No file explains why. <strong>ANALYSIS:</strong> likely a switch from an aspirational <code>.ai</code> domain to an owned/available <code>.com</code> brand, or a deliberate split between a personal brand (<code>@PrinceOnPurpose</code>) and a venture brand (<code>@LiveUnmute</code>).</p>
+<p><strong>Change 2 — from one product to two, then back to one.</strong> The 30 September document defines &quot;Unmute&quot; as an umbrella over <strong>Unmute Sign</strong> (Deaf communication) and <strong>Unmute Expression</strong> (helping people &quot;turn knowledge, thoughts and ideas into clear, effective communication&quot; — essentially a communication-coaching/AI-writing product) (S6). By 18–19 October, both the Value Proposition Canvas and Lean Canvas describe <strong>only the healthcare sign-language product</strong> (S3, S4), and the 15 October deck contains no trace of Expression (S1).</p>
+<p><strong>This is an undocumented strategic reversal.</strong> The documents do not say Expression was dropped, parked, or renamed. See Section 13, Conflict C1.</p>
+<p><strong>Change 3 — from &quot;replace interpreters&quot; to &quot;complement interpreters,&quot; and back.</strong> The market research explicitly warns: &quot;Unmute should complement rather than claim to replace interpreters, especially in high-stakes cases&quot; (S6). The pitch deck, written two weeks later, headlines <strong>&quot;0 — Interpreters Needed: AI replaces the need for scarce, expensive human interpreters&quot;</strong> (S1). See Conflict C2. This is the most reputationally dangerous contradiction in the corpus, because it is a claim about a protected community made in a public-facing asset.</p>
+<p><strong>Change 4 — narrower geography in the newer documents.</strong> The July deck and October deck both promise eventual expansion to Kenya, Ghana, South Africa and a &quot;global platform.&quot; But the October canvases are strictly Nigerian and hospital-specific (S3, S4). <strong>ANALYSIS:</strong> the operating scope has quietly narrowed to &quot;one Nigerian hospital workflow&quot; while the narrative scope remains global — a normal and healthy divergence for a pre-seed venture, but one that should be made explicit to avoid the pitch being read as fantasy.</p>
+<h2>2.4 Current vision, mission, brand message</h2>
+<ul>
+<li><strong>Tagline / brand line:</strong> &quot;Every Voice Deserves to Be Heard.&quot; — consistent across July and October decks (S1, S8).</li>
+<li><strong>Positioning sentence:</strong> &quot;An AI-powered healthcare communication platform that enables real-time conversation between Deaf patients and healthcare professionals — using sign language recognition, speech recognition, and AI-generated sign language&quot; (S1).</li>
+<li><strong>Mission framing:</strong> &quot;I&#x27;m not building another AI product. I&#x27;m building the future of accessible healthcare — starting in Nigeria and scaling to the world&quot; (S1).</li>
+<li><strong>Stated expansion thesis:</strong> &quot;Start in hospitals. Scale to education, government, and global accessibility infrastructure&quot; (S1).</li>
+<li><strong>Mission (canvas version, more sober):</strong> &quot;Bridge the communication gap between Deaf patients and healthcare workers through AI-powered sign-language technology&quot; (S3).</li>
+</ul>
+<p>There is no separate, formally adopted vision statement or mission statement anywhere in the Drive. The two sentences above are the closest artefacts.</p>
+<hr/>
+<h1>3. Problem definition and evidence</h1>
+<h2>3.1 The problem as the documents define it</h2>
+<p>Unmute defines its problem at three levels of abstraction, and the documents are not consistent about which is primary.</p>
+<p><strong>Level 1 — the healthcare communication gap (primary framing).</strong></p>
+<p>&quot;Deaf patients struggle to communicate with healthcare workers who do not understand sign language. Qualified sign-language interpreters may be unavailable. Medical information can be misunderstood, delayed or communicated through unsuitable alternatives&quot; (S3).</p>
+<p><strong>Level 2 — the structural access gap (deck framing).</strong></p>
+<p>Three named barriers: <strong>workforce scale</strong> (hundreds of thousands of health workers — training all is &quot;logistically impossible&quot;), <strong>cost</strong> (interpreters &quot;expensive, scarce, rarely available in rural or emergency settings&quot;), and <strong>time</strong> (&quot;years of training required — while patients need help today&quot;) (S1).</p>
+<p><strong>Level 3 — the universal communication gap (September framing).</strong></p>
+<p>&quot;UNMUTE addresses the gap between what a person has to communicate and what they are able to communicate or have understood&quot; (S6) — a thesis broad enough to cover both Deaf communication and general expressive difficulty.</p>
+<p><strong>ANALYSIS:</strong> Level 3 is the strongest <em>company</em> thesis and the weakest <em>fundraising</em> thesis, because it describes an enormous, unfocused market. Levels 1 and 2 are what the October documents converged back to. The reversion is strategically correct.</p>
+<h2>3.2 Evidence table — every documented problem claim</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Claim</th><th>Source</th><th>Type</th><th>Assessment</th></tr></thead><tbody>
+<tr><td>P1</td><td>Only <strong>8%</strong> of surveyed Deaf Nigerians could access full communication in healthcare</td><td>S6, citing Global Deaf Research Institute 2024 Nigeria pilot</td><td>THIRD-PARTY RESEARCH (as cited)</td><td>Strongest quantitative evidence in the corpus. <strong>Not independently verified in this audit</strong> — no GDRI document, dataset, or link exists in the Drive. Sample size, methodology, and geography unknown.</td></tr>
+<tr><td>P2</td><td>Only <strong>7%</strong> could communicate with their doctors</td><td>S6, same source</td><td>THIRD-PARTY RESEARCH (as cited)</td><td>Same caveat.</td></tr>
+<tr><td>P3</td><td>Only <strong>38%</strong> reported being able to afford required healthcare services</td><td>S6, same source</td><td>THIRD-PARTY RESEARCH (as cited)</td><td>Used as context. This is a <em>financial access</em> statistic, not a communication statistic — it does not directly support Unmute&#x27;s thesis and should not be bundled with P1/P2 as if it did.</td></tr>
+<tr><td>P4</td><td>A Nigerian Sign Language dataset of <strong>8,000 static images, curated to 5,000 frames, covering 137 signs/words</strong>, with a real-time sign-to-speech pipeline</td><td>S6, citing &quot;IJCAI research&quot;</td><td>THIRD-PARTY RESEARCH (as cited)</td><td>No paper title, authors, year, or link. <strong>This is the most important citation to verify</strong>, because it defines the known state of the art for NSL and therefore the novelty of Unmute&#x27;s intended contribution.</td></tr>
+<tr><td>P5</td><td>Direct interview with the <strong>Association of Sign Language Interpreters of Nigeria (ASLIN)</strong> confirmed reliance on gestures / local or &quot;pidgin&quot; signs and the need for native NSL resources</td><td>S6; audio at S15</td><td>FOUNDER CLAIM (primary research conducted)</td><td>The <em>existence</em> of the interview is evidenced by the 20.7 MB recording (S15). The <em>findings</em> are reported second-hand in S6. The recording itself was not transcribed in this audit.</td></tr>
+<tr><td>P6</td><td>Nigerian investigative reporting documented Deaf people <strong>paying private interpreters</strong> to accompany them to hospitals</td><td>S6, citing &quot;ICIR&quot;</td><td>THIRD-PARTY RESEARCH (as cited)</td><td>No article title, date, or URL. Cited as proof the problem is already monetised.</td></tr>
+<tr><td>P7</td><td><strong>70 million+</strong> Deaf people globally lack accessible healthcare</td><td>S1</td><td>UNVERIFIED</td><td>No source cited. This conflates (a) global Deaf population estimates with (b) lack of <em>healthcare access specifically</em>. Widely repeated in the deck as &quot;the market is vast.&quot; Must be re-sourced or removed before external use.</td></tr>
+<tr><td>P8</td><td>Unmute has <strong>received seven payments</strong> from people waiting to use the product</td><td>S6</td><td>FOUNDER CLAIM</td><td>Only revenue-adjacent signal. No amounts, dates, channel, or refund terms recorded. See Section 8.</td></tr>
+<tr><td>P9</td><td>Deaf patients face &quot;delayed treatment, misdiagnosis, and preventable death&quot; with &quot;documented cases across multiple Nigerian states&quot;</td><td>S1</td><td>UNVERIFIED</td><td>&quot;Documented&quot; is asserted without a single citation.</td></tr>
+<tr><td>P10</td><td>The <strong>Zulaihatu Abdullahi</strong> case (19-year-old Deaf woman died after communication failure)</td><td>S1, S2, S8, S9</td><td>UNVERIFIED</td><td>No provenance in any file.</td></tr>
+<tr><td>P11</td><td>Health-worker training is infeasible at scale (&quot;hundreds of thousands of healthcare workers&quot;)</td><td>S1</td><td>FOUNDER CLAIM / REASONED ARGUMENT</td><td>Directionally sound; no workforce figure is cited.</td></tr>
+</tbody></table><br/>
+<h2>3.3 What is external research vs founder observation</h2>
+<p>The corpus is admirably disciplined about this in <strong>one</strong> document — S6 — which repeatedly separates &quot;secondary data,&quot; &quot;direct ecosystem research,&quot; and &quot;company signal.&quot; It is notably less disciplined in <strong>S1</strong>, where third-party statistics, founder narrative, and product promises sit side by side without distinction.</p>
+<p><strong>Where S6 deserves credit:</strong> it explicitly states that its statistics &quot;are supporting evidence for communication barriers, not estimates of Unmute&#x27;s market size,&quot; and that the seven payments are &quot;early company-level demand signals, not yet proof of repeat usage or institutional purchasing.&quot; That is exactly the right epistemic posture, and it is the single strongest indicator of analytical maturity in the corpus.</p>
+<h2>3.4 What is missing from the problem evidence</h2>
+<ul>
+<li><strong>No primary interviews with Deaf patients are documented.</strong> Ten discovery interviews are <em>targeted</em> in S5; none are recorded, summarised, or transcribed in the Drive.</li>
+<li><strong>No clinician interviews</strong> are documented.</li>
+<li><strong>No hospital-side evidence</strong> of any kind — no procurement conversation, no clinical champion, no workflow observation.</li>
+<li><strong>No prevalence denominator.</strong> The corpus never states how many Deaf sign-language users are in Nigeria, or how many hospital encounters involve them. Without that, the problem is vivid but not sized.</li>
+</ul>
+<hr/>
+<h1>4. Product and technical architecture</h1>
+<h2>4.1 The proposed user experience</h2>
+<p>The clearest description across all files is a <strong>single shared device in a consultation room</strong>, running a mobile application (S4), used alternately by patient and clinician:</p>
+<ol>
+<li><strong>Patient signs to camera</strong> → vision model → text → speech for the clinician (&quot;Vision → Text&quot;) (S1).</li>
+<li><strong>Clinician speaks</strong> → speech recognition → text → <strong>AI avatar signs</strong> the message back to the patient (&quot;Medical AI → Avatar Signs&quot;) (S1).</li>
+<li>The deck compresses this to: &quot;From camera to comprehension in under two seconds — a seamless, bidirectional conversation powered entirely by AI&quot; (S1).</li>
+</ol>
+<p>The Lean Canvas describes the same thing more soberly: &quot;Sign-to-text and sign-to-speech translation. Speech/text-to-sign visual representation. A mobile platform for basic healthcare communication&quot; (S3).</p>
+<h2>4.2 Feature-by-feature status assessment</h2>
+<p>Each feature is labelled strictly. <strong>Nothing in this table may be read as &quot;working&quot;</strong> — the corpus contains no build artefacts.</p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Feature</th><th>Claimed in</th><th>Status</th><th>Reasoning</th></tr></thead><tbody>
+<tr><td>Sign → text recognition (ASL)</td><td>S1, S3, S4, S11</td><td><strong>Partially implemented / unverified</strong></td><td>CV states machine-learning approaches were &quot;researched and implemented&quot; during a 5-month internship (S11). A How2Sign ASL manifest was loaded in Aug 2026 (S13/S14). No accuracy metric, demo, or repo exists.</td></tr>
+<tr><td>Sign → speech synthesis</td><td>S1, S3, S4</td><td><strong>Partially implemented / unverified</strong></td><td>Same basis. &quot;Real-time sign-to-speech&quot; is claimed in CV and referenced as a third-party pipeline in S6.</td></tr>
+<tr><td>Speech → text (clinician side)</td><td>S1, S4</td><td><strong>Proposed but not built</strong></td><td>No ASR vendor, model, or implementation is named anywhere.</td></tr>
+<tr><td>Text → AI signing avatar</td><td>S1, S4, S11</td><td><strong>Experimental / unverified</strong></td><td>CV: &quot;Designed a 3D sign language representation system using digital modeling techniques.&quot; That is <em>design</em>, not a deployed avatar. No Blender file, rig, animation library, or avatar asset appears in Drive.</td></tr>
+<tr><td>Nigerian Sign Language support</td><td>S1 (&quot;supports NSL, ASL, and more&quot;), S3, S4</td><td><strong>Proposed but not built</strong></td><td>The deck itself says Nigeria has &quot;almost no structured NSL dataset&quot; and that building it is a <em>future</em> roadmap step (S1, step 2). Claiming NSL support in the same deck is internally inconsistent.</td></tr>
+<tr><td>ASL support</td><td>S1, S2</td><td><strong>Dataset present; model unverified</strong></td><td>How2Sign is an ASL dataset. Presence of a manifest ≠ a trained model.</td></tr>
+<tr><td><strong>Under 2-second latency</strong></td><td>S1</td><td><strong>Unverified claim</strong></td><td>No benchmark, device spec, or measurement.</td></tr>
+<tr><td><strong>Offline capable</strong></td><td>S1</td><td><strong>Unverified claim; technically doubtful as stated</strong></td><td>No on-device model, size, or architecture is described. Vision transformers + speech + avatar rendering on a low-end Android device offline is a hard engineering claim.</td></tr>
+<tr><td><strong>Private by design — &quot;patient data never leaves the device without consent&quot;</strong></td><td>S1</td><td><strong>Unverified claim; conflicts with cloud AI</strong></td><td>No privacy architecture, DPA, or data-flow diagram exists. If any recognition or LLM call is cloud-based, the claim is false as written.</td></tr>
+<tr><td>Multilingual / multi-sign-language</td><td>S1</td><td><strong>Proposed</strong></td><td>No second-language dataset beyond ASL exists.</td></tr>
+<tr><td>Hospital deployment / institutional mode</td><td>S1, S3, S4</td><td><strong>Proposed</strong></td><td>No pilot build, no admin console, no EHR integration.</td></tr>
+<tr><td><strong>Unmute Expression</strong> (general communication coaching product)</td><td>S6 only</td><td><strong>Deprecated or parked</strong></td><td>Present in the 30 Sep document, absent from all 15–19 Oct documents. No build evidence.</td></tr>
+<tr><td>Web/landing page</td><td>S1, S5</td><td><strong>UNKNOWN</strong></td><td><code>liveunmute.com</code> and <code>unmute.ai</code> are cited as live URLs. Neither was fetched in this audit.</td></tr>
+<tr><td>Hardware / wearable</td><td>—</td><td><strong>NOT FOUND</strong></td><td>No hardware component is discussed anywhere.</td></tr>
+</tbody></table><br/>
+<h2>4.3 Technology stack actually named in the files</h2>
+<p>This is a short list, and its shortness is a finding.</p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Layer</th><th>Named technology</th><th>Source</th></tr></thead><tbody>
+<tr><td>Dataset</td><td><strong>How2Sign</strong> (ASL, RGB front-view video, sentence-level alignment)</td><td>S13, S14</td></tr>
+<tr><td>Modelling approach</td><td>&quot;computer vision datasets and AI models,&quot; &quot;vision models, transformers, and edge AI&quot; — generic, no named architecture</td><td>S11, S1</td></tr>
+<tr><td>3D representation</td><td>&quot;digital modeling techniques&quot; — <strong>Blender is never named in any file</strong></td><td>S11</td></tr>
+<tr><td>Speech</td><td>&quot;speech recognition,&quot; &quot;speech synthesis&quot; — no vendor</td><td>S1</td></tr>
+<tr><td>Platform</td><td>Mobile application (iOS/Android unspecified)</td><td>S3, S4</td></tr>
+<tr><td>Cloud</td><td>&quot;Cloud infrastructure and hosting&quot; listed as a cost line</td><td>S3</td></tr>
+<tr><td>APIs / third parties</td><td><strong>None named.</strong> No ASR API, no LLM provider, no avatar SDK, no cloud vendor.</td><td>—</td></tr>
+<tr><td>Repository</td><td><strong>None for Unmute.</strong> The session repo <code>unmute-sign</code> contains only <code>README.md</code>.</td><td>—</td></tr>
+</tbody></table><br/>
+<p><strong>ANALYSIS:</strong> A pitch that promises &quot;under two seconds&quot; and &quot;offline&quot; cannot be evaluated without knowing whether inference is on-device or server-side. The complete absence of any architecture document means every technical claim is currently unfalsifiable — which protects the venture in the short term and exposes it badly in any technical due-diligence conversation.</p>
+<h2>4.4 Prototype vs MVP vs long-term vision</h2>
+<p>The documents do not use these terms consistently. Reconstructed from the roadmap (S1) and canvases (S3, S4):</p>
+<ul>
+<li><strong>Current prototype:</strong> <em>No documented prototype.</em> The closest artefact is a research-internship implementation of sign→text/speech plus a 3D representation design (S11), and an ASL dataset manifest (S13). There is no evidence these were integrated, and no demo exists in Drive.</li>
+<li><strong>Proposed MVP:</strong> ASL proof of concept validating the core recognition engine (S1, stage 1) — i.e. <strong>the MVP is explicitly an ASL system, not an NSL system.</strong></li>
+<li><strong>Proposed pilot product:</strong> an NSL-trained model deployed in three Nigerian hospitals, measured on outcomes (S1, stage 3).</li>
+<li><strong>Long-term vision:</strong> national rollout via the Ministry of Health, then Kenya/Ghana/South Africa, then a global multilingual accessibility platform (S1).</li>
+</ul>
+<p><strong>This sequencing is the most consequential architectural fact in the corpus:</strong> the venture intends to validate on <strong>American</strong> Sign Language and then re-train on <strong>Nigerian</strong> Sign Language. Those are different languages with different grammar, lexicon, and fingerspelling systems. Recognition accuracy on ASL predicts almost nothing about NSL performance. See Section 5 and Risk R3.</p>
+<hr/>
+<h1>5. Datasets and AI research</h1>
+<h2>5.1 Inventory</h2>
+<h3>D1 — How2Sign (ASL)</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Attribute</th><th>Detail</th></tr></thead><tbody>
+<tr><td><strong>Files</strong></td><td><code>how2sign_realigned_train</code> (Google Sheet, 16 Aug 2026, ~1.8 MB) and <code>how2sign_realigned_train.csv</code> (5.6 MB, uploaded to this Drive 8 Nov 2023, last modified 2 May 2024) — S13, S14</td></tr>
+<tr><td><strong>Provenance</strong></td><td>Not owned by the founder. The CSV is owned by a third party (<code>mandacduarte2@gmail.com</code>), last modified 2024. This is an <strong>externally sourced, shared research dataset</strong>, not a Unmute-created asset.</td></tr>
+<tr><td><strong>Purpose</strong></td><td>Sentence-level alignment manifest for continuous sign-language video</td></tr>
+<tr><td><strong>Schema (verified)</strong></td><td><code>VIDEO_ID, VIDEO_NAME, SENTENCE_ID, SENTENCE_NAME, START_REALIGNED, END_REALIGNED, SENTENCE</code></td></tr>
+<tr><td><strong>Language</strong></td><td><strong>American Sign Language.</strong> Spoken-English sentence transcripts aligned to signer video.</td></tr>
+<tr><td><strong>Vocabulary / domain</strong></td><td>Open-domain instructional speech — the rows sampled cover art history (acanthus leaves, illuminated manuscripts), psychology (self-esteem), massage technique, pet care (fleas, parrot grooming), tennis, and marathon running. <strong>No medical vocabulary whatsoever.</strong></td></tr>
+<tr><td><strong>Format &amp; scale</strong></td><td>Tabular alignment metadata; the underlying videos are not in Drive. The spreadsheet is ~18,000+ rows (1.8 MB of CSV-equivalent text).</td></tr>
+<tr><td><strong>Licensing</strong></td><td><strong>Not documented anywhere in the Drive.</strong> How2Sign has its own academic licence terms; nothing in the corpus records that Unmute reviewed or complies with them.</td></tr>
+<tr><td><strong>Intended use</strong></td><td>Implicitly: train/validate the ASL recognition engine for &quot;MVP stage 1&quot; (S1).</td></tr>
+<tr><td><strong>What remains</strong></td><td>Everything downstream: no model, no training run, no evaluation split, no accuracy baseline, no licence record.</td></tr>
+</tbody></table><br/>
+<p><strong>Critical analytical point:</strong> How2Sign is continuous, open-domain, <em>American</em> Sign Language. Unmute&#x27;s clinical use case requires <strong>domain-specific, Nigerian</strong> sign vocabulary (symptoms, body parts, pain descriptors, instructions, consent language). The dataset in the Drive cannot produce the product described in the deck. It can only prove that a pipeline runs.</p>
+<h3>D2 — Nigerian Sign Language corpus (planned)</h3>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Attribute</th><th>Detail</th></tr></thead><tbody>
+<tr><td><strong>Status</strong></td><td><strong>Does not exist.</strong> Entirely a proposal.</td></tr>
+<tr><td><strong>Source</strong></td><td>S1 roadmap stage 2: &quot;Build the first structured Nigerian Sign Language training corpus&quot;</td></tr>
+<tr><td><strong>Stated plan</strong></td><td>&quot;Unmute will build the definitive corpus&quot; (S1); &quot;Potential to build locally relevant sign-language datasets through community collaboration&quot; (S3)</td></tr>
+<tr><td><strong>Language</strong></td><td>Nigerian Sign Language (NSL)</td></tr>
+<tr><td><strong>Vocabulary coverage</strong></td><td>Undefined. No target sign count, no clinical vocabulary list, no grammar model.</td></tr>
+<tr><td><strong>Format &amp; scale</strong></td><td>Undefined. No specification of video vs skeletal keypoints, signer count, regional variation, or annotation schema.</td></tr>
+<tr><td><strong>Access / consent / licensing</strong></td><td><strong>Not addressed in any file.</strong> This is the single largest unmanaged legal and ethical exposure in the venture.</td></tr>
+<tr><td><strong>What remains</strong></td><td>Everything: protocol design, ethics approval, Deaf community partnership, consent framework, compensation model, annotation standards, regional variation handling, storage, and governance.</td></tr>
+</tbody></table><br/>
+<h3>D3 — Referenced third-party NSL work</h3>
+<p>S6 cites &quot;IJCAI research&quot; producing an NSL dataset of <strong>8,000 static images → 5,000 curated frames, 137 signs/words</strong>, with a real-time sign-to-speech pipeline. No paper, author, year, or link is recorded. <strong>This must be located and read</strong> before Unmute can claim novelty, because 137 signs is a meaningful starting lexicon and may already cover part of the intended clinical vocabulary.</p>
+<h3>D4 — Research paper (adjacent, not Unmute)</h3>
+<p><code>When AI Becomes a Confidant</code> (S23, 10 Jul 2026) is a conceptual AI-safety paper by the founder on <strong>Relational Role Attribution</strong> in human–AI interaction. It is not about sign language and is not a Unmute asset. It is relevant only as evidence of the founder&#x27;s research capability and interest in AI safety/trust — which is directly pertinent to a product that will ask Deaf patients to trust a machine translation in a clinical setting.</p>
+<h2>5.2 ASL vs NSL — the distinction the documents blur</h2>
+<p>This deserves its own subsection because it is the most likely source of a fatal technical misjudgement.</p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Dimension</th><th>ASL (what the data is)</th><th>NSL (what the product needs)</th></tr></thead><tbody>
+<tr><td>Recognition data available to Unmute</td><td>How2Sign manifest (S13/S14)</td><td>None</td></tr>
+<tr><td>Grammar</td><td>Distinct syntax, topic-comment structures, spatial grammar</td><td>Distinct; influenced by Nigerian linguistic environment; under-documented</td></tr>
+<tr><td>Lexicon</td><td>Large, standardised, documented</td><td>Smaller documented lexicon; significant regional variation and &quot;local/pidgin signs&quot; per ASLIN interview (S6)</td></tr>
+<tr><td>Fingerspelling</td><td>ASL manual alphabet</td><td>Different manual alphabet</td></tr>
+<tr><td>Clinical vocabulary</td><td>Absent from How2Sign</td><td>Must be elicited from Deaf community and clinicians</td></tr>
+<tr><td>Transferability</td><td><strong>Near zero at the sign level</strong></td><td>—</td></tr>
+</tbody></table><br/>
+<p>The pitch deck&#x27;s line &quot;Supports Nigerian Sign Language, ASL, and more&quot; (S1) implies a shared engine across languages. <strong>That is not how sign languages work.</strong> A model trained on ASL does not &quot;support&quot; NSL; it must be retrained, and the data must be built first. The venture&#x27;s own roadmap acknowledges this. The marketing copy does not.</p>
+<h2>5.3 What must be verified before any dataset or API can be used</h2>
+<ol>
+<li><strong>How2Sign licence terms</strong> — permitted use, redistribution, commercial restriction, attribution requirement.</li>
+<li><strong>Provenance of the CSV in this Drive</strong> — it is a shared third-party file, not a licensed acquisition. Whether the founder has independent access rights is unknown.</li>
+<li><strong>The IJCAI NSL paper</strong> — title, authors, dataset access conditions, whether the 137-sign vocabulary is reusable.</li>
+<li><strong>GDRI 2024 Nigeria pilot</strong> — full report, sample, methodology, permission to cite.</li>
+<li><strong>Any speech-recognition or LLM API</strong> — data residency, whether audio is retained, whether patient speech would constitute special-category health data, and whether the provider trains on submitted data.</li>
+<li><strong>Deaf community consent model</strong> — who owns contributed sign data, how contributors are credited/compensated, and whether the corpus can be commercialised.</li>
+</ol>
+<hr/>
+<h1>6. Customers, users, and market</h1>
+<h2>6.1 Segments, separated by role</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Role</th><th>Who</th><th>Evidence</th></tr></thead><tbody>
+<tr><td><strong>End users (demand side)</strong></td><td>Deaf sign-language users, characterised as &quot;Amina, a Deaf student/young professional who uses Nigerian Sign Language and regularly deals with hearing people who do not sign, including healthcare workers&quot; (S6)</td><td>S6, S3</td></tr>
+<tr><td><strong>End users (supply side)</strong></td><td>Doctors and nurses in consultation, triage, and admissions</td><td>S3, S4</td></tr>
+<tr><td><strong>Influencers of adoption</strong></td><td>Deaf associations; sign-language interpreter networks; individual clinicians who champion accessibility</td><td>S3, S6, S5</td></tr>
+<tr><td><strong>Economic buyer</strong></td><td>&quot;Hospitals, healthcare networks and public healthcare institutions&quot; (S3); &quot;Initial institutional buyer may be a hospital/accessibility programme&quot; (S6)</td><td>S3, S6</td></tr>
+<tr><td><strong>Partners / channels</strong></td><td>Association of Sign Language Interpreters of Nigeria (engaged); Deaf associations; hospital partnerships</td><td>S6, S3</td></tr>
+<tr><td><strong>Future expansion</strong></td><td>Education, government/public services, then Kenya, Ghana, South Africa, then &quot;global accessibility infrastructure&quot;</td><td>S1, S6</td></tr>
+</tbody></table><br/>
+<p><strong>Persons who are explicitly <em>not</em> the buyer:</strong> individual Deaf users. The Lean Canvas lists only institutional revenue (S3). The seven payments (S6) are therefore anomalous relative to the stated model — see Conflict C4.</p>
+<h2>6.2 Market sizing</h2>
+<p><strong>There is no TAM, SAM, or SOM calculation anywhere in the corpus.</strong> This is a genuine absence, not a document I failed to open. S6 explicitly declines to convert its statistics into market size (&quot;These figures are supporting evidence for communication barriers, not estimates of Unmute&#x27;s market size&quot;).</p>
+<p>The only sizing-adjacent figures are:</p>
+<ul>
+<li>&quot;Over 70 million Deaf people globally lack accessible healthcare&quot; (S1) — unsourced, and not a revenue-relevant number.</li>
+<li>&quot;Hundreds of thousands of healthcare workers across Nigeria&quot; (S1) — unsourced, and a cost-of-training argument, not a market.</li>
+</ul>
+<p><strong>ANALYSIS:</strong> For a hospital-subscription model, the relevant market is <em>Nigerian hospitals and clinics that serve Deaf patients and have budget</em>, not global Deaf population. That number is derivable (tertiary/secondary/primary facility counts, private hospital counts in Lagos/Abuja/Enugu) but has not been derived. Any investor conversation will surface this within two questions.</p>
+<h2>6.3 Competitive landscape as documented</h2>
+<p>S6 contains the only competitor analysis in the corpus. Its structure is honest and useful:</p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Alternative</th><th>Type</th><th>What users like</th><th>What frustrates</th></tr></thead><tbody>
+<tr><td>Human interpreter</td><td>Direct/Indirect</td><td>High-quality, nuanced communication</td><td>Availability, cost, scheduling, scalability, privacy</td></tr>
+<tr><td>Family / friends</td><td>Indirect</td><td>Trusted, often free</td><td>Dependence, unavailability, privacy, insufficient signs</td></tr>
+<tr><td>Writing / texting</td><td>Indirect</td><td>Easy, ubiquitous</td><td>Slow, literacy-dependent, weak for complex interaction</td></tr>
+<tr><td>Local/pidgin signs &amp; gestures</td><td>Indirect</td><td>Immediate, familiar</td><td>Limited/inconsistent vocabulary</td></tr>
+<tr><td>Remote/video interpretation</td><td>Direct/Adjacent</td><td>Interpreter without travel</td><td>Human availability, connectivity, scheduling</td></tr>
+<tr><td>Sign-language learning apps</td><td>Adjacent</td><td>Useful for vocabulary</td><td>Learning-focused, not real-time clinical communication</td></tr>
+<tr><td>General AI / speech tools</td><td>Adjacent</td><td>Fast, scalable</td><td>May not recognise localised NSL; no trusted bidirectional sign</td></tr>
+</tbody></table><br/>
+<p><strong>No named commercial competitor</strong> (e.g. SignAll, SLAIT, Signapse, Google&#x27;s sign-language efforts, or Nigerian entrants) is identified. The analysis is category-level, not company-level. That is sufficient for a Lean Canvas and insufficient for a fundraise.</p>
+<h2>6.4 Willingness to pay — evidence vs hypothesis</h2>
+<p><strong>Evidence (weak but real):</strong></p>
+<ul>
+<li>People already pay for private interpreters to accompany Deaf patients to hospitals, per ICIR reporting cited in S6. This proves the <em>problem</em> is monetised; it does not prove willingness to pay <em>for software</em>.</li>
+<li>Seven payments for Unmute early access (S6). Undocumented in amount or terms.</li>
+<li>Institutions pay for accessibility support generally (asserted, not evidenced).</li>
+</ul>
+<p><strong>Hypothesis (explicitly labelled as such in S6):</strong></p>
+<ul>
+<li>Hospitals will pay a subscription after seeing pilot evidence.</li>
+<li>A defined institutional buyer exists with budget authority for accessibility tooling.</li>
+</ul>
+<p><strong>Not tested:</strong> price point, procurement route, budget cycle, whether accessibility spend sits with clinical, IT, HR, or corporate social responsibility, and whether a Nigerian public hospital has any discretionary software budget at all.</p>
+<hr/>
+<h1>7. Business model and financial information</h1>
+<h2>7.1 Revenue model as documented</h2>
+<p>The <strong>only</strong> revenue model in the corpus is the Lean Canvas (S3), which lists four streams without any figures:</p>
+<ol>
+<li>Hospital subscriptions</li>
+<li>Institutional software licensing</li>
+<li>Implementation and training fees</li>
+<li>Government and healthcare network contracts</li>
+</ol>
+<p>The Value Proposition Canvas frames the offering as an &quot;Institutional communication solution for hospitals and, in the future, other public-facing institutions&quot; (S4).</p>
+<h2>7.2 Cost structure as documented</h2>
+<p>Also only in S3, and also without figures:</p>
+<ul>
+<li>AI and software development</li>
+<li>Sign-language data collection and validation</li>
+<li>Cloud infrastructure and hosting</li>
+<li>Pilot testing, training, and customer acquisition</li>
+</ul>
+<p><strong>No monetary value is attached to any cost line. There is no budget, no burn rate, no runway, no unit economics, no pricing tier, no contract value, and no funding request anywhere in the corpus.</strong></p>
+<h2>7.3 Conflicting or absent financial assumptions</h2>
+<p>There is nothing to conflict, because there is only one model and it has no numbers. However, three implicit assumptions are worth surfacing:</p>
+<ul>
+<li><strong>Subscription vs licence vs per-encounter.</strong> The canvas lists subscriptions <em>and</em> licensing <em>and</em> implementation fees <em>and</em> government contracts as if they are complementary. They imply very different sales motions (self-serve recurring vs enterprise procurement vs services-heavy). <strong>A pre-seed venture cannot execute four motions.</strong> This is an unmade decision, not a strategy.</li>
+<li><strong>Who pays for the Deaf patient&#x27;s side.</strong> The model assumes the hospital pays for a tool that primarily benefits a patient population that may be a small minority of its caseload. The business case to a hospital CFO is unstated.</li>
+<li><strong>Free-tier pressure.</strong> If the seven paying individuals are consumers, there is an implicit consumer product that the Lean Canvas does not model.</li>
+</ul>
+<hr/>
+<h1>8. Traction, validation, and partnerships</h1>
+<p>This section applies strict status definitions. <strong>Nothing is upgraded without a document.</strong></p>
+<h2>8.1 Prototypes and demos</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Sign→text/speech research implementation</td><td><strong>Claimed, not evidenced</strong></td><td>CV (S11) states it was developed during a 2025 internship. No code, demo, or output exists in Drive.</td></tr>
+<tr><td>3D signing representation</td><td><strong>Designed, not evidenced</strong></td><td>CV (S11): &quot;Designed a 3D sign language representation system using digital modeling techniques.&quot; No asset file.</td></tr>
+<tr><td>Integrated bidirectional app</td><td><strong>Not built</strong></td><td>No artefact.</td></tr>
+<tr><td>Pitch video</td><td><strong>Exists; content unverified</strong></td><td><code>Unmute Pitch Video —IDICE</code>, 87 MB, 6 Aug 2026 (S16). Format suggests a produced narrative video, not a screen recording of working software. Not viewable in this audit.</td></tr>
+<tr><td>Public demo link</td><td><strong>Not found</strong></td><td>No URL, no Loom, no YouTube, no TestFlight/Play link.</td></tr>
+</tbody></table><br/>
+<h2>8.2 User research</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Activity</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Interview with ASLIN</td><td><strong>Conducted</strong> (15 Sep 2026)</td><td>20.7 MB audio recording exists (S15); findings summarised second-hand in S6. Not transcribed.</td></tr>
+<tr><td>Deaf patient discovery interviews</td><td><strong>Targeted, not completed</strong></td><td>S5 sets a goal of &quot;at least 10 in-depth discovery interviews&quot; — a forward-looking target, not a record.</td></tr>
+<tr><td>Clinician interviews</td><td><strong>Not documented</strong></td><td>None.</td></tr>
+<tr><td>Survey / responses</td><td><strong>Targeted, not completed</strong></td><td>S5 goal: &quot;at least 15 meaningful responses or direct enquiries.&quot; No tally exists.</td></tr>
+<tr><td>Prototype user testing</td><td><strong>Not started</strong></td><td>S5 goal: &quot;secure a group of interested participants willing to test the prototype.&quot; No evidence any testing occurred.</td></tr>
+</tbody></table><br/>
+<h2>8.3 Payments and users</h2>
+<p><strong>DOCUMENTED:</strong> &quot;Unmute has also received seven payments from people waiting to use the product; these are early company-level demand signals, not yet proof of repeat usage or institutional purchasing&quot; (S6).</p>
+<p><strong>NOT DOCUMENTED:</strong> amount per payment, total collected, date range, payment channel, what was promised in exchange, refund policy, identity of payers (individual vs institution), or whether any payer has since been contacted.</p>
+<p><strong>ANALYSIS:</strong> Seven payments is the venture&#x27;s single most valuable asset <em>and</em> its most fragile claim. If it is a waitlist deposit of ₦5,000, it is a curiosity. If it is ₦200,000 from a clinic, it is a seed of a business. The corpus does not tell us, and any serious diligence will ask.</p>
+<h2>8.4 Pilots and institutional partnerships</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Item</th><th>Status</th></tr></thead><tbody>
+<tr><td>Hospital pilot</td><td><strong>Proposed only</strong> — &quot;Deploy in 3 Nigerian hospitals&quot; is roadmap stage 3 (S1); S5 sets &quot;identify at least three hospitals willing to discuss structured MVP testing&quot; as an unmet goal</td></tr>
+<tr><td>Signed pilot agreement</td><td><strong>None found</strong></td></tr>
+<tr><td>Letter of intent / MOU</td><td><strong>None found</strong></td></tr>
+<tr><td>Ministry of Health partnership</td><td><strong>Proposed only</strong> — roadmap stage 4 (S1)</td></tr>
+<tr><td>ASLIN relationship</td><td><strong>Contacted / interviewed</strong> — not a formal partnership. No agreement, no endorsement, no LOI. <strong>Do not describe ASLIN as a partner.</strong></td></tr>
+</tbody></table><br/>
+<h2>8.5 Programs, competitions, awards</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Hackaholics 7.0 (Wema Bank), Enugu</td><td><strong>Entered / pitched</strong></td><td><code>Team Unmute</code> folder inside <code>Hackaholics 7.0 Enugu pitch deck</code> (S17, S24), 14 Oct 2026. <strong>No evidence of placement, award, or shortlist.</strong></td></tr>
+<tr><td>iDICE Startup Bridge / Founders Lab, Cohort 2</td><td><strong>Participating</strong></td><td>Module 1 &amp; 2 worksheets submitted Sept 2026 (S6, S18); onboarding pack and Base Grant info session attended Oct 2026 (S25)</td></tr>
+<tr><td>iDICE pitch video</td><td><strong>Produced</strong></td><td>S16, 6 Aug 2026</td></tr>
+<tr><td>iHatch Cohort 5 (ONDI/NITDA/JICA)</td><td><strong>NOT Unmute</strong></td><td>The iHatch materials in Drive are for <strong>Persat Finance</strong> (S19). Do not claim.</td></tr>
+<tr><td>Awards</td><td><strong>None found</strong></td><td>—</td></tr>
+<tr><td>Grants received</td><td><strong>None found</strong></td><td>Founders Lab has a &quot;Base Grant&quot; track (S25); no award document exists</td></tr>
+</tbody></table><br/>
+<h2>8.6 Traction scorecard</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Metric</th><th>Value</th><th>Confidence</th></tr></thead><tbody>
+<tr><td>Paying users</td><td>7 (undisclosed amounts)</td><td>Low — founder claim</td></tr>
+<tr><td>Active users</td><td>Unknown</td><td>—</td></tr>
+<tr><td>Hospitals piloted</td><td>0 documented</td><td>High confidence in the zero</td></tr>
+<tr><td>Signed partnerships</td><td>0</td><td>High confidence</td></tr>
+<tr><td>Revenue (recognised)</td><td>Unknown</td><td>—</td></tr>
+<tr><td>Accuracy benchmark</td><td>None published</td><td>—</td></tr>
+<tr><td>Team size</td><td>1</td><td>High — CV, all docs single-authored</td></tr>
+<tr><td>Funding raised</td><td>Unknown / likely ₦0</td><td>Inferred from absence</td></tr>
+</tbody></table><br/>
+<hr/>
+<h1>9. Team, founder, and resources</h1>
+<h2>9.1 The founder</h2>
+<p><strong>Prince Nzubechukwu Michael</strong> — Enugu, Nigeria. Contact: <code>princeonpurpose@gmail.com</code>; personal site <code>princeonpurpose.com</code>.</p>
+<p><strong>Documented experience (S11, CV):</strong></p>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Period</th><th>Role</th><th>Organisation</th><th>Relevance to Unmute</th></tr></thead><tbody>
+<tr><td>Apr 2025 – Aug 2025</td><td>AI Research Intern</td><td>Robotics and Artificial Intelligence Nigeria (RAIN), Ibadan</td><td><strong>Direct</strong> — Unmute originated here</td></tr>
+<tr><td>Jan 2026 – current</td><td>Co-founder &amp; CTO</td><td>Persat Labs, Enugu</td><td>Indirect — technical leadership, but a <strong>competing time commitment</strong></td></tr>
+<tr><td>Jan 2026 – current</td><td>Product &amp; Research Lead</td><td>The BeaconSmith, Enugu</td><td>Indirect — <strong>third concurrent commitment</strong></td></tr>
+</tbody></table><br/>
+<p><strong>Self-described capabilities:</strong> AI research, prompt engineering, LLM architecture, NLP, system design, cloud architecture, product discovery, product roadmap, team management.</p>
+<p><strong>Research output:</strong> authored a conceptual AI-safety paper, <em>When AI Becomes a Confidant</em> (S23), on trust and relational dependence in human–AI interaction — evidence of genuine research ability and, notably, of the exact trust problem Unmute will face in a clinical setting.</p>
+<p><strong>References listed:</strong> Dr Olusola Ayoola; Nzube Ndiokwelu; Philemon Nwigwe (RAIN / The BeaconSmith affiliations).</p>
+<h2>9.2 Team composition</h2>
+<p><strong>There is no team.</strong> Every Unmute document is single-authored. The pitch deck has no team slide. The Hackaholics folder contains only a deck. There is:</p>
+<ul>
+<li>no technical co-founder,</li>
+<li>no clinical advisor,</li>
+<li>no Deaf community advisor or co-design partner,</li>
+<li>no interpreter on staff or retainer,</li>
+<li>no designer,</li>
+<li>no business/commercial lead.</li>
+</ul>
+<p><strong>ANALYSIS:</strong> For a venture whose core risk is <em>cultural and clinical legitimacy</em>, the absence of a Deaf advisor is more serious than the absence of a second engineer. A hearing founder building a product for Deaf users without a Deaf co-designer will be challenged — correctly — by every accelerator, funder, and community reviewer.</p>
+<h2>9.3 Access to interpreters, Deaf communities, healthcare</h2>
+<ul>
+<li><strong>Interpreters:</strong> one interview with ASLIN (S15/S6). No ongoing relationship evidenced.</li>
+<li><strong>Deaf community:</strong> no documented individual relationships; the Lean Canvas lists &quot;Access to Deaf communities, sign-language interpreters and healthcare professionals for validation&quot; as an <em>asset</em> (S3) — which, given the rest of the corpus, reads as an aspiration rather than a held asset.</li>
+<li><strong>Healthcare professionals:</strong> none named, none quoted, no clinical advisor.</li>
+</ul>
+<h2>9.4 Resources, equipment, funding</h2>
+<ul>
+<li><strong>Funding:</strong> none documented. No grant, no investment, no prize.</li>
+<li><strong>Equipment:</strong> not documented. No GPU, camera, or device inventory.</li>
+<li><strong>Software:</strong> Google Workspace, a How2Sign dataset, and (per CV) AI/ML tooling. No paid infrastructure evidenced.</li>
+<li><strong>Time:</strong> the founder holds two other concurrent roles (S11). Available hours per week are not stated — the Module 1 worksheet that asks this question is blank (S18).</li>
+</ul>
+<h2>9.5 Skill and resource gaps</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Gap</th><th>Severity</th><th>Why</th></tr></thead><tbody>
+<tr><td>No Deaf co-designer / advisor</td><td><strong>Critical</strong></td><td>Legitimacy, usability, and consent for dataset creation</td></tr>
+<tr><td>No clinical advisor</td><td><strong>Critical</strong></td><td>Clinical workflow, safety, liability, procurement credibility</td></tr>
+<tr><td>No second engineer</td><td>High</td><td>A bidirectional real-time system is not a solo build on a part-time basis</td></tr>
+<tr><td>No commercial/procurement capability</td><td>High</td><td>Hospital sales in Nigeria is relationship- and tender-driven</td></tr>
+<tr><td>No ML evaluation capability demonstrated</td><td>High</td><td>No benchmark, no accuracy target, no test protocol</td></tr>
+<tr><td>Split attention across three organisations</td><td>High</td><td>Execution risk</td></tr>
+</tbody></table><br/>
+<hr/>
+<h1>10. Startup programs and applications</h1>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Program</th><th>Purpose</th><th>Date / cohort</th><th>Status</th><th>Claims &amp; metrics used</th><th>Commitments / milestones</th><th>Source</th></tr></thead><tbody>
+<tr><td><strong>Hackaholics 7.0</strong> (Wema Bank) — Enugu</td><td>Pitch competition</td><td>Oct 2026 (folder 14 Oct)</td><td><strong>Entered / pitched.</strong> No result documented.</td><td>Pitch deck content only (S1/S2). No traction metrics presented.</td><td>None documented</td><td>S17, S24</td></tr>
+<tr><td><strong>iDICE Startup Bridge — Founders Lab, Cohort 2</strong></td><td>Incubator / accelerator</td><td>Sept 2026 – ongoing</td><td><strong>Participating.</strong> Modules 1 &amp; 2 submitted; onboarding completed; Base Grant session attended 16 Oct 2026</td><td>GDRI 8%/7%/38%; IJCAI 8,000/5,000/137; 7 payments; ASLIN interview</td><td>Module 2 market-fit argument; Module 1 goal plan <strong>left blank</strong></td><td>S6, S18, S25</td></tr>
+<tr><td><strong>iDICE pitch video</strong></td><td>Program pitch</td><td>6 Aug 2026</td><td><strong>Produced</strong></td><td>Unknown — video not viewable</td><td>—</td><td>S16</td></tr>
+<tr><td><strong>iDICE Base Grant</strong></td><td>Grant funding</td><td>Cohort 2, info session 16 Oct 2026</td><td><strong>Eligible / informed.</strong> No application or award documented.</td><td>—</td><td>—</td><td>S25</td></tr>
+<tr><td><strong>iHatch Cohort 5</strong> (ONDI / NITDA / JICA)</td><td>Incubation</td><td>2026</td><td><strong>NOT Unmute — this is Persat Finance.</strong> Do not cite.</td><td>—</td><td>—</td><td>S19, and iHatch programme files</td></tr>
+<tr><td><strong>Enugu Tech Fest (ETF)</strong></td><td>Event</td><td>2026</td><td><strong>Unclear.</strong> An ETF media/brand folder exists in Drive but contains no Unmute material.</td><td>—</td><td>—</td><td>Drive listing only</td></tr>
+</tbody></table><br/>
+<h2>10.1 Inconsistencies across applications that need correction</h2>
+<ol>
+<li><strong>Domain/contact drift.</strong> July deck: <code>prince@unmute.ai</code> / <code>www.unmute.ai</code>. October deck: <code>contact@liveunmute.com</code> / <code>www.liveunmute.com</code>. Any application still carrying the old address is out of date. <strong>Determine which domain is actually owned and live.</strong></li>
+<li><strong>Product scope drift.</strong> The 30 Sep Founders Lab submission describes <strong>two products</strong> (Sign + Expression). The 15 Oct deck and 18–19 Oct canvases describe <strong>one</strong>. If Founders Lab assessed the two-product version and the deck now contradicts it, that should be reconciled explicitly rather than left to be discovered.</li>
+<li><strong>&quot;Replaces interpreters&quot; vs &quot;complements interpreters.&quot;</strong> S6 (submitted to Founders Lab) says complement. S1 (used at Hackaholics) says &quot;0 interpreters needed.&quot; Two assessors at two programs have been told different things about the same core value proposition.</li>
+<li><strong>Team description.</strong> The Hackaholics deck has no team slide; the CV shows three concurrent roles. Any verbal claim of a &quot;team&quot; would be inconsistent with the file record.</li>
+<li><strong>NSL capability.</strong> S1 asserts NSL support; S6 and S1&#x27;s own roadmap say the NSL corpus does not yet exist.</li>
+</ol>
+<hr/>
+<h1>11. Product roadmap and execution plans</h1>
+<h2>11.1 The published roadmap (S1)</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Stage</th><th>Stated scope</th><th>Status as of 20 Oct 2026</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>MVP</strong></td><td>ASL proof of concept — core recognition engine validated</td><td><strong>In progress / not evidenced.</strong> Dataset manifest loaded Aug 2026; no model, metric, or demo.</td></tr>
+<tr><td>2</td><td><strong>NSL Dataset</strong></td><td>Build the first structured Nigerian Sign Language training corpus</td><td><strong>Not started.</strong> No protocol, partner, ethics approval, or funding.</td></tr>
+<tr><td>3</td><td><strong>Hospital Pilot</strong></td><td>Deploy in 3 Nigerian hospitals — measure outcomes, iterate</td><td><strong>Not started.</strong> Zero hospitals identified in writing.</td></tr>
+<tr><td>4</td><td><strong>National Rollout</strong></td><td>Partner with Ministry of Health for nationwide deployment</td><td><strong>Not started.</strong> No contact evidenced.</td></tr>
+<tr><td>5</td><td><strong>Africa Expansion</strong></td><td>Kenya, Ghana, South Africa — localise per region</td><td>Not started. Aspirational.</td></tr>
+<tr><td>6</td><td><strong>Global Platform</strong></td><td>Multilingual accessibility infrastructure</td><td>Not started. Aspirational.</td></tr>
+</tbody></table><br/>
+<p><strong>No dates, durations, or dependencies are attached to any stage.</strong> The roadmap is ordinal, not scheduled. That is acceptable at pre-seed but means there is no way to tell whether the venture is ahead, behind, or on plan.</p>
+<h2>11.2 The validation plan (S5 — Digital Presence Worksheet, 19 Oct 2026)</h2>
+<p>This is the most concrete execution document in the corpus. It sets five measurable targets:</p>
+<ol>
+<li>Receive at least <strong>15</strong> meaningful responses or direct enquiries from the target audience.</li>
+<li>Conduct at least <strong>10</strong> in-depth discovery interviews with Deaf sign-language users and healthcare workers.</li>
+<li>Identify at least <strong>three</strong> hospitals willing to discuss structured MVP testing or a potential pilot.</li>
+<li>Obtain specific feedback identifying recurring communication problems and the situations where Unmute would be useful.</li>
+<li>Secure a group of interested participants willing to test the prototype.</li>
+</ol>
+<p><strong>Status of each: no completion recorded.</strong> These are targets set one day before this audit.</p>
+<p>The document also states two assumptions to test, quoted verbatim because they are unusually well-framed:</p>
+<ul>
+<li><em>&quot;Deaf patients and healthcare workers experience communication barriers frequently enough to want and use a tool like Unmute during routine healthcare interactions.&quot;</em></li>
+<li><em>&quot;Unmute can accurately handle a defined set of Nigerian Sign Language interactions in a real healthcare environment.&quot;</em></li>
+<li>And: <em>&quot;whether hospitals or other healthcare institutions would be willing to pay for a reliable solution after seeing evidence of its usefulness.&quot;</em></li>
+</ul>
+<h2>11.3 The market-fit assumption (S6 — 30 Sep 2026)</h2>
+<blockquote>&quot;Sign: users/institutions will trust and adopt AI-powered Nigerian Sign Language communication at the accuracy required for real-world use, and a defined buyer will pay.&quot;</blockquote>
+<p>This is correctly identified as the biggest unvalidated assumption. It is also, notably, <strong>two assumptions fused into one</strong> — trust/accuracy and willingness-to-pay are separable and should be tested separately.</p>
+<h2>11.4 Completed vs planned — strict accounting</h2>
+<p><strong>Completed (evidenced):</strong></p>
+<ul>
+<li>ASL dataset acquired and loaded (S13)</li>
+<li>ASLIN interview conducted (S15)</li>
+<li>Market research module completed (S6)</li>
+<li>Pitch deck, video, canvas set, and digital-presence plan produced (S1, S16, S3, S4, S5)</li>
+<li>Two program applications/submissions made (Founders Lab, Hackaholics)</li>
+</ul>
+<p><strong>Planned but not done (all with no recorded start):</strong></p>
+<ul>
+<li>Working bidirectional prototype</li>
+<li>Accuracy benchmark on any sign language</li>
+<li>NSL corpus</li>
+<li>Deaf-user testing</li>
+<li>Clinician testing</li>
+<li>Hospital identification</li>
+<li>Pilot</li>
+<li>Pricing</li>
+<li>Financial model</li>
+<li>Fundraise</li>
+</ul>
+<h2>11.5 Dependencies and blockers</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Blocker</th><th>Blocks</th><th>Notes</th></tr></thead><tbody>
+<tr><td>No NSL data</td><td>NSL product, hospital pilot, any Nigerian clinical claim</td><td>Cannot be solved by engineering alone; requires community partnership and funding</td></tr>
+<tr><td>No clinical partner</td><td>Pilot, workflow design, credibility</td><td>Cold outreach to hospitals without a prototype is unlikely to convert</td></tr>
+<tr><td>No technical co-founder</td><td>Build velocity</td><td>Solo + two other roles</td></tr>
+<tr><td>No funding</td><td>Dataset collection (paid contributors), compute, pilot</td><td>Founders Lab Base Grant is the nearest identified route</td></tr>
+<tr><td>No accuracy benchmark</td><td>Any claim of &quot;reliable&quot;</td><td>Needs a test set and a target (e.g. word error rate threshold)</td></tr>
+<tr><td>Unresolved privacy architecture</td><td>Clinical deployment, data protection compliance</td><td>Nigeria Data Protection Act obligations for health data</td></tr>
+</tbody></table><br/>
+<hr/>
+<h1>12. Brand, messaging, and digital presence</h1>
+<h2>12.1 Brand assets</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Element</th><th>Current version</th><th>Source</th></tr></thead><tbody>
+<tr><td><strong>Name</strong></td><td>Unmute</td><td>All</td></tr>
+<tr><td><strong>Tagline</strong></td><td>&quot;Every Voice Deserves to Be Heard.&quot;</td><td>S1, S8</td></tr>
+<tr><td><strong>Category label</strong></td><td>&quot;AI-powered healthcare communication platform&quot;</td><td>S1</td></tr>
+<tr><td><strong>Boilerplate</strong></td><td>&quot;An AI-powered healthcare communication platform that enables real-time conversation between Deaf patients and healthcare professionals — using sign language recognition, speech recognition, and AI-generated sign language.&quot;</td><td>S1</td></tr>
+<tr><td><strong>Founder line</strong></td><td>&quot;I&#x27;m not building another AI product. I&#x27;m building the future of accessible healthcare — starting in Nigeria and scaling to the world.&quot;</td><td>S1</td></tr>
+<tr><td><strong>Closing line</strong></td><td>&quot;Healthcare should never depend on whether your voice can be heard.&quot;</td><td>S1</td></tr>
+<tr><td><strong>Email</strong></td><td><code>contact@liveunmute.com</code> (current); <code>prince@unmute.ai</code> (superseded)</td><td>S1; S8</td></tr>
+<tr><td><strong>Website</strong></td><td><code>www.liveunmute.com</code> (current); <code>www.unmute.ai</code> (superseded)</td><td>S1; S8</td></tr>
+<tr><td><strong>Venture social</strong></td><td><code>@LiveUnmute</code> (LinkedIn), <code>@LiveUnmuted</code> (Instagram)</td><td>S5</td></tr>
+<tr><td><strong>Founder social</strong></td><td><code>@PrinceOnPurpose</code> (LinkedIn, Instagram)</td><td>S5</td></tr>
+<tr><td><strong>WhatsApp</strong></td><td>WhatsApp Business channel planned</td><td>S5, S3</td></tr>
+</tbody></table><br/>
+<h2>12.2 Digital presence plan (S5, 19 Oct 2026)</h2>
+<ul>
+<li><strong>Channels:</strong> WhatsApp Business, LinkedIn, Instagram.</li>
+<li><strong>Split:</strong> founder-led (<code>@PrinceOnPurpose</code>) for narrative and build-in-public; venture (<code>@LiveUnmute</code> / <code>@LiveUnmuted</code>) for the product.</li>
+<li><strong>Cadence:</strong> &quot;at least one meaningful update each week.&quot;</li>
+<li><strong>Content:</strong> what is being built, what is learned from users, technical challenges, prototype demonstrations, changes made from feedback.</li>
+<li><strong>Discipline stated:</strong> &quot;be transparent about what works, what remains experimental and what still needs validation&quot;; &quot;will not publish identifiable patient information or confidential interview details.&quot;</li>
+<li><strong>Consistency requirement:</strong> identical information across landing page, LinkedIn, Instagram, and WhatsApp Business; accessible visual content, clear language, captioned videos.</li>
+<li><strong>Conversion:</strong> simple route to contact, request a demo, or join a testing list; track enquiries and feedback.</li>
+</ul>
+<h2>12.3 Messaging assessment</h2>
+<p><strong>Strongest asset:</strong> the tagline. &quot;Every Voice Deserves to Be Heard&quot; is thematically precise, emotionally legible, and works for both Deaf communication and the broader access mission.</p>
+<p><strong>Weakest asset:</strong> the &quot;0 Interpreters Needed&quot; impact slide (S1). It is (a) unsupported, (b) contradicted by the venture&#x27;s own research document, (c) professionally offensive to the interpreter community Unmute says it wants as a channel partner, and (d) likely to be the single most-quoted line by any Deaf reviewer. <strong>Recommend deleting or reframing it before the deck is shown again.</strong></p>
+<p><strong>Second weakness:</strong> the deck&#x27;s opening uses a named deceased individual as its hook. Even if the case is real and permission exists, using a death as a pitch device without documented consent is a reputational and ethical exposure. It should be verified and, ideally, replaced with a consented, living participant&#x27;s story or an anonymised composite clearly labelled as such.</p>
+<hr/>
+<h1>13. Decisions, contradictions, and unresolved questions</h1>
+<p>This is the most important section of the report. Each conflict is stated without resolving it, with a recommendation for which source to treat as authoritative.</p>
+<h2>C1 — One product or two? (Unresolved)</h2>
+<ul>
+<li><strong>S6 (30 Sep 2026):</strong> Unmute = <strong>Unmute Sign + Unmute Expression</strong>, sharing &quot;one company thesis.&quot;</li>
+<li><strong>S3, S4, S5, S1 (15–19 Oct 2026):</strong> Unmute = <strong>healthcare sign-language product only.</strong> No mention of Expression.</li>
+</ul>
+<p><strong>Conflict:</strong> Expression disappears entirely in the three most recent documents.</p>
+<p><strong>Recommendation:</strong> Treat <strong>S3/S4 (18–19 Oct)</strong> as authoritative for current scope. But record an explicit decision: was Expression <em>dropped</em>, <em>parked</em>, or <em>renamed</em>? Investors who saw the September document will ask. The absence of any note is itself a governance gap.</p>
+<h2>C2 — Replace or complement interpreters? (Serious)</h2>
+<ul>
+<li><strong>S6 (30 Sep):</strong> &quot;Unmute should complement rather than claim to replace interpreters, especially in high-stakes cases.&quot;</li>
+<li><strong>S1 (15 Oct):</strong> &quot;<strong>0 — Interpreters Needed.</strong> AI replaces the need for scarce, expensive human interpreters.&quot;</li>
+</ul>
+<p><strong>Conflict:</strong> Direct contradiction, 15 days apart, on the venture&#x27;s core value claim.</p>
+<p><strong>Recommendation:</strong> <strong>S6 is authoritative</strong> — it is the more considered statement, it is consistent with the actual product (a tool that will fail on complex or unrepresented vocabulary), and it is the position that preserves the ASLIN relationship. The deck line should be corrected immediately.</p>
+<h2>C3 — Does Unmute support Nigerian Sign Language today? (Serious)</h2>
+<ul>
+<li><strong>S1:</strong> &quot;Multilingual — Supports Nigerian Sign Language, ASL, and more.&quot;</li>
+<li><strong>S1 (same document, roadmap):</strong> &quot;Nigeria has almost no structured Nigerian Sign Language dataset — Unmute will build the definitive corpus&quot;; NSL dataset is roadmap stage <strong>2</strong>, after the ASL MVP.</li>
+<li><strong>S6:</strong> &quot;Nigerian Sign Language AI remains an emerging field.&quot;</li>
+</ul>
+<p><strong>Conflict:</strong> The capability slide claims a shipped property; the roadmap treats it as future work requiring data that does not exist.</p>
+<p><strong>Recommendation:</strong> Rewrite as &quot;Designed for Nigerian Sign Language; ASL proof-of-concept first, NSL corpus in development.&quot; The current phrasing is the kind of claim that, if repeated to a technical reviewer, ends the meeting.</p>
+<h2>C4 — Who is the customer? (Unresolved)</h2>
+<ul>
+<li><strong>S3:</strong> Revenue only from institutions (hospital subscriptions, licensing, implementation fees, government contracts).</li>
+<li><strong>S6:</strong> &quot;Seven people have paid for Unmute and are waiting to use it.&quot;</li>
+<li><strong>S5:</strong> Digital presence aimed at individual Deaf users and healthcare workers (&quot;join a testing list&quot;).</li>
+</ul>
+<p><strong>Conflict:</strong> A pure B2B model with unexplained consumer payments and consumer-facing acquisition.</p>
+<p><strong>Recommendation:</strong> Decide explicitly whether there is a bottom-up consumer wedge feeding institutional sales, or whether the seven payments were deposits on a future product. Document the answer; it changes the go-to-market entirely.</p>
+<h2>C5 — Timeline inconsistency in the founder&#x27;s account</h2>
+<ul>
+<li><strong>S11 (CV):</strong> Unmute developed during <strong>Apr–Aug 2025</strong> at RAIN.</li>
+<li><strong>S1 (deck):</strong> Presented as a response to a specific patient death, with no date or institutional context.</li>
+</ul>
+<p><strong>Conflict:</strong> Not a factual contradiction, but the deck implies a continuous personal mission, while the CV places the build inside a five-month internship that ended ~14 months before the current pitch.</p>
+<p><strong>Recommendation:</strong> Reconcile in the narrative. &quot;I built the first version during a research internship in 2025, and have been developing it since&quot; is both true and stronger than an ambiguous origin story.</p>
+<h2>C6 — Which domain and email are real?</h2>
+<ul>
+<li><strong>S8/S9 (Jul 2026):</strong> <code>unmute.ai</code>, <code>prince@unmute.ai</code>.</li>
+<li><strong>S1 (Oct 2026):</strong> <code>liveunmute.com</code>, <code>contact@liveunmute.com</code>.</li>
+</ul>
+<p><strong>Conflict:</strong> Two different brand identities in circulation. Applications, decks, and social bios may carry either.</p>
+<p><strong>Recommendation:</strong> <strong>S1 is authoritative.</strong> Confirm <code>liveunmute.com</code> is registered, resolving, and has a working contact address. Retire <code>unmute.ai</code> from all collateral.</p>
+<h2>C7 — Programme attribution risk</h2>
+<ul>
+<li><strong>iHatch Cohort 5</strong> materials in Drive are for <strong>Persat Finance</strong>, not Unmute (S19).</li>
+<li><strong>Hackaholics</strong> materials are for Unmute (S17).</li>
+</ul>
+<p><strong>Risk:</strong> Because both ventures live in the same Drive and the same founder&#x27;s portfolio, there is a real possibility of cross-attribution in applications or conversations.</p>
+<p><strong>Recommendation:</strong> Maintain a hard separation. Never describe iHatch as a Unmute program.</p>
+<h2>C8 — The &quot;seven payments&quot; claim is unverifiable as recorded</h2>
+<p>No amount, date, channel, or consideration is documented (S6). It is used in a submitted accelerator worksheet as a demand signal.</p>
+<p><strong>Recommendation:</strong> Reconstruct the record from payment provider history and document it in a single evidence file. If the payments were not for the product but for something else (e.g. a deposit on a service), say so.</p>
+<h2>C9 — Unmade decisions (not contradictions, but absences)</h2>
+<ol>
+<li>Pricing — no figure anywhere.</li>
+<li>Buyer within the hospital — clinical director? IT? administration? CSR?</li>
+<li>Whether the product is a shared tablet, a patient&#x27;s own phone, or a kiosk.</li>
+<li>Whether inference is on-device or cloud (this determines whether &quot;offline&quot; and &quot;private by design&quot; are achievable).</li>
+<li>Whether the avatar is 3D, 2D, or video-based.</li>
+<li>Which clinical scenarios are in scope for v1 (triage? consultation? admissions? pharmacy?).</li>
+<li>Whether the NSL corpus will be owned, licensed, or open.</li>
+<li>Legal entity and jurisdiction for Unmute (Persat Labs Limited exists; no Unmute entity is documented).</li>
+</ol>
+<hr/>
+<h1>14. Risks and strategic gaps</h1>
+<h2>14.1 Risks explicitly acknowledged in the files</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>Risk</th><th>Where stated</th></tr></thead><tbody>
+<tr><td>Recognition/translation accuracy insufficient for real clinical use</td><td>S6 (&quot;users/institutions will trust and adopt … at the accuracy required&quot;)</td></tr>
+<tr><td>Trust and adoption by Deaf users</td><td>S6, S5</td></tr>
+<tr><td>A defined institutional buyer may not pay</td><td>S6, S5</td></tr>
+<tr><td>NSL data scarcity</td><td>S1, S6</td></tr>
+<tr><td>Dependence on interpreters being unavailable — but interpreters remain necessary for complex cases</td><td>S6</td></tr>
+<tr><td>Expression may not be a repeatable product</td><td>S6</td></tr>
+</tbody></table><br/>
+<h2>14.2 Risks I am adding from analysis</h2>
+<p><strong>R1 — Technical feasibility of the stated spec (High).</strong> &lt;2s latency, offline, bidirectional, on mobile, with an avatar, is a hard combination. The avatar alone (realistic continuous signing synthesis) is an open research problem; most commercial systems use pre-recorded video clips or human interpreters, not generative avatars. <strong>The deck&#x27;s &quot;AI-generated sign language&quot; is the least credible element of the product description and is presented as if solved.</strong></p>
+<p><strong>R2 — ASL→NSL transfer (High).</strong> Validating on ASL says nothing about NSL. The roadmap&#x27;s stage 1→2 sequencing creates a false sense of progress: a working ASL demo will feel like 80% of the product and will in fact be ~0% of the Nigerian product.</p>
+<p><strong>R3 — Dataset consent and ownership (High, legal/ethical).</strong> Building a sign-language corpus from Deaf contributors requires informed consent, compensation norms, and clarity on commercial reuse. None of this is addressed. Sign language is embodied and identity-linked; a corpus scraped or collected without community governance would be a serious harm and a serious liability.</p>
+<p><strong>R4 — Health data protection (High).</strong> Video of a patient signing in a clinical encounter, plus audio of a clinician, is sensitive health data under Nigeria&#x27;s Data Protection Act. There is no privacy impact assessment, no retention policy, no data-flow diagram, and no processor agreements. The &quot;data never leaves the device&quot; claim, if untrue, converts a marketing line into a compliance problem.</p>
+<p><strong>R5 — Clinical safety and liability (High).</strong> If a mistranslation contributes to a clinical error, who is liable? There is no disclaimer strategy, no &quot;not for emergency use&quot; scoping, no human-in-the-loop design for high-stakes moments, and no clinical governance.</p>
+<p><strong>R6 — Community legitimacy (High).</strong> A hearing founder, no Deaf advisor, a pitch built on a deceased Deaf woman&#x27;s story, and a slide claiming AI makes interpreters unnecessary. Each of these individually is survivable; together they read as extraction rather than partnership. <strong>This is the risk most likely to end the venture early, and it is the cheapest to fix.</strong></p>
+<p><strong>R7 — Institutional procurement reality (High).</strong> Nigerian public hospitals rarely have discretionary software budgets or fast procurement. The stated buyer may not exist in the form assumed. The realistic first buyer may be a private hospital chain, an NGO, a development-funded programme, or a health insurer — none of which is analysed.</p>
+<p><strong>R8 — Founder bandwidth and single point of failure (High).</strong> Three concurrent roles, no team, no funding. If the founder is unavailable for a month, the venture stops.</p>
+<p><strong>R9 — Evidence fragility (Medium-High).</strong> The venture&#x27;s public claims rest on five citations, four of which are second-hand with no link in Drive. One diligent reviewer asking &quot;can you send me that study?&quot; exposes the whole evidence base.</p>
+<p><strong>R10 — Brand/asset control (Medium).</strong> Two domains, two social handles, no documented entity. If <code>unmute.ai</code> is not owned, previous collateral points at someone else&#x27;s property.</p>
+<hr/>
+<h1>15. Recommended next actions</h1>
+<p>Ordered by urgency and dependency. Each action states why, the expected outcome, and the document it derives from.</p>
+<h2>Immediate (next 7 days) — protect credibility</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Action</th><th>Why</th><th>Outcome</th><th>Source</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>Remove or rewrite &quot;0 Interpreters Needed.&quot;</strong> Replace with &quot;reduces routine dependence on interpreters; complex and high-stakes cases still require human interpreters.&quot;</td><td>Directly contradicts the venture&#x27;s own research and will alienate the interpreter network it depends on</td><td>Deck becomes internally consistent and defensible</td><td>S1 vs S6</td></tr>
+<tr><td>2</td><td><strong>Correct the NSL capability claim</strong> to &quot;designed for NSL; ASL PoC first.&quot;</td><td>Current claim is contradicted by the same deck&#x27;s roadmap</td><td>Technical credibility preserved</td><td>S1</td></tr>
+<tr><td>3</td><td><strong>Verify or replace the Zulaihatu story.</strong> Locate the source; obtain family permission if real; otherwise replace with a consented participant story or a clearly-labelled composite</td><td>Using a real death without provenance or consent is an ethical and reputational hazard</td><td>Deck opens with unimpeachable evidence</td><td>S1, S8</td></tr>
+<tr><td>4</td><td><strong>Source all five external statistics</strong> (GDRI, IJCAI, ICIR, 70M, workforce) with title, year, and URL in a single citations file</td><td>Every claim currently fails the &quot;send me the study&quot; test</td><td>A citable evidence appendix</td><td>S1, S6</td></tr>
+<tr><td>5</td><td><strong>Reconstruct the &quot;seven payments&quot; record</strong> — amount, date, channel, consideration, refund policy</td><td>It is the only traction metric and it is currently unauditable</td><td>A one-page evidence file, or a corrected claim</td><td>S6</td></tr>
+<tr><td>6</td><td><strong>Confirm domain and email ownership.</strong> Decide <code>liveunmute.com</code> vs <code>unmute.ai</code>; update all collateral</td><td>Two identities are in circulation</td><td>One canonical contact</td><td>S1 vs S8</td></tr>
+</tbody></table><br/>
+<h2>Before the MVP can be demonstrated (next 4–8 weeks)</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Action</th><th>Why</th><th>Outcome</th><th>Source</th></tr></thead><tbody>
+<tr><td>7</td><td><strong>Define MVP scope as one clinical scenario</strong> (e.g. triage pain/body-location vocabulary, 50–100 signs), not &quot;sign language translation&quot;</td><td>Unbounded scope cannot be built or evaluated</td><td>A testable spec</td><td>S1 stage 1, S3</td></tr>
+<tr><td>8</td><td><strong>Build and publish a baseline accuracy benchmark</strong> on a held-out ASL set (word/sign error rate, latency on a named device)</td><td>Replaces unverifiable claims with a number</td><td>First honest technical metric</td><td>S1</td></tr>
+<tr><td>9</td><td><strong>Record a 60-second screen demo</strong> of the working pipeline and host it at a stable URL</td><td>No demo exists anywhere in Drive; every application asks for one</td><td>A shareable proof artefact</td><td>—</td></tr>
+<tr><td>10</td><td><strong>Write a one-page technical architecture note</strong>: on-device vs cloud, model, ASR vendor, avatar method, latency budget</td><td>Determines whether &quot;offline&quot; and &quot;private&quot; are achievable at all</td><td>Removes the largest unknown from diligence</td><td>—</td></tr>
+<tr><td>11</td><td><strong>Recruit a Deaf co-designer or paid advisor</strong> and name them publicly</td><td>Legitimacy, usability, and consent for corpus work</td><td>Credibility with community and funders</td><td>S3 (lists community access as an asset it does not have)</td></tr>
+<tr><td>12</td><td><strong>Recruit a clinical advisor</strong> (one practising clinician)</td><td>Workflow realism and hospital credibility</td><td>Access and validation</td><td>—</td></tr>
+</tbody></table><br/>
+<h2>Before a real-world pilot</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Action</th><th>Why</th><th>Outcome</th><th>Source</th></tr></thead><tbody>
+<tr><td>13</td><td><strong>Complete the 10 discovery interviews</strong> and publish a summary with themes and counts</td><td>S5 sets this target; nothing is recorded</td><td>The primary evidence the deck currently lacks</td><td>S5</td></tr>
+<tr><td>14</td><td><strong>Write the NSL data collection protocol</strong>: consent, compensation, annotation, regional variation, storage, ownership</td><td>Prerequisite to any corpus work; the highest legal/ethical exposure</td><td>A fundable, defensible protocol</td><td>S3, S1</td></tr>
+<tr><td>15</td><td><strong>Complete a data protection impact assessment</strong> for clinical video/audio</td><td>Health data; NDPA obligations; &quot;data never leaves device&quot; claim</td><td>Compliance readiness</td><td>S1</td></tr>
+<tr><td>16</td><td><strong>Define clinical safety boundaries</strong> — what the tool must never be used for, and the human escalation path</td><td>Liability and patient safety</td><td>A safety case a hospital can accept</td><td>—</td></tr>
+<tr><td>17</td><td><strong>Convert &quot;three hospitals&quot; from a target into named prospects</strong> with a named contact and a stated next step</td><td>S5 goal 3; currently zero</td><td>A real pipeline</td><td>S5</td></tr>
+</tbody></table><br/>
+<h2>Before commercial deployment</h2>
+<table border="1" cellspacing="0" cellpadding="5"><thead><tr><th>#</th><th>Action</th><th>Why</th><th>Outcome</th><th>Source</th></tr></thead><tbody>
+<tr><td>18</td><td><strong>Choose one revenue model</strong> (subscription <em>or</em> per-encounter <em>or</em> licence) and price it</td><td>Four listed streams imply four sales motions a solo founder cannot run</td><td>A costed offer</td><td>S3</td></tr>
+<tr><td>19</td><td><strong>Build a bottom-up market model</strong> — number of target hospitals × plausible contract value</td><td>No TAM/SAM/SOM exists</td><td>Fundable sizing</td><td>absence in all files</td></tr>
+<tr><td>20</td><td><strong>Identify the actual budget holder</strong> inside a hospital and the procurement route</td><td>The assumed buyer may not exist</td><td>A viable sales path</td><td>S6</td></tr>
+<tr><td>21</td><td><strong>Resolve the entity question</strong> — is Unmute a Persat Labs product or its own company?</td><td>Affects IP ownership, grants, and investment</td><td>Clean cap table and IP chain</td><td>S11, S20</td></tr>
+</tbody></table><br/>
+<h2>Questions to resolve before fundraising or public claims</h2>
+<ol>
+<li>What is the measured accuracy of the system, on which sign language, on what test set?</li>
+<li>Is there a working demo, and can a stranger use it?</li>
+<li>Who is the buyer, and has anyone with budget authority said they would pay?</li>
+<li>What exactly did the seven payers pay for?</li>
+<li>Who owns the NSL corpus, and who consented to it?</li>
+<li>Is Unmute a separate legal entity from Persat Labs?</li>
+<li>Is there a Deaf person with decision-making authority in the venture?</li>
+<li>What happens clinically when the system is wrong?</li>
+</ol>
+<p><strong>Until questions 1, 2, 3, and 7 have evidenced answers, Unmute should describe itself as &quot;pre-prototype, in customer discovery&quot; — not as a platform with pilots, multilingual support, or sub-two-second performance.</strong></p></body></html>

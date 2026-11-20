@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Before you test — Unmute</title>
+<meta name="description" content="What works today in the Unmute prototype, what does not, and what to look for. Written for clinicians and testers.">
+<meta name="theme-color" content="#E3E1DC">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bone: #E3E1DC;
+    --paper: #F7F6F3;
+    --ink: #121212;
+    --ink-70: #454540;
+    --ink-45: #7A7871;
+    --rule: rgba(18, 18, 18, 0.13);
+    --rule-soft: rgba(18, 18, 18, 0.07);
+    --blue: #006AFE;
+    --blue-deep: #0056CC;
+    --blue-lo: #E6F0FF;
+    --amber: #B47400;
+    --amber-lo: #FFF3DC;
+    --display: 'Syncopate', 'Arial Black', sans-serif;
+    --body: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bone);
+    color: var(--ink);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 22px 90px; }
+
+  /* ---- top bar ---- */
+  .top {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .top img { height: 22px; display: block; }
+  .top a {
+    font-family: var(--display); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border: 1px solid var(--ink); border-radius: 999px;
+    padding: 9px 16px; transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .top a:hover { background: var(--ink); color: var(--paper); }
+
+  /* ---- hero ---- */
+  .hero { padding: 52px 0 34px; }
+  .kicker {
+    font-family: var(--display); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-45);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(26px, 5vw, 44px); line-height: 1.08;
+    letter-spacing: -0.02em; margin: 0 0 18px; max-width: 18ch;
+  }
+  .lede { font-size: 17px; color: var(--ink-70); max-width: 62ch; margin: 0; }
+  .lede b { color: var(--ink); }
+
+  /* ---- status strip ---- */
+  .status {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 18px 20px; margin: 30px 0 8px;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex: none;
+    background: var(--ink-45);
+  }
+  .dot.is-live { background: var(--blue); box-shadow: 0 0 0 4px rgba(0, 106, 254, 0.14); }
+  .dot.is-demo { background: var(--amber); box-shadow: 0 0 0 4px rgba(180, 116, 0, 0.14); }
+  .status-main { flex: 1; min-width: 0; }
+  .status-title {
+    font-family: var(--display); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase; margin: 0 0 6px;
+  }
+  .status-body { margin: 0; font-size: 14.5px; color: var(--ink-70); }
+  .status-body b { color: var(--ink); }
+
+  /* ---- sections ---- */
+  section { margin-top: 46px; }
+  h2 {
+    font-family: var(--display); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.19em; text-transform: uppercase;
+    margin: 0 0 6px; color: var(--ink);
+  }
+  .sub { color: var(--ink-45); font-size: 14px; margin: 0 0 18px; }
+
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
+
+  .card {
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 14px; padding: 19px 20px;
+  }
+  .card h3 {
+    font-family: var(--display); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin: 0 0 11px; color: var(--ink);
+  }
+  .card.is-real { border-color: rgba(0, 106, 254, 0.4); background: var(--blue-lo); }
+  .card.is-real h3 { color: var(--blue-deep); }
+  .card.is-gap { border-color: rgba(180, 116, 0, 0.35); background: var(--amber-lo); }
+  .card.is-gap h3 { color: var(--amber); }
+  .card ul { margin: 0; padding: 0; list-style: none; }
+  .card li {
+    position: relative; padding-left: 16px; margin-bottom: 9px;
+    font-size: 14px; color: var(--ink-70);
+  }
+  .card li:last-child { margin-bottom: 0; }
+  .card li::before {
+    content: ""; position: absolute; left: 0; top: 8px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--ink-45);
+  }
+  .card.is-real li::before { background: var(--blue); }
+  .card.is-gap li::before { background: var(--amber); }
+  .card li b { color: var(--ink); font-weight: 600; }
+
+  /* ---- steps ---- */
+  ol.steps { counter-reset: s; list-style: none; margin: 0; padding: 0; }
+  ol.steps li {
+    counter-increment: s; position: relative;
+    padding: 0 0 20px 46px; border-left: 1px solid var(--rule);
+    margin-left: 15px; font-size: 15px; color: var(--ink-70);
+  }
+  ol.steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: -15px; top: -3px;
+    width: 29px; height: 29px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    font-family: var(--display); font-size: 9px; font-weight: 700;
+    display: grid; place-items: center; letter-spacing: 0.04em;
+  }
+  ol.steps b { color: var(--ink); }
+
+  .note {
+    background: var(--paper); border-left: 2px solid var(--blue);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 18px 0 0;
+    font-size: 14.5px; color: var(--ink-70);
+  }
+  .note b { color: var(--ink); }
+  .note.warn { border-left-color: var(--amber); }
+
+  code {
+    font-family: var(--mono); font-size: 12.5px;
+    background: rgba(18, 18, 18, 0.06); padding: 2px 6px; border-radius: 5px;
+  }
+
+  footer {
+    margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--rule);
+    display: flex; gap: 18px; flex-wrap: wrap; align-items: baseline;
+    font-size: 13px; color: var(--ink-45);
+  }
+  footer a { color: var(--blue-deep); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .stamp { font-family: var(--display); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <img src="assets/unmute-logo-trimmed.png" alt="Unmute">
+    <a href="/">Open the app →</a>
+  </div>
+
+  <div class="hero">
+    <p class="kicker">Read this first · two minutes</p>
+    <h1>What works today, and what doesn't.</h1>
+    <p class="lede">
+      You are looking at a working prototype, not a finished product. This page tells you
+      <b>exactly which parts are real</b>, so you never have to guess whether something is broken
+      or simply not built yet.
+    </p>
+
+    <div class="status" id="status">
+      <span class="dot" id="dot"></span>
+      <div class="status-main">
+        <p class="status-title" id="status-title">Checking the engine…</p>
+        <p class="status-body" id="status-body">Reading the deployment configuration.</p>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>The honest split</h2>
+    <p class="sub">Three lists. Nothing is exaggerated in any of them.</p>
+
+    <div class="grid">
+      <div class="card is-real">
+        <h3>Real, working now</h3>
+        <ul>
+          <li><b>Two-way interface</b> — patient signs on one screen, clinician speaks on the other</li>
+          <li><b>Camera capture</b> with an explicit consent gate before anything is filmed</li>
+          <li><b>Patient confirmation</b> — the transcript is shown to the patient and only spoken once they agree</li>
+          <li><b>Speech recognition</b> for the clinician, using the browser's own engine</li>
+          <li><b>Repeat control</b> on the clinician screen</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Depends on the engine</h3>
+        <ul>
+          <li><b>Sign recognition</b> — active only when a key is configured; the status banner above says which state you are in</li>
+          <li><b>Signed replies</b> — the avatar appears only if the engine returns a video</li>
+          <li>With no key, the patient's phrases come from a <b>fixed script</b></li>
+        </ul>
+      </div>
+
+      <div class="card is-gap">
+        <h3>Not built yet</h3>
+        <ul>
+          <li><b>Clinical vocabulary</b> — the recogniser is general ASL, not hospital ASL</li>
+          <li><b>Continuous signing</b> — short takes only; a long flowing sentence will fragment</li>
+          <li><b>Saved history</b> — nothing is stored between sessions</li>
+          <li><b>Live interpreter hand-off</b>, BAA, audit logging</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try this</h2>
+    <p class="sub">About five minutes. Chrome, Edge or Safari — Firefox cannot capture video here.</p>
+
+    <ol class="steps">
+      <li>Open <a href="/" style="color:var(--blue-deep)">the app</a> and tap <b>Speak to patient</b>.</li>
+      <li>Tap the <b>speech</b> button and say <b>“Where does it hurt?”</b> — then watch the patient's screen. If an engine is connected, the reply is rendered as signing. If not, you get a still pose and a note saying so.</li>
+      <li>Now the other direction. Tap the <b>hand</b> button. Read the consent line — it names who receives the video — then tap <b>Patient agrees</b>.</li>
+      <li>Sign something short: <b>one or two signs</b>, not a sentence. Tap the hand again to stop.</li>
+      <li>Read the transcript. It shows a <b>match percentage</b>. If it is wrong, tap <b>No — sign again</b> and confirm that nothing was spoken.</li>
+    </ol>
+
+    <div class="note">
+      <b>The confirmation step is the product.</b> At the accuracy these engines actually deliver,
+      roughly one sentence in ten is wrong. On a ward, a wrong sentence is a clinical event — so
+      nothing reaches the clinician that the patient has not read and approved first.
+    </div>
+  </section>
+
+  <section>
+    <h2>Where it will disappoint you</h2>
+    <p class="sub">Better to read this here than to discover it during a demo.</p>
+
+    <div class="grid">
+      <div class="card is-gap">
+        <h3>Accuracy</h3>
+        <ul>
+          <li>General-purpose models, so <b>medical terms will fail</b>: <i>milligrams</i>, <i>NPO</i>, <i>penicillin</i></li>
+          <li>Fingerspelling and names are unreliable</li>
+          <li>Poor lighting or hands out of frame produce confident nonsense, not an error</li>
+        </ul>
+      </div>
+
+      <div class="card is-gap">
+        <h3>Flow</h3>
+        <ul>
+          <li>One <b>8-second take</b> at a time — this is a phrase reader, not a flowing conversation</li>
+          <li>Each take needs a tap to start and a tap to stop</li>
+          <li>There is a delay between stopping and reading — usually a second or two</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What happens to the video</h2>
+    <p class="sub">The part that matters for a patient.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Where it goes</h3>
+        <ul>
+          <li>The clip is sent to the translation provider named on the consent screen</li>
+          <li>It is <b>not written to storage</b> by this app — no recording, no history, no upload of anything else</li>
+          <li>The camera is <b>stopped</b>, not just hidden, when you leave the screen</li>
+        </ul>
+      </div>
+
+      <div class="card is-gap">
+        <h3>What is still missing</h3>
+        <ul>
+          <li>A signed <b>business associate agreement</b></li>
+          <li>A written <b>no-training-on-our-data</b> clause</li>
+          <li>A stated retention period and sub-processor list</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note warn">
+      <b>Do not use this with a real patient yet.</b> Testing with colleagues, or with a
+      Deaf signer who has agreed to be recorded, is the point of this build. A patient in
+      a bed is not — not until the agreements above exist in writing.
+    </div>
+  </section>
+
+  <section>
+    <h2>Tell us what broke</h2>
+    <p class="sub">The most useful thing you can send is the sentence that went wrong.</p>
+
+    <div class="note">
+      Note the <b>match percentage</b>, what you actually signed, and what appeared on screen.
+      If a clip fails entirely, the note under the caption names the cause — a rejected key, a rate
+      limit, an unreachable engine — and that text is worth copying. Send it to
+      <a href="mailto:contact@liveunmute.com" style="color:var(--blue-deep)">contact@liveunmute.com</a>.
+    </div>
+  </section>
+
+  <footer>
+    <span class="stamp">Unmute · prototype</span>
+    <span>Two-way sign-language communication for hospitals.</span>
+    <a href="/">Open the app →</a>
+  </footer>
+</div>
+
+<script type="module">
+  // The banner states the deployment's real state rather than a claim that goes
+  // stale. It asks the proxy the same question the app asks.
+  const dot = document.getElementById("dot");
+  const title = document.getElementById("status-title");
+  const body = document.getElementById("status-body");
+
+  function paint(kind, heading, text) {
+    dot.className = `dot ${kind}`;
+    title.textContent = heading;
+    body.innerHTML = text;
+  }
+
+  async function check() {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+
+    try {
+      const res = await fetch("/api/sign/status", {
+        headers: { accept: "application/json" },
+        signal: ctrl.signal,
+      });
+
+      if (!res.ok) throw new Error(`status ${res.status}`);
+
+      const json = await res.json();
+
+      if (json.configured) {
+        paint(
+          "is-live",
+          "Engine connected — this is a live test",
+          `Sign recognition is running through <b>${json.vendor || "Sign-Speak"}</b>` +
+            (json.model ? ` (model <code>${json.model}</code>)` : "") +
+            ". The patient's signing is genuinely being read. Expect mistakes — that is what we are measuring."
+        );
+      } else {
+        paint(
+          "is-demo",
+          "Demo mode — no engine connected",
+          "The interface is real; the patient's phrases come from a <b>fixed script</b>. " +
+            "Nothing is being recognised. Use this to judge the flow, not the accuracy."
+        );
+      }
+    } catch {
+      paint(
+        "is-demo",
+        "Demo mode — no engine connected",
+        "The translation engine is not configured on this deployment, so the patient's phrases " +
+          "come from a <b>fixed script</b>. Everything else on this page applies."
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  check();
+</script>
+</body>
+</html>

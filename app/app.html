@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unmute — app</title>
+<meta name="theme-color" content="#E3E1DC">
+<link rel="icon" href="assets/favicon.ico">
+
+<!-- /app is a short link for testers. It used to be a second page; there is
+     only one app now, so this forwards to it and keeps the hash. -->
+<script>
+  location.replace("/" + (location.hash || ""));
+</script>
+
+<noscript><meta http-equiv="refresh" content="0; url=/"></noscript>
+</head>
+<body>
+<p>Redirecting to <a href="/">the app</a>.</p>
+</body>
+</html>
