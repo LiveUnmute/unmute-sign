@@ -30,9 +30,11 @@ The app keeps these directions separate:
 | Patient ASL → English | Sign-Speak (pending) | Recognition candidate; a key and live test are still awaited. |
 | Clinician English → ASL | Signa AI (sandbox) | Produces an avatar video from English text; it does not recognise patient signing. |
 
-Signa is being added as an output provider while Sign-Speak responds. A Signa
-avatar does not make the app two-way by itself, and Signa's published ASL
-output support is not evidence of ASL recognition support.
+Signa's English → ASL output path is integrated through a server-minted,
+short-lived client token; the browser calls Signa directly for the animation and
+video. The matching deploy context still needs a valid `SIGNA_KEY` and a live
+test. A Signa avatar does not make the app two-way by itself, and Signa's
+published ASL output support is not evidence of ASL recognition support.
 
 ---
 

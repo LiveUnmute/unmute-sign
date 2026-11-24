@@ -284,28 +284,41 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
   async function sign(text) {
     if (!text) return null;
 
-    const previousVideo = s.signing?.videoUrl;
-    if (typeof previousVideo === "string" && previousVideo.startsWith("blob:")) {
-      try { globalThis.URL?.revokeObjectURL(previousVideo); } catch { /* best-effort cleanup */ }
-    }
-
-    set({ signing: { pending: true }, note: "Rendering the reply in ASL…" });
+    // Keep the last completed segment visible and repeatable while the next
+    // one is rendering. Replace and revoke it only after a new video succeeds.
+    const previous = s.signing ? { ...s.signing } : null;
+    set({
+      signing: previous ? { ...previous, pending: true } : { pending: true },
+      note: "Rendering this speech segment in ASL…",
+      error: "",
+    });
 
     try {
       const out = await provider.textToSign({ text });
+      const previousVideo = previous?.videoUrl;
+      if (typeof previousVideo === "string" && previousVideo.startsWith("blob:") && previousVideo !== out.videoUrl) {
+        try { globalThis.URL?.revokeObjectURL(previousVideo); } catch { /* best-effort cleanup */ }
+      }
       set({
-        signing: { videoUrl: out.videoUrl, durationMs: out.durationMs, source: out.source },
-        note: out.source === "mock" ? "Scripted still — no avatar engine configured." : "Signed reply ready.",
+        signing: { videoUrl: out.videoUrl, durationMs: out.durationMs, source: out.source, pending: false },
+        note: out.source === "mock" ? "Scripted still — no avatar engine configured." : "ASL segment ready. Tap Repeat to replay it.",
       });
       return out;
     } catch (err) {
       set({
-        signing: null,
-        note: "Could not render the signed reply. Showing the fallback pose.",
+        signing: previous ? { ...previous, pending: false } : null,
+        note: previous?.videoUrl
+          ? "The next segment failed; the last completed sign is still available to repeat."
+          : "Could not render this signed segment.",
         error: humanError(err),
       });
       return null;
     }
+  }
+
+  async function warmOutput() {
+    if (typeof provider?.warm !== "function") return true;
+    return provider.warm();
   }
 
   /* ---------------------------------------------------------------
@@ -349,6 +362,7 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
     accept,
     discard,
     sign,
+    warmOutput,
     speak,
     stopSpeaking,
   };
@@ -370,7 +384,7 @@ function humanError(err) {
     return "Could not reach the translation service — check the connection. Direct Sign-Speak mode may also need this site's origin allowlisted.";
   }
   if (/did not finish in time|timeout/i.test(msg)) {
-    return "The engine took too long. Try a shorter sentence and check the connection.";
+    return "The engine did not finish rendering this segment. The transcript stays visible; check the connection or provider, then try the segment again. Short or one-word input can time out too.";
   }
   return msg.slice(0, 180) || "The engine failed.";
 }

@@ -241,8 +241,9 @@
 
     <ol class="steps">
       <li>Open <a href="/" style="color:var(--blue-deep)">the app</a> and tap <b>Speak to patient</b>.</li>
-      <li>Tap the <b>speech</b> button and say <b>“Where does it hurt?”</b> — then watch the patient's screen. If an engine is connected, the reply is rendered as signing. If not, you get a still pose and a note saying so.</li>
-      <li>Now the other direction. Tap the <b>hand</b> button. Read the consent line — it names who receives the video — then tap <b>Patient agrees</b>.</li>
+      <li>Tap <b>Speak</b> once and allow microphone access. Your transcript appears as you talk; a pause of two seconds completes a chunk and starts its ASL output. Keep talking for another chunk without tapping again.</li>
+      <li>Tap <b>Repeat</b> to replay the most recently completed sign. Tap the same speech control, now labelled <b>Stop</b>, to end the conversation and flush any final recognized text.</li>
+      <li>Now the patient direction. Tap the <b>hand</b> button. Read the consent line — it names who receives the video — then tap <b>Patient agrees</b>.</li>
       <li>Sign something short: <b>one or two signs</b>, not a sentence. Tap the hand again to stop.</li>
       <li>Read the transcript. It shows a <b>match percentage</b>. If it is wrong, tap <b>No — sign again</b> and confirm that nothing was spoken.</li>
     </ol>
@@ -271,9 +272,9 @@
       <div class="card is-gap">
         <h3>Flow</h3>
         <ul>
-          <li>One <b>8-second take</b> at a time — this is a phrase reader, not a flowing conversation</li>
-          <li>Each take needs a tap to start and a tap to stop</li>
-          <li>There is a delay between stopping and reading — usually a second or two</li>
+          <li>Patient sign capture is one <b>8-second take</b> at a time; it is not continuous ASL recognition</li>
+          <li>Patient capture needs one tap to start and another to stop; clinician speech uses a separate continuous Speak toggle</li>
+          <li>Clinician speech is chunked after a <b>two-second pause</b>; Signa rendering can take several seconds</li>
         </ul>
       </div>
     </div>
@@ -372,15 +373,15 @@
     if (hasRecognition && hasSignaOutput) {
       paint(
         "is-live",
-        "Both directions have an engine configured",
-        `<b>${recognition.vendor || "Recognition provider"}</b> handles patient sign → English; ` +
-          `<b>${output.vendor || "Signa AI"}</b> handles clinician English → ASL. This remains a prototype, not clinical validation.`
+        "Provider keys are configured for both directions",
+        `<b>${recognition.vendor || "Recognition provider"}</b> is configured for patient sign → English; ` +
+          `<b>${output.vendor || "Signa AI"}</b> is configured for clinician English → ASL. A first request still has to verify credentials; this remains a prototype, not clinical validation.`
       );
     } else if (hasSignaOutput) {
       paint(
         "is-live",
-        "Signa ASL output is connected",
-        `<b>${output.vendor || "Signa AI"}</b> can sign clinician English text. Patient sign → English is still a <b>scripted demo</b> until a recognition provider is configured.`
+        "Signa output key is configured",
+        `<b>${output.vendor || "Signa AI"}</b> is configured for clinician English → ASL. The first signing request still has to verify the key. Patient sign → English is still a <b>scripted demo</b> until a recognition provider is configured.`
       );
     } else if (hasRecognition) {
       paint(

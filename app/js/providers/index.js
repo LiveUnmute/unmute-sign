@@ -43,6 +43,9 @@ export function combineProviders(signToTextProvider, textToSignProvider) {
     },
     signToText: (options) => incoming.signToText(options),
     textToSign: (options) => outgoing.textToSign(options),
+    async warm() {
+      return typeof outgoing.warm === "function" ? outgoing.warm() : true;
+    },
     async healthy() {
       const providers = [...new Set([incoming, outgoing])].filter((p) => isLiveProvider(p));
       const results = await Promise.all(

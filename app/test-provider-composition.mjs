@@ -27,8 +27,17 @@ try {
       if (String(url) === "/api/sign/status") {
         return Response.json({ configured: false, vendor: "Sign-Speak" });
       }
-      if (String(url) === "/api/signa/video") {
-        return new Response(new Blob([new Uint8Array([1, 2, 3])], { type: "video/mp4" }), {
+      if (String(url) === "/api/signa/token") {
+        return Response.json({ token: "ct_composition_test", expiresAt: new Date(Date.now() + 300_000).toISOString() });
+      }
+      if (String(url) === "https://api.usesigna.org/v1/sign") {
+        return new Response(new Uint8Array([1, 2, 3]), {
+          status: 200,
+          headers: { "content-type": "application/vnd.signa.sgn" },
+        });
+      }
+      if (String(url) === "https://api.usesigna.org/v1/sign/video") {
+        return new Response(new Blob([new Uint8Array([4, 5, 6])], { type: "video/mp4" }), {
           status: 200,
           headers: { "content-type": "video/mp4" },
         });

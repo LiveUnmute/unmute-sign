@@ -1,9 +1,9 @@
 # Going live: the two-way conversation
 
-The pilot uses separate providers for the two directions. **Signa is being
-integrated for clinician English → ASL avatar output**; Sign-Speak remains the
-candidate for **patient ASL → English recognition**. Signa's avatar output is
-not sign recognition.
+The pilot uses separate providers for the two directions. **Signa is integrated
+for clinician English → ASL avatar output**; Sign-Speak remains the candidate
+for **patient ASL → English recognition**. Signa's avatar output is not sign
+recognition.
 
 The Signa setup and current implementation are documented in
 [`SIGNA_INTEGRATION.md`](./SIGNA_INTEGRATION.md). The Sign-Speak instructions
@@ -16,7 +16,7 @@ below cover its separate recognition integration and key setup.
 | | Direction | Engine | Status |
 |---|---|---|---|
 | Patient signs → clinician reads and hears | ASL → English | **Sign-Speak** | Provider path exists; awaiting key. Otherwise the response is scripted. |
-| Clinician speaks → patient sees it signed | English → ASL | **Signa AI** | Server proxy is implemented; awaiting `SIGNA_KEY` in the app environment and a live sandbox test. |
+| Clinician speaks → patient sees it signed | English → ASL | **Signa AI** | Server-minted short-lived client token; browser calls Signa for `.sgn` and MP4. Deploy-context key status and a live sandbox test must be verified. |
 | Anything at all | both | scripted mock | Working now, labelled **Demo**. |
 
 With no server-side keys configured, the app falls back to the scripted demo.
@@ -28,21 +28,21 @@ sign recognition.
 ## 2. The flow, as implemented
 
 ```
-        PATIENT SIGNS                          CLINICIAN SPEAKS
-        ─────────────                          ────────────────
-   consent gate names recogniser           browser speech recognition
-        │                                          │
-   camera opens visibly                    English sentence arrives
-        │                                          │
-   tap hand → record ≤ 8s                  POST /api/signa/video
-        │                                          │
-   Sign-Speak recognition (when set)       Signa /v1/sign  (en → ase)
-        │                                          │
-   transcript + confidence                 Signa /v1/sign/video → MP4
-        │                                          │
-   PATIENT CONFIRMS                         stage plays it; repeat control
-        │
-   spoken aloud to the clinician
+        PATIENT SIGNS                              CLINICIAN SPEAKS
+        ─────────────                              ────────────────
+   consent gate names recogniser              one tap starts continuous speech
+        │                                               │
+   camera opens visibly                       transcript stays visible
+        │                                               │
+   tap hand → record ≤ 8s                     2 seconds of silence completes a chunk
+        │                                               │
+   Sign-Speak recognition (when set)          POST /api/signa/token (5-minute token)
+        │                                               │
+   transcript + confidence                    Signa /v1/sign → .sgn → /v1/sign/video → MP4
+        │                                               │
+   PATIENT CONFIRMS                             later chunks queue while listening continues
+        │                                               │
+   spoken aloud to the clinician                second tap stops; Repeat replays last output
 ```
 
 Signa handles only the clinician-text-to-ASL-avatar path. It does not read the

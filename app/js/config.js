@@ -144,7 +144,7 @@ export async function probeProxy(cfg = readConfig()) {
   }
 }
 
-/** Ask whether the Signa server proxy has a key; it never reveals or tests it. */
+/** Ask whether the Signa token broker has a server-side key; never reveals or tests it. */
 export async function probeSigna(cfg = readConfig()) {
   if (!cfg.signaProxyBase) return { configured: false, reason: "Signa proxy disabled" };
 

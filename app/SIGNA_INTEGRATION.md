@@ -1,68 +1,103 @@
-# Signa AI: ASL output for the pilot
+# Signa AI: English → ASL output
 
-**Scope:** clinician English text → ASL avatar video. This is one direction of
-Unmute's planned two-way workflow. Signa's reviewed API does **not** recognise
-patient signing; patient ASL → English remains a separate Sign-Speak path and
-is still scripted until that recognition integration is configured.
+**Scope:** clinician English text → ASL avatar video. Signa's reviewed API
+supports signed output; it does **not** recognise patient signing. Patient
+ASL → English remains a separate recognition path and is a scripted demo until
+that provider is configured. Nothing here establishes clinical validation.
 
-## Current implementation
+## Signa 504 diagnosis and fix
 
-The app sends clinician speech through the browser's speech-recognition feature
-when available, then passes the resulting English text to Signa. Signa is
-configured for English (`en`) → American Sign Language (`ase`). The proxy calls
-Signa's documented endpoints in order:
+The 504 text in the preview — `Signa did not finish rendering within the
+serverless time limit` — came from Unmute's old Netlify Function. That function
+ran both Signa requests (`/v1/sign`, then `/v1/sign/video`) synchronously and
+aborted its upstream request after 8.5 seconds. The exact wording was generated
+by that local timeout. A repeatable 504 on a one-word input therefore did not
+show that the word was too long; the serverless request was timing out while
+waiting for Signa's render.
 
-1. `POST /v1/sign` to receive `.sgn` animation bytes.
-2. `POST /v1/sign/video` to render an MP4 avatar video.
+The flow now uses Signa's documented short-lived client-token pattern:
 
-The browser calls only Unmute's same-origin `POST /api/signa/video` endpoint.
-The Netlify Function reads the main Signa key, and returns the MP4; it does not
-store the text, animation, or video. The Signa key is never sent to browser
-code. There is no Signa live-audio/WebSocket path in this prototype.
+1. The browser asks `POST /api/signa/token` for a five-minute client token.
+2. The Netlify Function uses `SIGNA_KEY` only to mint that token. It does not
+   sign text or render video.
+3. The browser calls Signa directly with the short-lived token:
+   `POST /v1/sign` (`from: "en"`, `to: "ase"`) for `.sgn` bytes, then
+   `POST /v1/sign/video` for the MP4.
 
-## Add the sandbox key
+This removes video rendering from Netlify's synchronous-function time limit.
+The browser allows up to 45 seconds for the two Signa calls. A Signa-side HTTP
+error, including a vendor 504, is shown as a Signa response instead of being
+relabelled as Unmute's serverless timeout. The serverless function can still
+return a distinct timeout if Signa's **token service** itself does not respond.
 
-The key has been created in the Signa dashboard, but it is not available to this
-repository or to the browser. To enable the integration:
+The main key is never put in browser code. The browser holds a `ct_…` token in
+module memory only; it is not persisted. Signa's client-token documentation
+allows client tokens to call signing and video endpoints from a web page.
 
-1. In the **Unmute app's Netlify site**, add an environment variable named
-   `SIGNA_KEY` and paste the sandbox key as its value.
-2. Redeploy the site so the function receives the new environment variable.
-3. Check `GET /api/signa/status`. It should return `configured: true` and
-   `to: "ase"`. This only confirms that a value is present; the first short
-   signing request is what verifies that Signa accepts it.
-4. Open the app's **Speak** direction and test one short, non-sensitive English
-   sentence. The status chip should identify Signa as the live output engine.
+## Configure and verify the deployment
 
-Do **not** paste the key into chat, `index.html`, a meta tag, `UNMUTE_CONFIG`, or
-a committed file. The local `.env` patterns are ignored by Git. For a local
-server session, provide `SIGNA_KEY` through the process environment before
-starting `node app/server.mjs`; the local server invokes the same function code.
+The deployed `SIGNA_KEY` status must be checked in the exact Netlify deploy
+context being tested; the repository cannot see the value. In the Unmute app's
+Netlify site, set `SIGNA_KEY` as a server-side environment variable and include
+the **Deploy previews** context if testing a pull-request preview. Then redeploy.
+
+Check `GET /api/signa/status` on that same deployment. It returns only whether
+a non-empty key is present, the vendor and direction (`en` → `ase`); it never
+returns or tests the key. `configured: true` does not prove Signa accepts it.
+The first approved test phrase verifies authentication and rendering.
+
+Use a short, non-sensitive English phrase in the clinician **Speak** direction.
+A successful test should produce an MP4. If it fails, copy the displayed stage
+and HTTP status (`token`, `sign`, or `video`) for diagnosis. Do not infer that a
+shorter sentence will fix a timeout. A `401` means the server-side key was
+rejected; a `403`/`429`/`5xx` should be read with the returned stage and vendor
+message.
+
+Do **not** paste the key into chat, `index.html`, a meta tag, `UNMUTE_CONFIG`,
+or a committed file. For local testing, provide `SIGNA_KEY` in the process
+environment before starting `node app/server.mjs`.
+
+## Clinician conversation flow
+
+- Tap **Speak** once to start a continuous browser speech-recognition session.
+- The recognized transcript stays visible as the clinician talks.
+- Two seconds of detected silence completes the current chunk and queues its
+  English → ASL output. Listening remains active for the next chunk.
+- Tap **Speak / Stop** again to end recognition and the microphone meter. Any
+  final transcript text is flushed for signing.
+- **Repeat** replays the most recently completed *successful* sign output. If a
+  newer chunk is still rendering, the previous completed output remains
+  repeatable.
+
+Browser `SpeechRecognition` support varies. If it is unavailable, the app says
+so; it does not fabricate a transcript. The browser's speech-recognition
+service is separate from Signa. Signa receives English text, not microphone
+audio. Do not use patient information for testing.
 
 ## Safeguards and limits
 
-- The proxy accepts one short sentence (up to 300 characters) per request,
-  allows six video requests per IP per minute per warm function instance, and
-  times out upstream work after 8.5 seconds.
-- The browser receives an MP4, not the API key or a reusable client token. The
-  patient-signing video is **not** sent to Signa by this integration.
-- Use non-sensitive sample phrases only. Do not use it for patient care or
-  clinical decisions; the avatar output has not been validated by Deaf ASL users
-  or qualified sign-language professionals.
-- Signa can skip words it cannot sign. Keep the clinician's English visible and
-  review the signed result; do not assume the avatar conveyed every word.
-- The sandbox dashboard reports a 20,000-character allowance, 60 live minutes,
-  10 videos, and expiry on **2026-12-01**. A generated video consumes quota, so
-  keep testing deliberate.
-- `?provider=mock` forces the fully scripted demo without calling either vendor.
+- Each Signa text request is capped at 300 characters. A generated MP4 consumes
+  video quota; a failed video is not charged according to Signa's docs.
+- The token endpoint allows six requests per IP per minute per warm function
+  instance. The browser reuses a token while it is valid. This is a burst guard,
+  not user authentication or a durable global quota.
+- The Netlify function does not store transcript, `.sgn`, token, or video. The
+  browser keeps the token and MP4 object URL in memory for the page session.
+- Signa may skip words it cannot sign. Keep the clinician's English transcript
+  visible and review the generated signing; do not assume every word was
+  conveyed.
+- The avatar output has not been validated by Deaf ASL users or qualified
+  sign-language professionals. Do not use it for patient care or clinical
+  decisions.
+- `?provider=mock` forces the scripted demo without contacting either vendor.
   `?provider=signspeak` selects Sign-Speak for English-to-sign comparison when
-  its key is configured.
+  its provider is configured.
 
-## What remains separate
+## Direction status
 
-| Direction | Provider | State |
+| Direction | Provider | Status |
 |---|---|---|
-| Clinician English → ASL avatar | Signa AI | Proxy integrated; awaiting `SIGNA_KEY` in the app environment and a live sandbox test |
-| Patient ASL → English | Sign-Speak | Separate recognition provider; awaiting its response/key |
+| Clinician English → ASL avatar | Signa AI | Short-lived client-token flow implemented; deploy-context key status and live sandbox result must be verified. |
+| Patient ASL → English | Separate recognition provider | Signa does not provide this direction; it remains separate and may be scripted. |
 
 Signa's ASL **output** support does not establish ASL **recognition** support.

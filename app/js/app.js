@@ -21,17 +21,16 @@
 // The UI says which half you are getting rather than leaving it ambiguous.
 
 import { renderHome, renderSign, renderHistory, renderSettings } from "./screens.js";
-import { SCRIPT, TRANSLATOR_SIGNS, resolveStep } from "./media.js";
+import { SCRIPT, resolveStep } from "./media.js";
 import { getProvider } from "./providers/index.js";
 import { createLiveSession } from "./live.js";
 import { readConfig } from "./config.js";
+import { createSpeechConversation } from "./speech-conversation.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const RENDER = { home: renderHome, sign: renderSign, history: renderHistory, settings: renderSettings };
-
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 const state = {
   screen: "home",
@@ -46,10 +45,13 @@ const state = {
   confidence: 98,
   busy: false,
 
-  micStream: null,
-  audioCtx: null,
-  levelRAF: null,
-  recognition: null,
+  speechConversation: null,
+  conversationActive: false,
+  speechError: "",
+  segmentCounter: 0,
+  signedQueue: [],
+  signedQueueBusy: false,
+  lastSignedChunk: null,
 
   // The live engine. `null` until providers/index.js has resolved, which is
   // instant when there is no key and one dynamic import when there is.
@@ -77,12 +79,15 @@ function signState() {
   return {
     mode: state.mode === "patient" ? "sign" : "speak",
     entry,
-    caption: state.caption || entry.text,
+    caption: state.caption,
     note: state.note,
     confidence: state.confidence,
     live: state.live,
     ready: state.liveReady,
     bootFailed: state.bootFailed,
+    conversationActive: state.conversationActive,
+    conversationBusy: state.busy,
+    lastSignedChunk: state.lastSignedChunk,
   };
 }
 
@@ -131,9 +136,12 @@ function paint() {
 function go(screen) {
   if (!RENDER[screen] || screen === state.screen) return;
 
-  // Leaving the conversation closes the camera. Browsing history is not a
-  // reason for a patient's room to stay on a lens.
-  if (state.screen === "sign") session?.disarm();
+  // Leaving the conversation closes both microphone and camera. A clinician's
+  // audio session must not keep running behind another screen.
+  if (state.screen === "sign") {
+    stopSpeechConversation();
+    session?.disarm();
+  }
 
   state.screen = screen;
   history.replaceState(null, "", `#${screen}`);
@@ -206,10 +214,11 @@ function setMode(mode) {
   const next = mode === "sign" ? "patient" : "clinician";
   if (next === state.mode) {
     if (next === "patient") onHandTap();
-    else listen();
+    else toggleSpeechConversation();
     return;
   }
 
+  if (state.conversationActive || state.busy) stopSpeechConversation();
   state.mode = next;
   state.caption = "";
   state.note = "";
@@ -224,9 +233,10 @@ function setMode(mode) {
     }
   } else {
     // The patient must never be visible on the clinician page — and the camera
-    // is not merely hidden, it is closed.
+    // is not merely hidden, it is closed. The Speak tap also starts the session.
     session?.disarm();
-    showClinician(state.clinicianIndex, "Tap the speech button and talk.");
+    showClinician(state.clinicianIndex, "Tap Speak to start. A 2-second pause ends each signed segment.");
+    toggleSpeechConversation();
   }
 }
 
@@ -276,224 +286,209 @@ function nextPatient() {
 
 function showClinician(index, note = "") {
   state.clinicianIndex = index;
-  const { entry } = currentEntry();
-
-  state.caption = entry.text;
-  state.note = note;
-
-  paint();
-}
-
-function repeatSign() {
-  const { entry } = currentEntry();
-  state.caption = entry.text;
-  state.note = "Repeated.";
-  paint();
-
-  // re-run any video from the top
-  const v = $("video.stage-media", host);
-  if (v) {
-    v.currentTime = 0;
-    const started = v.play?.();
-    if (started && typeof started.catch === "function") started.catch(() => {});
-  }
-
-  // and flash the frame so a repeat is visible even on a still
-  const stage = $("[data-stage]", host);
-  if (stage) {
-    stage.classList.remove("is-flash");
-    void stage.offsetWidth;
-    stage.classList.add("is-flash");
-  }
-}
-
-async function listen() {
-  if (state.busy) return;
-  state.busy = true;
-
-  const btn = $('.dir-btn[data-mode="speak"]', host);
-  btn?.classList.add("is-live");
-
-  const proceed = async () => {
-    // 1. Ask for the microphone. This is a real permission prompt.
-    let granted = false;
-    try {
-      if (!state.micStream) {
-        state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-      granted = true;
-      startMeter(state.micStream);
-    } catch (err) {
-      setNote("Microphone blocked — showing the scripted transcript instead.");
-    }
-
-    // 2. Transcribe. Real where the browser offers it.
-    if (granted && SR) {
-      runRecognition();
-    } else {
-      window.setTimeout(() => {
-        finishListening();
-        advanceClinician(granted ? "Scripted transcript — this browser has no speech engine." : "");
-      }, 1600);
-    }
-  };
-
-  await proceed();
-}
-
-function runRecognition() {
-  const rec = new SR();
-  state.recognition = rec;
-
-  rec.lang = "en-US";
-  rec.interimResults = true;
-  rec.continuous = false;
-  rec.maxAlternatives = 1;
-
-  rec.onresult = (ev) => {
-    let interim = "";
-    let final = "";
-
-    for (let i = ev.resultIndex; i < ev.results.length; i += 1) {
-      const chunk = ev.results[i][0].transcript;
-      if (ev.results[i].isFinal) final += chunk;
-      else interim += chunk;
-    }
-
-    const caption = $("[data-caption]", host);
-    if (caption) caption.textContent = (final || interim).trim();
-  };
-
-  rec.onerror = () => {
-    finishListening();
-    advanceClinician("Couldn't hear that — using the scripted line.");
-  };
-
-  rec.onend = () => {
-    const caption = $("[data-caption]", host);
-    const heard = (caption?.textContent || "").trim();
-
-    finishListening();
-
-    if (heard) {
-      pickPoseFor(heard);
-    } else {
-      advanceClinician("Didn't catch that — using the scripted line.");
-    }
-  };
-
-  try {
-    rec.start();
-  } catch {
-    finishListening();
-    advanceClinician("Speech engine unavailable — scripted transcript.");
-  }
-
-  // Safety net: a recogniser that never fires still returns the user to a
-  // usable screen rather than leaving the button stuck.
-  window.setTimeout(() => {
-    if (state.busy) rec.stop();
-  }, 8000);
-}
-
-/** Choose the translator pose whose scripted line best matches what was heard. */
-function pickPoseFor(heard) {
-  const words = heard.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
-
-  let best = 0;
-  let bestScore = -1;
-
-  TRANSLATOR_SIGNS.forEach((entry, i) => {
-    const text = entry.text.toLowerCase();
-    const score = words.reduce((n, w) => n + (text.includes(w) ? 1 : 0), 0);
-    if (score > bestScore) {
-      bestScore = score;
-      best = i;
-    }
-  });
-
-  const entry = TRANSLATOR_SIGNS[best];
-  const stepIndex = clinicianSteps.findIndex((s) => s.key === entry.id);
-
-  state.clinicianIndex = stepIndex >= 0 ? stepIndex : 0;
-  state.caption = heard;
-  state.note = "Heard from the microphone.";
-  paint();
-
-  // The other half of the conversation: hand the sentence to the engine and
-  // render whatever it returns to sign. With no engine this is a no-op and the
-  // matched pose above stands.
-  maybeSign(heard);
-}
-
-function maybeSign(text) {
-  if (!isLiveCapability("textToSign") || !session || !text) return;
-  session.sign(text);
-}
-
-function advanceClinician(note) {
-  const next = (state.clinicianIndex + 1) % clinicianSteps.length;
-  state.clinicianIndex = next;
-  const { entry } = currentEntry();
-
-  state.caption = entry.text;
+  state.caption = "";
   state.note = note;
   paint();
 }
 
-function finishListening() {
-  state.busy = false;
-  stopMeter();
-  $('.dir-btn[data-mode="speak"]', host)?.classList.remove("is-live");
-}
-
-function setNote(text) {
+function setClinicianNote(text) {
   state.note = text;
   const el = $("[data-note]", host);
   if (el) el.textContent = text;
 }
 
-/* --- live input level -------------------------------------
-   Proves the mic is actually open: the ring around the speech button
-   tracks real input, not a CSS animation. */
-
-function startMeter(stream) {
-  try {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) return;
-
-    state.audioCtx = state.audioCtx || new Ctx();
-    const ctx = state.audioCtx;
-    if (ctx.state === "suspended") ctx.resume();
-
-    const src = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    src.connect(analyser);
-
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    const btn = $('.dir-btn[data-mode="speak"]', host);
-
-    const tick = () => {
-      analyser.getByteTimeDomainData(data);
-      let peak = 0;
-      for (let i = 0; i < data.length; i += 1) {
-        peak = Math.max(peak, Math.abs(data[i] - 128) / 128);
-      }
-      if (btn) btn.style.setProperty("--lvl", peak.toFixed(3));
-      state.levelRAF = requestAnimationFrame(tick);
-    };
-    tick();
-  } catch {
-    /* metering is a nicety; never block the demo */
+function updateClinicianTranscript(transcript = state.caption) {
+  state.caption = String(transcript || "");
+  if (state.mode !== "clinician") return;
+  const caption = $("[data-caption]", host);
+  if (caption) caption.textContent = state.caption;
+  if (state.conversationActive) {
+    setClinicianNote(state.busy
+      ? "Listening — translating a completed segment."
+      : "Listening — a two-second pause completes each segment.");
   }
 }
 
-function stopMeter() {
-  if (state.levelRAF) cancelAnimationFrame(state.levelRAF);
-  state.levelRAF = null;
-  const btn = $('.dir-btn[data-mode="speak"]', host);
-  if (btn) btn.style.setProperty("--lvl", "0");
+function updateConversationControls() {
+  const button = $('.dir-btn[data-mode="speak"]', host);
+  if (button) {
+    button.classList.toggle("is-live", state.conversationActive);
+    button.setAttribute("aria-pressed", String(state.conversationActive));
+    button.setAttribute("aria-label", state.conversationActive ? "End conversation" : "Start conversation");
+    button.style.setProperty("--lvl", state.conversationActive ? button.style.getPropertyValue("--lvl") || "0" : "0");
+  }
+  const label = $('.dir[data-dir="speak"] .dir-label', host);
+  if (label) label.textContent = state.conversationActive ? "Stop" : "Speak";
+}
+
+function ensureSpeechConversation() {
+  if (state.speechConversation) return state.speechConversation;
+
+  state.speechConversation = createSpeechConversation({
+    language: "en-US",
+    silenceMs: 2_000,
+    onTranscript: (transcript) => updateClinicianTranscript(transcript),
+    onChunk: (text, index) => {
+      state.segmentCounter = index;
+      state.signedQueue.push({ id: index, text });
+      state.busy = true;
+      if (state.mode === "clinician") {
+        setClinicianNote(state.conversationActive
+          ? "Listening — translating a completed segment."
+          : "Conversation ended — translating the final segment.");
+      }
+      drainSignedQueue();
+    },
+    onState: (speechState) => {
+      const wasActive = state.conversationActive;
+      state.conversationActive = Boolean(speechState.active);
+
+      if (speechState.error) {
+        state.speechError = speechState.error;
+        setClinicianNote(speechState.error);
+      } else if (speechState.active) {
+        state.speechError = "";
+        setClinicianNote(speechState.warning || (state.busy
+          ? "Listening — translating a completed segment."
+          : "Listening — a two-second pause completes each segment."));
+      } else if (speechState.stopping) {
+        if (!state.speechError) setClinicianNote("Ending conversation…");
+      } else if (!state.speechError) {
+        setClinicianNote(state.busy
+          ? "Conversation ended — finishing the signed segments."
+          : "Conversation ended.");
+      }
+
+      if (wasActive !== state.conversationActive) updateConversationControls();
+      if (speechState.error && state.mode === "clinician") updateConversationControls();
+    },
+    onLevel: (level) => {
+      const button = $('.dir-btn[data-mode="speak"]', host);
+      if (button) button.style.setProperty("--lvl", Number(level || 0).toFixed(3));
+    },
+  });
+
+  return state.speechConversation;
+}
+
+function maybeSign(text) {
+  if (!isLiveCapability("textToSign") || !session || !text) return Promise.resolve(null);
+  return session.sign(text);
+}
+
+function drainSignedQueue() {
+  if (state.signedQueueBusy) return;
+  const item = state.signedQueue.shift();
+  if (!item) {
+    state.busy = false;
+    if (state.mode === "clinician" && !state.conversationActive && !state.speechError) {
+      setClinicianNote("Conversation ended.");
+    }
+    return;
+  }
+
+  state.busy = true;
+  state.signedQueueBusy = true;
+  if (state.mode === "clinician") {
+    setClinicianNote(state.conversationActive
+      ? "Listening — translating a completed segment."
+      : "Conversation ended — finishing the signed segments.");
+  }
+
+  Promise.resolve(maybeSign(item.text)).then((result) => {
+    if (result?.videoUrl) {
+      state.lastSignedChunk = {
+        id: item.id,
+        text: item.text,
+        videoUrl: result.videoUrl,
+        source: result.source || "",
+      };
+      if (state.screen === "sign" && state.mode === "clinician") paint();
+      if (state.mode === "clinician") {
+        setClinicianNote(state.conversationActive
+          ? "Listening — signed the last completed segment."
+          : "ASL output ready. Tap Repeat to replay the last segment.");
+      }
+    } else if (!isLiveCapability("textToSign")) {
+      if (state.mode === "clinician") setClinicianNote("Transcript captured. No live ASL output is configured.");
+    } else if (state.live?.error && state.mode === "clinician") {
+      setClinicianNote(state.live.error);
+    }
+  }).catch((error) => {
+    console.warn("Signa rendering failed:", error);
+    if (state.mode === "clinician") setClinicianNote(String(error?.message || "Could not render this signed segment."));
+  }).finally(() => {
+    state.signedQueueBusy = false;
+    state.busy = state.signedQueue.length > 0;
+    if (state.busy) drainSignedQueue();
+    else if (state.mode === "clinician" && state.conversationActive && !state.speechError) {
+      setClinicianNote("Listening — a two-second pause completes each segment.");
+    } else if (state.mode === "clinician" && !state.speechError && !state.live?.error) {
+      setClinicianNote(state.lastSignedChunk
+        ? "ASL output ready. Tap Repeat to replay the last segment."
+        : "Conversation ended.");
+    }
+  });
+}
+
+function startSpeechConversation() {
+  if (state.mode !== "clinician") return;
+  state.caption = "";
+  state.speechError = "";
+  state.segmentCounter = 0;
+  const caption = $("[data-caption]", host);
+  if (caption) caption.textContent = "";
+  setClinicianNote("Starting conversation…");
+
+  const speech = ensureSpeechConversation();
+  Promise.resolve(session?.warmOutput?.()).catch((error) => {
+    console.warn("Signa output warmup failed:", error);
+  });
+  Promise.resolve(speech.start()).then((started) => {
+    if (!started && state.conversationActive && !state.speechError) {
+      setClinicianNote("Speech recognition could not start. Check microphone access and try again.");
+    }
+  }).catch((error) => {
+    console.warn("Could not start speech conversation:", error);
+    state.speechError = "Could not start the conversation. Check microphone permission and try again.";
+    setClinicianNote(state.speechError);
+    state.speechConversation?.stop().catch(() => {});
+    state.conversationActive = false;
+    updateConversationControls();
+  });
+}
+
+function stopSpeechConversation() {
+  const speech = state.speechConversation;
+  if (!speech || (!state.conversationActive && !speech.active)) return Promise.resolve();
+  return speech.stop().catch((error) => {
+    console.warn("Could not stop speech conversation cleanly:", error);
+    state.conversationActive = false;
+    updateConversationControls();
+  });
+}
+
+function toggleSpeechConversation() {
+  if (state.mode !== "clinician") return;
+  if (state.conversationActive) {
+    stopSpeechConversation();
+    return;
+  }
+  startSpeechConversation();
+}
+
+function repeatSign() {
+  const chunk = state.lastSignedChunk;
+  const video = $("[data-sign-video]", host);
+  if (!chunk?.videoUrl || !video) {
+    setClinicianNote("There is no completed ASL segment to repeat yet.");
+    return;
+  }
+
+  try { video.currentTime = 0; } catch { /* metadata may still be loading */ }
+  const started = video.play?.();
+  if (started && typeof started.catch === "function") started.catch(() => {});
+  setClinicianNote(`Repeating the sign for: “${chunk.text}”`);
 }
 
 /* ------------------------------------------------------------
@@ -605,8 +600,17 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("hashchange", () => {
   const next = (location.hash || "#home").slice(1);
   if (RENDER[next] && next !== state.screen) {
+    if (state.screen === "sign" && next !== "sign") {
+      stopSpeechConversation();
+      session?.disarm();
+    }
     state.screen = next;
     paint();
     if (next === "sign") armSignScreen();
   }
+});
+
+window.addEventListener("pagehide", () => {
+  stopSpeechConversation();
+  session?.disarm();
 });

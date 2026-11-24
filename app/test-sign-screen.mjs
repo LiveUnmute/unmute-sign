@@ -161,6 +161,39 @@ ok("the clinician direction labels Signa output live", () => {
   assert.match(html, /<span class="demo-chip is-live" title="Signa AI · English to ASL output">Live<\/span>/);
 });
 
+ok("clinician screen shows the live transcript and start/stop control without scripted fallback text", () => {
+  const html = renderSign({
+    mode: "speak",
+    entry: { text: "This is not a live transcript." },
+    caption: "Where does it hurt?",
+    conversationActive: true,
+  });
+  assert.match(html, /aria-pressed="true" aria-label="End conversation"/);
+  assert.match(html, />Stop<\/span>/);
+  assert.match(html, /<p class="caption" data-caption>Where does it hurt\?<\/p>/);
+  assert.doesNotMatch(html, /This is not a live transcript/);
+});
+
+ok("speech transcript is escaped before it enters the rendered HTML", () => {
+  const html = renderSign({ mode: "speak", caption: '<img src=x onerror="alert(1)">' });
+  assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
+  assert.doesNotMatch(html, /<img src=x/);
+});
+
+ok("Repeat is disabled until a sign exists, then uses the most recent completed segment", () => {
+  const disabled = renderSign({ mode: "speak" });
+  assert.match(disabled, /data-repeat[^>]*disabled/);
+
+  const html = renderSign({
+    mode: "speak",
+    live: { signing: { videoUrl: "blob:older" } },
+    lastSignedChunk: { id: 2, text: "For two days", videoUrl: "blob:latest" },
+  });
+  assert.match(html, /src="blob:latest"/);
+  assert.doesNotMatch(html, /src="blob:older"/);
+  assert.doesNotMatch(html, /data-repeat[^>]*disabled/);
+});
+
 ok("home status states that Signa output is only one direction", () => {
   const html = renderHome({
     live: {

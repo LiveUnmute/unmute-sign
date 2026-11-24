@@ -9,6 +9,13 @@
 
 import { mediaMarkup } from "./media.js";
 
+const escapeHtml = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#39;");
+
 export const ICONS = {
   home: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 10.2 12 3.7l8.4 6.5V20a.9.9 0 0 1-.9.9H4.5a.9.9 0 0 1-.9-.9v-9.8Z"/><path d="M9.6 20.9v-6.3h4.8v6.3"/></svg>`,
 
@@ -234,7 +241,9 @@ export const renderSign = (state = {}) => {
   // clinician side where the patient is deliberately not shown.
   const scripted = speaking || live?.consent === "declined" || Boolean(state.bootFailed);
 
-  const signed = speaking ? live?.signing : null;
+  const signed = speaking && state.lastSignedChunk?.videoUrl
+    ? { videoUrl: state.lastSignedChunk.videoUrl, pending: Boolean(live?.signing?.pending) }
+    : null;
 
   const kicker = speaking
     ? `Clinician <b>speaking</b>`
@@ -250,7 +259,12 @@ export const renderSign = (state = {}) => {
     ? `Camera <b>on</b>`
     : `Patient <b>signs</b>`;
 
-  const caption = confirming ? live?.transcript || "" : state.caption || entry.text || "";
+  const caption = confirming
+    ? live?.transcript || ""
+    : speaking
+    ? state.caption || ""
+    : state.caption || entry.text || "";
+  const safeCaption = escapeHtml(caption);
 
   const confidence =
     confirming && live ? Math.round((live.confidence || 0) * 100) : state.confidence || 98;
@@ -260,7 +274,11 @@ export const renderSign = (state = {}) => {
     : camUp
     ? `<video class="stage-media stage-media--cam" data-cam autoplay muted playsinline></video>`
     : scripted
-    ? mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")
+    ? mediaMarkup(
+        entry.media || "media/patient-01.jpg",
+        speaking ? "ASL output preview; no completed segment yet." : entry.text || "",
+        state.poster || ""
+      )
     : standByMarkup(phase, live, state.ready);
 
   const isLive = Boolean(activeCapability.live);
@@ -272,7 +290,9 @@ export const renderSign = (state = {}) => {
     ? "Scripted — no sign-output engine configured"
     : "Scripted — no sign-recognition engine configured";
 
-  const note = live?.error || live?.note || state.note || "";
+  const note = escapeHtml(live?.error || state.note || live?.note || "");
+  const safeChipTitle = escapeHtml(chipTitle);
+  const hasRepeatableSign = Boolean(state.lastSignedChunk?.videoUrl);
 
   return `
 <div class="screen screen--media${recording ? " is-recording" : ""}">
@@ -289,13 +309,13 @@ export const renderSign = (state = {}) => {
     <span class="track-chip">${confidence}%</span>
   </div>`}
 
-  <span class="demo-chip${isLive ? " is-live" : ""}" title="${chipTitle}">${chip}</span>
+  <span class="demo-chip${isLive ? " is-live" : ""}" title="${safeChipTitle}">${chip}</span>
 
   <div class="sheet">
     <div class="sheet-head">
       <span class="sheet-kicker" data-kicker>${kicker}</span>
       ${speaking
-        ? `<button class="repeat" data-repeat aria-label="Repeat the sign">
+        ? `<button class="repeat" data-repeat aria-label="Repeat the most recent signed segment"${hasRepeatableSign ? "" : ' disabled title="Complete a speech segment before repeating."'}>
              ${ICONS.repeat}<span>Repeat</span>
            </button>`
         : ""}
@@ -320,7 +340,7 @@ export const renderSign = (state = {}) => {
 
     ${confirming ? `
     <div class="confirm" data-confirm>
-      <p class="caption" data-caption>${caption}</p>
+      <p class="caption" data-caption>${safeCaption}</p>
       <p class="confirm-meta">
         <span class="conf-pill${live?.uncertain ? " is-low" : ""}">${confidence}% match</span>
         <span>${live?.uncertain ? "Low confidence — check with the patient." : "Read from signing."}</span>
@@ -331,7 +351,7 @@ export const renderSign = (state = {}) => {
       </div>
     </div>` : ""}
 
-    ${consenting || confirming ? "" : `<p class="caption" data-caption>${caption}</p>`}
+    ${consenting || confirming ? "" : `<p class="caption" data-caption>${safeCaption}</p>`}
     <p class="caption-note" data-note>${note}</p>
 
     <div class="controls">
@@ -340,8 +360,8 @@ export const renderSign = (state = {}) => {
         <span class="dir-label">${recording ? "Stop" : "Sign"}</span>
       </div>
       <div class="dir${speaking ? " is-on" : ""}" data-dir="speak">
-        <button class="dir-btn" data-mode="speak" aria-label="Clinician speaks">${ICONS.speech}</button>
-        <span class="dir-label">Speak</span>
+        <button class="dir-btn${state.conversationActive ? " is-live" : ""}" data-mode="speak" aria-pressed="${Boolean(state.conversationActive)}" aria-label="${state.conversationActive ? "End conversation" : "Start conversation"}">${ICONS.speech}</button>
+        <span class="dir-label">${state.conversationActive ? "Stop" : "Speak"}</span>
       </div>
     </div>
   </div>

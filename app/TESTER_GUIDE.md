@@ -40,13 +40,18 @@ configured, the app will instead show its recognition result for patient video.
 ### Clinician speaks → ASL signer (clinician on screen)
 
 When Signa is configured, the browser's English speech transcript is sent to
-Signa for ASL output. Try short, non-sensitive sentences such as:
+Signa for ASL output. Tap **Speak** once to start a continuing conversation.
+The transcript stays visible; a pause of two seconds completes a chunk and
+starts its signing request while the microphone remains active for the next
+chunk. Try short, non-sensitive phrases such as:
 
 - Where does it hurt?
 - Are you taking any medication?
 - One moment, please.
 
-Without a live output provider, the app shows the scripted demo pose instead.
+Without a live output provider, the transcript still appears but no ASL video
+is generated. If browser speech recognition is unavailable, the app explains
+that rather than inventing a transcript.
 
 ---
 
@@ -57,15 +62,15 @@ Without a live output provider, the app shows the scripted demo pose instead.
    phrase — five of them, then it loops. The camera frame and the confidence
    score belong to this mode.
 3. **Speak mode** (speech button): the patient disappears and the signer
-   appears. Tap speech once — the browser will ask for microphone permission.
-   Allow it, say something, and wait.
-
-   - If the browser supports speech recognition, **your words appear as text**.
-   - If it doesn't, the app falls back to the next scripted line and says so
-     underneath.
-4. **Tap Repeat** (top right of the sheet) to replay the same translation.
-   Ask yourself: is it obvious what it does? Is the button big enough on a
-   ward, in a hurry?
+   appears. Tap **Speak** once — the browser will ask for microphone permission.
+   Allow it, then talk. **Your words appear as a live transcript.** A pause of
+   two seconds completes that chunk and starts its ASL translation; keep talking
+   for another chunk without tapping again.
+4. Tap **Repeat** to replay the sign for the most recently completed output.
+   While a newer chunk is still rendering, Repeat keeps the previous completed
+   sign available. Tap **Stop** (the same speech control) to end the session;
+   any final recognized text is flushed for signing. Ask whether the toggle and
+   repeat behavior are obvious and easy to use on a ward.
 
 ---
 

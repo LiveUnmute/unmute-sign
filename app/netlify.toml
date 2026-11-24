@@ -114,8 +114,8 @@
   status = 200
   force = true
 
-# Signa's server-side proxy keeps SIGNA_KEY out of the browser. This is a
-# separate route because Signa supplies ASL output, not patient sign recognition.
+# Signa's server-side token broker keeps SIGNA_KEY out of the browser. The
+# browser uses a short-lived client token for ASL output, not patient recognition.
 [[redirects]]
   from = "/api/signa/*"
   to = "/.netlify/functions/signa/:splat"

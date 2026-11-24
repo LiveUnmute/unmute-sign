@@ -573,8 +573,9 @@ a { color: inherit; }
   text-shadow: none;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
-.repeat:hover { background: #fff; border-color: #fff; color: var(--ink); }
-.repeat:active { transform: scale(0.96); }
+.repeat:hover:not(:disabled) { background: #fff; border-color: #fff; color: var(--ink); }
+.repeat:active:not(:disabled) { transform: scale(0.96); }
+.repeat:disabled { opacity: 0.52; cursor: not-allowed; }
 
 .caption-note {
   margin: 5px 0 0;

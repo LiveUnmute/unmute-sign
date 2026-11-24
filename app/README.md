@@ -86,7 +86,7 @@ made that way; the prompts are in the commit history.
 
 | | |
 |---|---|
-| **Real** | The microphone permission prompt, audio stream, and input-level ring. Where the browser exposes `SpeechRecognition`, the clinician's English transcript is genuinely what was spoken. With `SIGNA_KEY` configured server-side, Signa can render that English as an ASL avatar video. |
+| **Real** | The microphone permission prompt, audio stream, input-level ring, and browser speech transcript where `SpeechRecognition` is supported. The clinician Speak control stays active across turns; two seconds of silence completes a signing chunk. With a valid `SIGNA_KEY` in the matching deploy context, a short-lived client token lets Signa render the text as an ASL avatar video. |
 | **Scripted until recognition is configured** | Patient sign → English. Signa does not recognise sign-language video; patient phrases still come from `SCRIPT` in `media.js` until a separate recognition provider such as Sign-Speak is configured. |
 
 The sign screen labels the current direction's engine independently. A live
@@ -99,32 +99,26 @@ and on `localhost`; it may not prompt on a plain-`http` LAN address.
 
 ## The conversation
 
-`SCRIPT` in `js/media.js` is the pre-arranged two-way exchange:
+`SCRIPT` in `js/media.js` remains the patient-side scripted demo. On the
+clinician side, one tap on **Speak** starts a continuing speech-recognition
+session. The transcript appears live; each two-second pause completes the
+current English chunk and queues it for ASL output without closing the session.
+A second tap ends recognition and the input meter. **Repeat** replays the most
+recent successfully rendered chunk; if the next one is still rendering, the
+previous output remains available.
 
-```
-clinician  Where does it hurt?                      →  translator-01
-patient    My chest hurts.                          →  patient-02
-clinician  On a scale of 1 to 5, how bad is it?     →  translator-02
-patient    It started two days ago.                 →  patient-03
-clinician  Are you taking any medication?           →  translator-03
-patient    My throat is sore.                       →  patient-04
-clinician  I'm going to press here — tell me…       →  translator-05
-patient    I get dizzy when I stand up.             →  patient-05
-clinician  One moment, please.                      →  translator-04
-patient    I don't understand.                      →  patient-01
-```
-
-Five exchanges each, then both directions loop back to the top.
-
-The two directions keep independent cursors, so switching between Sign and
-Speak never loses the thread.
+Patient-demo poses keep their own cursor. Switching directions does not turn a
+Signa avatar into patient-sign recognition.
 
 ## Known gaps
 
-- The signer is a still photograph per phrase. Animation is the next step and
-  is why the media layer takes video already.
+- Without a live output provider, the signer is a still demo pose. Signa can
+  return an MP4 when configured, but that output is not clinically or
+  linguistically validated.
 - History and Settings are static.
-- Signa's English → ASL output provider is wired through a server-side Netlify
-  function, but still needs `SIGNA_KEY` configured and a live sandbox test.
+- Signa's server function now mints short-lived client tokens; the browser
+  calls Signa directly for `.sgn` and MP4 rendering so video work avoids the
+  Netlify synchronous timeout. Verify `SIGNA_KEY` in the exact deploy context
+  and complete a live sandbox test before treating output as connected.
 - Patient ASL → English remains scripted until Sign-Speak recognition is
   configured. `talksign.js` is still an unverified skeleton.
