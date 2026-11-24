@@ -1,7 +1,14 @@
 # From here to live: what's actually left
 
-The question was: what does it take to get to the point where the only thing
-missing is a Talksign API key.
+> **Current ASL pilot update (20 October 2026):** Signa is being integrated for
+> clinician English → ASL avatar output. Sign-Speak is still pending for patient
+> ASL → English recognition; Signa does not provide that direction. This file's
+> detailed model and vendor notes below are a previous Talksign-focused roadmap,
+> not a current Signa integration guide. See [`SIGNA_INTEGRATION.md`](./SIGNA_INTEGRATION.md)
+> and [`INTEGRATION.md`](./INTEGRATION.md) for the current provider split.
+
+The original question was: what does it take to get to the point where the only
+thing missing is a Talksign API key.
 
 The honest answer is that **the key is step seven of nine, not step one.** An
 API key does not make a product. What makes a product is everything around the

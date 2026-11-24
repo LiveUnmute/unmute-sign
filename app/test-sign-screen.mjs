@@ -14,7 +14,7 @@
 //   · clinician side          → never the patient's camera
 
 import { strict as assert } from "node:assert";
-import { renderSign } from "./js/screens.js";
+import { renderHome, renderSign } from "./js/screens.js";
 
 let pass = 0;
 const ok = (name, fn) => {
@@ -126,6 +126,52 @@ ok("camera blocked: says so, and does not pretend to be on", () => {
   assert.ok(hasStandby(html));
   assert.ok(!hasCam(html), "a dead camera was rendered as a live one");
   assert.match(html, /Camera blocked/);
+});
+
+ok("Signa output does not make patient-sign recognition look live", () => {
+  const html = renderSign({
+    mode: "sign",
+    live: {
+      phase: "consent",
+      isMock: false,
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+    ready: true,
+  });
+  assert.match(html, /Demo/);
+  assert.match(html, /No sign-recognition engine is configured/);
+  assert.match(html, /clip stays on this\s+device and is never uploaded/);
+  assert.doesNotMatch(html, /sent to <b>Signa AI<\/b>/);
+});
+
+ok("the clinician direction labels Signa output live", () => {
+  const html = renderSign({
+    mode: "speak",
+    live: {
+      isMock: false,
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+  });
+  assert.match(html, /<span class="demo-chip is-live" title="Signa AI · English to ASL output">Live<\/span>/);
+});
+
+ok("home status states that Signa output is only one direction", () => {
+  const html = renderHome({
+    live: {
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+  });
+  assert.match(html, /Signa AI can sign clinician English in ASL/);
+  assert.match(html, /Patient ASL → English remains a scripted demo/);
 });
 
 console.log(`\n${pass} passed`);

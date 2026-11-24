@@ -44,8 +44,17 @@ ok("_redirects mirrors it", () => {
   assert.ok(demoLine < catchLine, "/demo is after the catch-all in _redirects");
 });
 
+ok("Signa API route reaches its function before the catch-all", () => {
+  assert.match(toml, /from\s*=\s*"\/api\/signa\/\*"[\s\S]*?to\s*=\s*"\/\.netlify\/functions\/signa\/:splat"/);
+  assert.ok(toml.indexOf('from = "/api/signa/*"') < toml.indexOf('from = "/*"'));
+  const lines = redirects.split("\n").map((line) => line.trim());
+  const apiLine = lines.findIndex((line) => line.startsWith("/api/signa/*"));
+  const catchLine = lines.findIndex((line) => line.startsWith("/*"));
+  assert.ok(apiLine > -1 && apiLine < catchLine, "Signa API route is missing or after the catch-all");
+});
+
 ok("_redirects still carries every rule netlify.toml has", () => {
-  for (const path of ["/app", "/tester", "/api/sign/*", "/demo", "/*"]) {
+  for (const path of ["/app", "/tester", "/api/sign/*", "/api/signa/*", "/demo", "/*"]) {
     assert.ok(
       redirects.split("\n").some((l) => l.trim().startsWith(path)),
       `${path} missing from _redirects — the two files have drifted`

@@ -12,8 +12,8 @@ app/
 ├── js/screens.js     the four screens as markup
 ├── js/media.js       sign media + the pre-arranged conversation   ← edit here
 ├── js/app.js         navigation, microphone, simulation
-├── js/providers/     the translation seam: contract, mock, Talksign skeleton
-├── ROADMAP_TO_LIVE.md  what is left before the API key is the last step
+├── js/providers/     directional providers: Signa output, Sign-Speak, mock, Talksign skeleton
+├── ROADMAP_TO_LIVE.md  remaining work and pilot-readiness gates
 ├── assets/           logo, favicon
 ├── media/            patient-01…05, translator-01…05
 ├── netlify.toml      deploy config for app.liveunmute.com
@@ -24,6 +24,10 @@ app/
 ```bash
 cd app && PORT=8083 node server.mjs
 ```
+
+The local server also routes `/api/signa/*` to the same function handler used by
+Netlify. Without `SIGNA_KEY` it stays in demo mode. Provide the key through your
+local process environment for a sandbox test; never put it in a tracked file.
 
 Open `/` — it is the app, at any width. No frame, no backdrop, no board: the
 screens fill the window, with the content held to a readable column and the
@@ -82,15 +86,16 @@ made that way; the prompts are in the commit history.
 
 | | |
 |---|---|
-| **Real** | The microphone permission prompt, the audio stream, and the live input-level ring around the speech button. Where the browser exposes `SpeechRecognition`, the transcript is genuinely what you said. |
-| **Scripted** | The conversation. There is no sign-recognition model, so patient phrases come from `SCRIPT` in `media.js` and the confidence score is cosmetic. |
+| **Real** | The microphone permission prompt, audio stream, and input-level ring. Where the browser exposes `SpeechRecognition`, the clinician's English transcript is genuinely what was spoken. With `SIGNA_KEY` configured server-side, Signa can render that English as an ASL avatar video. |
+| **Scripted until recognition is configured** | Patient sign → English. Signa does not recognise sign-language video; patient phrases still come from `SCRIPT` in `media.js` until a separate recognition provider such as Sign-Speak is configured. |
 
-The app says which one you are getting on screen rather than leaving it
-ambiguous. This matters because the deck's status slide says there is no
-trained model — a prototype that quietly implied otherwise would contradict it.
+The sign screen labels the current direction's engine independently. A live
+Signa avatar never implies that patient signing is being recognised. See
+[`SIGNA_INTEGRATION.md`](./SIGNA_INTEGRATION.md) for setup and limits, and
+[`INTEGRATION.md`](./INTEGRATION.md) for the Sign-Speak recognition path.
 
-**Speech recognition needs a secure context.** It works on `https://` and on
-`localhost`; it will not prompt on a plain-`http` LAN address.
+**Browser speech recognition needs a secure context.** It works on `https://`
+and on `localhost`; it may not prompt on a plain-`http` LAN address.
 
 ## The conversation
 
@@ -119,6 +124,7 @@ Speak never loses the thread.
 - The signer is a still photograph per phrase. Animation is the next step and
   is why the media layer takes video already.
 - History and Settings are static.
-- The translation providers in `js/providers/` are not yet wired into the UI.
-  The mock works and is tested; `talksign.js` is a skeleton that throws until a
-  key is configured. See `ROADMAP_TO_LIVE.md` step 2.
+- Signa's English → ASL output provider is wired through a server-side Netlify
+  function, but still needs `SIGNA_KEY` configured and a live sandbox test.
+- Patient ASL → English remains scripted until Sign-Speak recognition is
+  configured. `talksign.js` is still an unverified skeleton.

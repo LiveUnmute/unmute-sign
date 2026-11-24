@@ -86,8 +86,12 @@ function signState() {
   };
 }
 
-/** True only when a real engine is configured and answered. */
-const isLiveEngine = () => Boolean(state.live && !state.live.isMock);
+/** Check the active direction; a live avatar must not imply live recognition. */
+const isLiveCapability = (direction) => {
+  const capability = state.live?.capabilities?.[direction];
+  if (capability) return Boolean(capability.live);
+  return Boolean(state.live && !state.live.isMock);
+};
 
 /**
  * True when a tap on the hand should open the camera rather than advance the
@@ -115,6 +119,8 @@ function paint() {
   const html =
     state.screen === "sign"
       ? renderSign(signState())
+      : state.screen === "home"
+      ? renderHome({ live: state.live })
       : RENDER[state.screen]();
 
   host.innerHTML = html;
@@ -421,7 +427,7 @@ function pickPoseFor(heard) {
 }
 
 function maybeSign(text) {
-  if (!isLiveEngine() || !session || !text) return;
+  if (!isLiveCapability("textToSign") || !session || !text) return;
   session.sign(text);
 }
 
@@ -515,7 +521,7 @@ function onLiveChange(snap) {
   const prev = state.live || {};
   state.live = snap;
 
-  const material = ["phase", "transcript", "confidence", "note", "error", "consent", "signing", "isMock"].some(
+  const material = ["phase", "transcript", "transcriptSource", "confidence", "note", "error", "consent", "signing", "isMock", "capabilities"].some(
     (k) => JSON.stringify(prev[k]) !== JSON.stringify(snap[k])
   );
 
@@ -536,8 +542,9 @@ async function bootLive() {
   const cfg = readConfig();
 
   try {
-    const { provider, reason } = await getProvider(cfg);
-    if (provider.name === "mock") console.info("[unmute] scripted demo:", reason);
+    const { provider, reason, mode } = await getProvider(cfg);
+    if (mode === "mock") console.info("[unmute] scripted demo:", reason);
+    else console.info("[unmute] provider directions:", reason);
 
     session = createLiveSession({ provider, config: cfg, onChange: onLiveChange });
     state.live = session.state;

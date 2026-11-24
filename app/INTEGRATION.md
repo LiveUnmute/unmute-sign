@@ -1,24 +1,27 @@
 # Going live: the two-way conversation
 
-The app now has a real product inside it. This document is what to do the day
-Sign-Speak hands over a key, and what to say if it does not work.
+The pilot uses separate providers for the two directions. **Signa is being
+integrated for clinician English → ASL avatar output**; Sign-Speak remains the
+candidate for **patient ASL → English recognition**. Signa's avatar output is
+not sign recognition.
 
-Everything below is already built and tested against a stub that imitates their
-API. No code changes are needed to switch it on — a key in one place does it.
+The Signa setup and current implementation are documented in
+[`SIGNA_INTEGRATION.md`](./SIGNA_INTEGRATION.md). The Sign-Speak instructions
+below cover its separate recognition integration and key setup.
 
 ---
 
-## 1. What runs today, without a key
+## 1. Direction-by-direction status
 
 | | Direction | Engine | Status |
 |---|---|---|---|
-| Patient signs → clinician reads and hears | sign → English | **Sign-Speak** | Built, awaiting key |
-| Clinician speaks → patient sees it signed | English → sign | **Sign-Speak** avatar (Echo 1.0 as an upgrade) | Built, awaiting key |
-| Anything at all | both | scripted mock | Working now, labelled **Demo** |
+| Patient signs → clinician reads and hears | ASL → English | **Sign-Speak** | Provider path exists; awaiting key. Otherwise the response is scripted. |
+| Clinician speaks → patient sees it signed | English → ASL | **Signa AI** | Server proxy is implemented; awaiting `SIGNA_KEY` in the app environment and a live sandbox test. |
+| Anything at all | both | scripted mock | Working now, labelled **Demo**. |
 
-With no key the app is exactly the demo it was yesterday: scripted poses,
-browser speech recognition where available, `Demo` in the corner. Nothing is
-broken and nothing pretends to be live.
+With no server-side keys configured, the app falls back to the scripted demo.
+Each direction has its own status, so a live avatar does not imply live patient-
+sign recognition.
 
 ---
 
@@ -27,29 +30,30 @@ broken and nothing pretends to be live.
 ```
         PATIENT SIGNS                          CLINICIAN SPEAKS
         ─────────────                          ────────────────
-   consent gate  (named vendor)            browser speech recognition
+   consent gate names recogniser           browser speech recognition
         │                                          │
-   camera opens, visibly                   sentence arrives
+   camera opens visibly                    English sentence arrives
         │                                          │
-   tap hand → record ≤ 8s                  POST /produceASL
+   tap hand → record ≤ 8s                  POST /api/signa/video
         │                                          │
-   POST /recognizeASL  (BLOCKING)          avatar video returned
-        │            └─ 202 → poll               │
-   transcript + confidence                 stage plays it
+   Sign-Speak recognition (when set)       Signa /v1/sign  (en → ase)
         │                                          │
-   PATIENT CONFIRMS  ◀── the product          repeat control
+   transcript + confidence                 Signa /v1/sign/video → MP4
+        │                                          │
+   PATIENT CONFIRMS                         stage plays it; repeat control
         │
    spoken aloud to the clinician
 ```
 
-The confirmation step is not decoration. At Sign-Speak's and Talksign's stated
-accuracy, roughly one sentence in ten is wrong. On a ward a wrong sentence is a
-clinical event, so **nothing is spoken that the patient has not approved**, and
-`No — sign again` discards the sentence completely — it never enters history.
+Signa handles only the clinician-text-to-ASL-avatar path. It does not read the
+patient's signing. Until Sign-Speak recognition is configured, the first
+direction remains a scripted demo. For recognized patient signing, the
+confirmation step remains mandatory: the patient approves what was understood
+before it is spoken to the clinician.
 
 ---
 
-## 3. Switching it on
+## 3. Sign-Speak: enabling patient-sign recognition
 
 ### Step 1 — get a **PUBLIC** key
 
@@ -201,14 +205,15 @@ Sign-Speak sells an **Automated Interpreting System** — AI plus human
 interpreters, both directions, 24/7. That is the same job Unmute is aiming at.
 They are a supplier today and a competitor on the roadmap.
 
-Which is why the code is written the way it is: one provider interface, two
-swappable implementations, a mock that always works. If Sign-Speak's terms turn
-bad, or Echo 1.0 arrives better, `js/live.js` does not change.
+That is why the code keeps the directions independently replaceable: the
+recognition provider can change without changing the Signa output path, and the
+mock remains available for safe demos. If Sign-Speak's terms turn bad, or a
+better output provider arrives, `js/live.js` does not need a vendor rewrite.
 
-**Echo 1.0 should be adopted as the upgrade, not the dependency.** Ship
-Sign-Speak for both directions first, put the same ten clinical sentences
-through both avatars, and let the Deaf design panel in the grant budget pick the
-winner blind.
+**Pilot sequence:** validate Signa's English → ASL output with short, approved
+sample phrases; connect Sign-Speak separately for ASL → English when its key is
+available; then evaluate both directions with Deaf ASL users. Do not call the
+combined workflow validated until that testing is complete.
 
 ---
 

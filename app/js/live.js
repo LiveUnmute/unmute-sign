@@ -29,6 +29,19 @@ import { openCamera, createRecorder, blobToBase64, bindPreview, supportsRecordin
 const SPEECH = typeof window !== "undefined" ? window.speechSynthesis : null;
 
 export function createLiveSession({ provider, config, onChange = () => {} }) {
+  const capabilities = provider?.capabilities || {
+    signToText: {
+      live: Boolean(provider?.signToText && provider?.name !== "mock"),
+      provider: provider?.name || "none",
+      vendor: provider?.vendor || null,
+    },
+    textToSign: {
+      live: Boolean(provider?.textToSign && provider?.name !== "mock"),
+      provider: provider?.name || "none",
+      vendor: provider?.vendor || null,
+    },
+  };
+
   const s = {
     phase: "idle", // idle | consent | ready | recording | sending | confirm | spoken | error
     consent: "unknown", // unknown | granted | declined
@@ -36,11 +49,13 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
     confidence: 0,
     uncertain: true,
     words: [],
+    transcriptSource: "",
     note: "",
     error: "",
     providerName: provider?.name || "none",
     vendor: provider?.vendor || null,
-    isMock: provider?.name === "mock",
+    capabilities,
+    isMock: !capabilities.signToText.live && !capabilities.textToSign.live,
     clipUrl: "",
     signing: null, // { videoUrl, durationMs } for the clinician direction
     history: [],
@@ -220,6 +235,7 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
         confidence: result.confidence,
         uncertain: Boolean(result.uncertain),
         words: result.words || [],
+        transcriptSource: result.source || provider?.capabilities?.signToText?.provider || provider?.name || "unknown",
         note: "Check this with the patient before it is spoken.",
         error: "",
       });
@@ -241,7 +257,7 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
       at: new Date().toISOString(),
       text: s.transcript,
       confidence: s.confidence,
-      source: s.providerName,
+      source: s.transcriptSource || s.providerName,
       confirmed: true,
     });
 
@@ -256,6 +272,7 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
       transcript: "",
       confidence: 0,
       words: [],
+      transcriptSource: "",
       note: "Discarded — nothing was spoken. Ask the patient to sign again.",
     });
   }
@@ -266,6 +283,11 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
 
   async function sign(text) {
     if (!text) return null;
+
+    const previousVideo = s.signing?.videoUrl;
+    if (typeof previousVideo === "string" && previousVideo.startsWith("blob:")) {
+      try { globalThis.URL?.revokeObjectURL(previousVideo); } catch { /* best-effort cleanup */ }
+    }
 
     set({ signing: { pending: true }, note: "Rendering the reply in ASL…" });
 
@@ -335,17 +357,20 @@ export function createLiveSession({ provider, config, onChange = () => {} }) {
 function humanError(err) {
   const msg = String(err?.message || err || "");
 
+  if (/signa/i.test(msg) && /401|403|unauthor|invalid.?key/i.test(msg)) {
+    return "Signa rejected its server-side key. Check SIGNA_KEY in the server environment; never add it to browser code.";
+  }
   if (/401|403|unauthor|invalid.?key/i.test(msg)) {
-    return "The engine rejected the key. Check that this is a PUBLIC key and that it is active.";
+    return "The engine rejected the key. For direct Sign-Speak mode, check that it is a PUBLIC key and active.";
   }
   if (/429|rate|quota/i.test(msg)) {
     return "Rate limit or monthly quota reached on the engine account.";
   }
   if (/failed to fetch|networkerror|load failed/i.test(msg)) {
-    return "Could not reach the engine — check the connection. Sign-Speak also blocks requests from origins it does not recognise, so a new deployment URL may need to be added to their allowlist.";
+    return "Could not reach the translation service — check the connection. Direct Sign-Speak mode may also need this site's origin allowlisted.";
   }
   if (/did not finish in time|timeout/i.test(msg)) {
-    return "The engine took too long. Short clips (one or two phrases) read fastest.";
+    return "The engine took too long. Try a shorter sentence and check the connection.";
   }
   return msg.slice(0, 180) || "The engine failed.";
 }

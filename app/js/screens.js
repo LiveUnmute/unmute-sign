@@ -49,6 +49,17 @@ export const ICONS = {
 const homebar = (dark) =>
   `<div class="home-bar${dark ? " is-on-dark" : ""}"><span></span></div>`;
 
+function engineCapability(live, direction) {
+  const explicit = live?.capabilities?.[direction];
+  if (explicit) return explicit;
+  if (!live) return { live: false, vendor: null, provider: "none" };
+  return {
+    live: !live.isMock,
+    vendor: live.vendor || live.providerName || null,
+    provider: live.providerName || "unknown",
+  };
+}
+
 const tabbar = (active) => {
   const tabs = [
     ["home", "home", "Home"],
@@ -74,7 +85,20 @@ const tabbar = (active) => {
    01 — HOME
    ------------------------------------------------------------ */
 
-export const renderHome = () => `
+export const renderHome = (state = {}) => {
+  const recognition = engineCapability(state.live, "signToText");
+  const output = engineCapability(state.live, "textToSign");
+  let statusText = "No translation engines are configured; the two-way workflow is shown with scripted demo content.";
+
+  if (recognition.live && output.live) {
+    statusText = `${recognition.vendor || "A recognition engine"} is configured for patient ASL → English, and ${output.vendor || "an output engine"} for clinician English → ASL. This is still a prototype.`;
+  } else if (output.live) {
+    statusText = `${output.vendor || "Signa AI"} can sign clinician English in ASL. Patient ASL → English remains a scripted demo until a recognition engine is configured.`;
+  } else if (recognition.live) {
+    statusText = `${recognition.vendor || "A recognition engine"} can read patient ASL. Signed output is not configured in this build.`;
+  }
+
+  return `
 <div class="screen">
 
   <div class="appbar">
@@ -84,9 +108,9 @@ export const renderHome = () => `
 
   <div class="home-body">
     <div class="hero">
-      <div class="kicker">Two-way · ASL ⇄ English</div>
+      <div class="kicker">ASL pilot · English ⇄ ASL</div>
       <h1 class="hero-title">The conversation, both ways.</h1>
-      <p class="hero-sub">No interpreter on the ward — the patient signs, you speak, both are understood.</p>
+      <p class="hero-sub">${statusText}</p>
       <div class="hero-people">
         <span class="pip pip--a"></span>
         <span class="pip pip--b"></span>
@@ -108,9 +132,9 @@ export const renderHome = () => `
       <span class="thumb thumb--a"></span>
       <span class="recent-text">
         <span class="recent-title">Chest pain, two days</span>
-        <span class="recent-meta">Signed reply · 2 min ago</span>
+        <span class="recent-meta">Sample signed reply</span>
       </span>
-      <span class="recent-tag">Live</span>
+      <span class="recent-tag">Sample</span>
     </div>
 
     <div class="recent">
@@ -125,6 +149,7 @@ export const renderHome = () => `
   ${tabbar("home")}
   ${homebar(false)}
 </div>`;
+};
 
 /* ------------------------------------------------------------
    02 — SIGN
@@ -183,6 +208,9 @@ export const renderSign = (state = {}) => {
   const entry = state.entry || {};
   const speaking = mode === "speak";
   const live = state.live || null;
+  const recognitionCapability = engineCapability(live, "signToText");
+  const outputCapability = engineCapability(live, "textToSign");
+  const activeCapability = speaking ? outputCapability : recognitionCapability;
 
   const phase = live?.phase || "idle";
   const consenting = !speaking && phase === "consent";
@@ -235,11 +263,14 @@ export const renderSign = (state = {}) => {
     ? mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")
     : standByMarkup(phase, live, state.ready);
 
-  const isLive = Boolean(live && !live.isMock);
+  const isLive = Boolean(activeCapability.live);
   const chip = isLive ? "Live" : "Demo";
+  const activeVendor = activeCapability.vendor || activeCapability.provider;
   const chipTitle = isLive
-    ? `${live.vendor || live.providerName} engine`
-    : "Scripted — no engine configured";
+    ? `${activeVendor || "Translation"} · ${speaking ? "English to ASL output" : "ASL recognition"}`
+    : speaking
+    ? "Scripted — no sign-output engine configured"
+    : "Scripted — no sign-recognition engine configured";
 
   const note = live?.error || live?.note || state.note || "";
 
@@ -273,13 +304,13 @@ export const renderSign = (state = {}) => {
     ${consenting ? `
     <div class="consent" data-consent>
       <p class="consent-body">
-        The patient is filmed so their signs can be read.
-        ${live && !live.isMock
-          ? `That video is sent to <b>${live.vendor || "the translation provider"}</b>
-             to be translated. This app does not store it.`
-          : `No translation engine is configured in this build, so the clip stays
-             on this device and is never uploaded. The reply that comes back is
-             <b>scripted for the demo</b> — the filming is real, the reading is not.`}
+        The patient is filmed so an engine can attempt to read their signs.
+        ${recognitionCapability.live
+          ? `That video is sent to <b>${recognitionCapability.vendor || "the sign-recognition provider"}</b>
+             for recognition. This app does not store it.`
+          : `No sign-recognition engine is configured, so the clip stays on this
+             device and is never uploaded. The response is <b>scripted for the demo</b> —
+             the filming is real, the reading is not.`}
       </p>
       <div class="consent-actions">
         <button class="btn-quiet" data-consent-no>Not now</button>

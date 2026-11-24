@@ -4,8 +4,8 @@
 // a model — it returns the pre-arranged script, and every caller is expected to
 // label the result as simulated in the UI.
 //
-// Its real job is to be a working implementation of the contract, so the rest of
-// the app can be finished and tested before Talksign is wired in.
+// Its real job is to be a working implementation of the contract, so the app
+// remains usable when either live direction is unavailable.
 
 import { normaliseConfidence } from "./contract.js";
 import { PATIENT_SIGNS, TRANSLATOR_SIGNS } from "../media.js";

@@ -1,9 +1,8 @@
 // The translation contract.
 //
 // Everything the UI knows about sign language lives behind this interface.
-// The app calls these two methods and renders whatever comes back — it does
-// not know whether the answer came from Talksign, from a different vendor, or
-// from the scripted mock.
+// The incoming and outgoing directions may use different providers; the app
+// renders each capability with its own status rather than conflating them.
 //
 // That is the whole point: when the Talksign key arrives, `talksign.js` starts
 // returning real results and nothing else in the codebase changes.
@@ -12,17 +11,19 @@
  * @typedef {Object} Translation
  * @property {string} text        What was said, in English.
  * @property {number} confidence  0–1. The UI must show this rather than hide it.
- * @property {string} source      "talksign" | "mock" | "error"
+ * @property {string} source      Provider identifier, e.g. "signspeak", "signa", "mock" or "error"
  * @property {boolean} uncertain  True when the provider is guessing. A clinical
  *                                tool that hides this is worse than one that
  *                                admits it.
  */
 
 /**
- * A provider translates in both directions.
+ * A provider or directional composite exposes the two directions independently.
  *
  * @typedef {Object} Provider
  * @property {string} name
+ * @property {{signToText: Object, textToSign: Object}} capabilities
+ *   Per-direction availability and vendor metadata used by the UI.
  *
  * @property {(opts: {
  *   stream: MediaStream|null,

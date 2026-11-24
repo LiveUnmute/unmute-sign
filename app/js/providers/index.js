@@ -1,85 +1,149 @@
-// Which engine the app talks to.
+// Resolve one provider per direction. Signa supplies English → ASL avatar
+// output; patient sign → English remains a separate recognition capability.
 //
-// One place decides, and the rest of the app never asks which vendor answered.
 // Resolution order:
+//   1. ?provider=mock  — force the fully scripted demo
+//   2. Sign-Speak      — preferred sign recognition; also a fallback signer
+//   3. Signa           — preferred signer when its server key is configured
+//   4. Talksign        — legacy fallback, if configured
+//   5. mock            — always works and is labelled as a demo
 //
-//   1. ?provider=mock          — force the scripted demo (Demo Day safety)
-//   2. ?provider=direct        — skip the proxy, use a key in the page
-//   3. the proxy               — /api/sign/status says the server holds a key
-//   4. a Sign-Speak key        — direct from the browser (key is public-only)
-//   5. a Talksign key          — Echo 1.0 for English→sign, when it ships
-//   6. nothing                 — scripted mock, clearly labelled in the UI
-//
-// The proxy is preferred over a key in the page because a bundle served to the
-// public is public. If both exist, the proxy wins.
+// The returned provider is a small directional composite. A live output engine
+// never makes the patient-recognition direction look live by association.
 
-import { readConfig, probeProxy } from "../config.js";
+import { readConfig, probeProxy, probeSigna } from "../config.js";
 import { createMockProvider } from "./mock.js";
 
 let cached = null;
 
+function isLiveProvider(provider) {
+  return Boolean(provider && provider.name !== "mock");
+}
+
+function capability(provider) {
+  return {
+    live: isLiveProvider(provider),
+    provider: provider?.name || "none",
+    vendor: provider?.vendor || null,
+  };
+}
+
+/** Combine independent incoming and outgoing engines without conflating them. */
+export function combineProviders(signToTextProvider, textToSignProvider) {
+  const incoming = signToTextProvider;
+  const outgoing = textToSignProvider;
+  const same = incoming === outgoing;
+
+  return {
+    name: same ? incoming.name : "hybrid",
+    vendor: same ? incoming.vendor || null : null,
+    capabilities: {
+      signToText: capability(incoming),
+      textToSign: capability(outgoing),
+    },
+    signToText: (options) => incoming.signToText(options),
+    textToSign: (options) => outgoing.textToSign(options),
+    async healthy() {
+      const providers = [...new Set([incoming, outgoing])].filter((p) => isLiveProvider(p));
+      const results = await Promise.all(
+        providers.map((p) => (typeof p.healthy === "function" ? p.healthy() : true))
+      );
+      return results.every(Boolean);
+    },
+  };
+}
+
 export async function resolveProvider(cfg = readConfig()) {
+  const mock = createMockProvider();
   if (cfg.forceProvider === "mock") {
-    return { provider: createMockProvider(), reason: "forced by ?provider=mock", mode: "mock" };
+    return { provider: combineProviders(mock, mock), reason: "forced by ?provider=mock", mode: "mock" };
   }
 
   const forcedDirect = cfg.forceProvider === "direct";
+  const forceSignaOutput = cfg.forceProvider === "signa";
+  const forceSignSpeakOutput = cfg.forceProvider === "signspeak";
 
-  // ── 1. the proxy ───────────────────────────────────────────────────────
-  if (!forcedDirect) {
-    const status = await probeProxy(cfg);
+  // Ask both server-side proxies in parallel, so one slow cold start does not
+  // serially delay the other direction. Neither endpoint returns a key.
+  const [signaStatus, signSpeakStatus] = await Promise.all([
+    probeSigna(cfg),
+    forcedDirect ? Promise.resolve({ configured: false, reason: "direct mode" }) : probeProxy(cfg),
+  ]);
 
-    if (status.configured) {
-      const { createSignSpeakProvider } = await import("./signspeak.js");
-      try {
-        const provider = createSignSpeakProvider({
-          proxy: true,
-          baseUrl: cfg.proxyBase,
-          model: status.model || cfg.signSpeakModel,
-        });
-        return {
-          provider,
-          reason: `proxy (${status.reason})`,
-          mode: "proxy",
-        };
-      } catch (err) {
-        console.warn("[unmute] proxy provider failed to build:", err?.message);
-      }
+  let signSpeakProvider = null;
+
+  if (signSpeakStatus.configured) {
+    const { createSignSpeakProvider } = await import("./signspeak.js");
+    try {
+      signSpeakProvider = createSignSpeakProvider({
+        proxy: true,
+        baseUrl: cfg.proxyBase,
+        model: signSpeakStatus.model || cfg.signSpeakModel,
+      });
+    } catch (error) {
+      console.warn("[unmute] Sign-Speak proxy provider failed to build:", error?.message);
     }
   }
 
-  // ── 2. a key in the page ───────────────────────────────────────────────
-  if (cfg.signSpeakKey) {
+  // A browser key is only supported for Sign-Speak's inference-only PUBLIC key.
+  if (!signSpeakProvider && cfg.signSpeakKey) {
     const { createSignSpeakProvider } = await import("./signspeak.js");
     try {
-      const provider = createSignSpeakProvider({
+      signSpeakProvider = createSignSpeakProvider({
         apiKey: cfg.signSpeakKey,
         baseUrl: cfg.signSpeakBase,
         model: cfg.signSpeakModel,
       });
-      return { provider, reason: "Sign-Speak key in the page", mode: "direct" };
-    } catch (err) {
-      console.warn("[unmute] Sign-Speak key unusable, falling back:", err?.message);
+    } catch (error) {
+      console.warn("[unmute] Sign-Speak key unusable, falling back:", error?.message);
     }
   }
 
-  // ── 3. Talksign, when Echo 1.0 arrives ─────────────────────────────────
-  if (cfg.talksignKey) {
+  let talksignProvider = null;
+  if (!signSpeakProvider && cfg.talksignKey) {
     const { createTalksignProvider } = await import("./talksign.js");
     try {
-      const provider = createTalksignProvider({ apiKey: cfg.talksignKey });
-      return { provider, reason: "Talksign key present", mode: "direct" };
-    } catch (err) {
-      console.warn("[unmute] Talksign unusable, falling back:", err?.message);
+      talksignProvider = createTalksignProvider({ apiKey: cfg.talksignKey });
+    } catch (error) {
+      console.warn("[unmute] Talksign unusable, falling back:", error?.message);
     }
   }
 
-  // ── 4. nothing ─────────────────────────────────────────────────────────
-  return {
-    provider: createMockProvider(),
-    reason: "no engine key configured — scripted demo",
-    mode: "mock",
-  };
+  let signaProvider = null;
+  if (signaStatus.configured) {
+    const { createSignaProvider } = await import("./signa.js");
+    try {
+      signaProvider = createSignaProvider({ baseUrl: cfg.signaProxyBase });
+    } catch (error) {
+      console.warn("[unmute] Signa provider failed to build:", error?.message);
+    }
+  }
+
+  // Inbound recognition is never inferred from Signa's avatar output.
+  const signToTextProvider = signSpeakProvider || talksignProvider || mock;
+
+  // Signa is the first ASL-output path for this pilot. Sign-Speak's own output
+  // remains available as a fallback, but can be explicitly selected for a
+  // comparison with ?provider=signspeak.
+  const textToSignProvider = forceSignSpeakOutput
+    ? signSpeakProvider || talksignProvider || mock
+    : forceSignaOutput
+    ? signaProvider || mock
+    : signaProvider || signSpeakProvider || talksignProvider || mock;
+
+  const provider = combineProviders(signToTextProvider, textToSignProvider);
+  const reason =
+    `sign→text: ${provider.capabilities.signToText.vendor || provider.capabilities.signToText.provider}; ` +
+    `text→sign: ${provider.capabilities.textToSign.vendor || provider.capabilities.textToSign.provider}`;
+
+  const mode =
+    provider.capabilities.signToText.live && provider.capabilities.textToSign.live
+      ? "live"
+      : provider.capabilities.signToText.live || provider.capabilities.textToSign.live
+      ? "partial"
+      : "mock";
+
+  return { provider, reason, mode, signaStatus, signSpeakStatus };
 }
 
 /** Resolve once per page load, then reuse. */

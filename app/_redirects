@@ -7,6 +7,7 @@
 /app                    /app.html               200
 /tester                 /tester.html            200
 /api/sign/*             /.netlify/functions/sign/:splat   200
+/api/signa/*            /.netlify/functions/signa/:splat  200
 
 # The pitch video. Above the catch-all or /demo renders the app home.
 /demo                   /demo/index.html        200

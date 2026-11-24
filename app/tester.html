@@ -342,45 +342,58 @@
     body.innerHTML = text;
   }
 
-  async function check() {
+  async function getStatus(path) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 3000);
-
     try {
-      const res = await fetch("/api/sign/status", {
+      const res = await fetch(path, {
         headers: { accept: "application/json" },
         signal: ctrl.signal,
       });
-
-      if (!res.ok) throw new Error(`status ${res.status}`);
-
-      const json = await res.json();
-
-      if (json.configured) {
-        paint(
-          "is-live",
-          "Engine connected — this is a live test",
-          `Sign recognition is running through <b>${json.vendor || "Sign-Speak"}</b>` +
-            (json.model ? ` (model <code>${json.model}</code>)` : "") +
-            ". The patient's signing is genuinely being read. Expect mistakes — that is what we are measuring."
-        );
-      } else {
-        paint(
-          "is-demo",
-          "Demo mode — no engine connected",
-          "The interface is real; the patient's phrases come from a <b>fixed script</b>. " +
-            "Nothing is being recognised. Use this to judge the flow, not the accuracy."
-        );
-      }
+      if (!res.ok) return { configured: false };
+      return await res.json();
     } catch {
+      return { configured: false };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function check() {
+    const [recognition, output] = await Promise.all([
+      getStatus("/api/sign/status"),
+      getStatus("/api/signa/status"),
+    ]);
+
+    const hasRecognition = Boolean(recognition.configured);
+    const hasSignaOutput = Boolean(output.configured);
+    const hasSignSpeak = hasRecognition && recognition.vendor === "Sign-Speak";
+
+    if (hasRecognition && hasSignaOutput) {
+      paint(
+        "is-live",
+        "Both directions have an engine configured",
+        `<b>${recognition.vendor || "Recognition provider"}</b> handles patient sign → English; ` +
+          `<b>${output.vendor || "Signa AI"}</b> handles clinician English → ASL. This remains a prototype, not clinical validation.`
+      );
+    } else if (hasSignaOutput) {
+      paint(
+        "is-live",
+        "Signa ASL output is connected",
+        `<b>${output.vendor || "Signa AI"}</b> can sign clinician English text. Patient sign → English is still a <b>scripted demo</b> until a recognition provider is configured.`
+      );
+    } else if (hasRecognition) {
+      paint(
+        "is-live",
+        "Sign recognition is connected",
+        `<b>${recognition.vendor || "Sign-Speak"}</b> can read patient signing. Signa ASL output is not configured${hasSignSpeak ? "; Sign-Speak output may be available for the reverse direction" : ""}. This remains a prototype, not clinical validation.`
+      );
+    } else {
       paint(
         "is-demo",
         "Demo mode — no engine connected",
-        "The translation engine is not configured on this deployment, so the patient's phrases " +
-          "come from a <b>fixed script</b>. Everything else on this page applies."
+        "The interface is real; translation is not. Patient phrases come from a <b>fixed script</b>, and no signed avatar engine is configured. Use this to judge the flow, not translation accuracy."
       );
-    } finally {
-      clearTimeout(timer);
     }
   }
 

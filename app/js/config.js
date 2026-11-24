@@ -30,8 +30,8 @@
  *
  * @returns {{
  *   signSpeakKey: string, signSpeakBase: string, signSpeakModel: string,
- *   talksignKey: string, forceProvider: string, maxClipMs: number,
- *   captureWidth: number, captureHeight: number
+ *   signaProxyBase: string, talksignKey: string, forceProvider: string,
+ *   maxClipMs: number, captureWidth: number, captureHeight: number
  * }}
  */
 export function readConfig() {
@@ -63,10 +63,13 @@ export function readConfig() {
     // Echo 1.0 arrives from Talksign; unused until their key exists.
     talksignKey: String(g.talksignKey || meta("talksign-key") || "").trim(),
 
-    // Where the proxy lives. Netlify rewrites /api/sign/* to the function in
-    // netlify/functions/sign.js, which holds the vendor key server-side. This
-    // is the preferred mode: nothing sensitive ships to the browser.
+    // Sign-Speak's proxy holds its key server-side. This path remains separate
+    // from Signa because the vendors provide different directions.
     proxyBase: String(g.proxyBase || meta("proxy-base") || "/api/sign").replace(/\/+$/, ""),
+
+    // Signa only provides clinician text/speech → signed output. Its secret
+    // key is never read by browser code; the server-side function owns it.
+    signaProxyBase: String(g.signaProxyBase || meta("signa-proxy-base") || "/api/signa").replace(/\/+$/, ""),
 
     // Set false to stop the app even asking the proxy (e.g. a static preview
     // deploy where functions are not available).
@@ -75,7 +78,7 @@ export function readConfig() {
     // How long to wait for /api/sign/status before deciding there is no proxy.
     proxyProbeMs: Number(g.proxyProbeMs) || 2500,
 
-    // ?provider=mock|signspeak — lets you demo without spending inference.
+    // ?provider=mock forces the fully scripted demo without spending inference.
     forceProvider: param("provider") || String(g.provider || ""),
 
     // 8s is one or two short phrases. Longer clips cost more per request and
@@ -93,11 +96,10 @@ export function readConfig() {
 }
 
 /**
- * Is a real engine configured?
+ * Are any browser-side vendor keys present?
  *
- * A key in the page is only one way. The proxy is checked separately and
- * asynchronously — see providers/index.js, which asks /api/sign/status before
- * deciding. This function stays synchronous so it can be used during render.
+ * This synchronous helper cannot see server-side proxy keys such as SIGNA_KEY;
+ * the provider resolver probes those endpoints separately.
  */
 export function hasLiveEngine(cfg = readConfig()) {
   return Boolean(cfg.signSpeakKey || cfg.talksignKey);
@@ -132,6 +134,40 @@ export async function probeProxy(cfg = readConfig()) {
       configured: Boolean(json?.configured),
       model: json?.model,
       vendor: json?.vendor,
+      note: json?.note,
+      reason: json?.configured ? "server key present" : "no server key",
+    };
+  } catch (err) {
+    return { configured: false, reason: err?.name === "AbortError" ? "timed out" : "unreachable" };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Ask whether the Signa server proxy has a key; it never reveals or tests it. */
+export async function probeSigna(cfg = readConfig()) {
+  if (!cfg.signaProxyBase) return { configured: false, reason: "Signa proxy disabled" };
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), cfg.proxyProbeMs);
+
+  try {
+    const res = await fetch(`${cfg.signaProxyBase}/status`, {
+      headers: { accept: "application/json" },
+      signal: ctrl.signal,
+    });
+
+    if (!res.ok) return { configured: false, reason: `status ${res.status}` };
+
+    const type = res.headers.get("content-type") || "";
+    if (!type.includes("json")) return { configured: false, reason: "not a function" };
+
+    const json = await res.json();
+    return {
+      configured: Boolean(json?.configured),
+      vendor: json?.vendor || "Signa AI",
+      from: json?.from || "en",
+      to: json?.to || "ase",
       note: json?.note,
       reason: json?.configured ? "server key present" : "no server key",
     };

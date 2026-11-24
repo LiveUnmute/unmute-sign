@@ -21,6 +21,19 @@ one-directional, and it is the wrong direction.
 That asymmetry is the whole strategic picture. Recognition is scarce,
 production is abundant. It also predicts where the money goes.
 
+### Current ASL pilot wiring
+
+The app keeps these directions separate:
+
+| Direction | Pilot provider | What it does |
+|---|---|---|
+| Patient ASL → English | Sign-Speak (pending) | Recognition candidate; a key and live test are still awaited. |
+| Clinician English → ASL | Signa AI (sandbox) | Produces an avatar video from English text; it does not recognise patient signing. |
+
+Signa is being added as an output provider while Sign-Speak responds. A Signa
+avatar does not make the app two-way by itself, and Signa's published ASL
+output support is not evidence of ASL recognition support.
+
 ---
 
 ## 2. sign.mt — now "Rylo Translate", run by Nagish Inc.

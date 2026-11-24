@@ -15,7 +15,7 @@
   NODE_VERSION = "22"
 
 # --- functions -----------------------------------------------------------
-# The sign-language proxy that keeps the vendor key out of the browser.
+# Separate Sign-Speak and Signa proxies keep each vendor key server-side.
 # Relative to this file's base directory, so it resolves to app/netlify/functions.
 
 [functions]
@@ -111,6 +111,14 @@
 [[redirects]]
   from = "/api/sign/*"
   to = "/.netlify/functions/sign/:splat"
+  status = 200
+  force = true
+
+# Signa's server-side proxy keeps SIGNA_KEY out of the browser. This is a
+# separate route because Signa supplies ASL output, not patient sign recognition.
+[[redirects]]
+  from = "/api/signa/*"
+  to = "/.netlify/functions/signa/:splat"
   status = 200
   force = true
 

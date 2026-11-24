@@ -82,6 +82,7 @@ export function createTalksignProvider(config = {}) {
 
   return {
     name: "talksign",
+    vendor: "Talksign",
 
     /**
      * Palm 1.0. Real implementation depends entirely on the transport:
