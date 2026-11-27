@@ -1,0 +1,557 @@
+// The four screens, as markup. Shared by the board and the interactive app.
+//
+//   01 Home       entry point — hero, one action, recent history
+//   02 Sign       the two-way screen: patient signs ⇄ clinician speaks
+//   03 History    past encounters
+//   04 Settings   language, capture, accessibility, data
+//
+// Design language (Syncopate, bone/ink/blue, hairline rules) is the website's.
+
+import { mediaMarkup } from "./media.js";
+
+const escapeHtml = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#39;");
+
+export const ICONS = {
+  home: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 10.2 12 3.7l8.4 6.5V20a.9.9 0 0 1-.9.9H4.5a.9.9 0 0 1-.9-.9v-9.8Z"/><path d="M9.6 20.9v-6.3h4.8v6.3"/></svg>`,
+
+  hand: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.5 13.4V6.2a1.4 1.4 0 0 1 2.8 0v5.6"/>
+    <path d="M11.3 11.8V4.7a1.4 1.4 0 0 1 2.8 0v7.1"/>
+    <path d="M14.1 11.8V6.6a1.4 1.4 0 0 1 2.8 0v7.2"/>
+    <path d="M8.5 13.4v-1.1a1.4 1.4 0 0 0-2.8 0v3.9a5.9 5.9 0 0 0 5.9 5.9h1.1a5.9 5.9 0 0 0 5.9-5.9v-2.1"/>
+  </svg>`,
+
+  speech: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.4 11.6a7.7 7.7 0 0 1-8.3 7.6 8.9 8.9 0 0 1-2.4-.4L4.6 20.4l1.3-3.9a7.6 7.6 0 0 1-1.3-4.4 7.7 7.7 0 0 1 7.9-7.6h.4a7.7 7.7 0 0 1 7.5 7.1Z"/>
+    <path d="M9.2 11.6h.01"/><path d="M12.4 11.6h.01"/><path d="M15.6 11.6h.01"/>
+  </svg>`,
+
+  clock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 2"/></svg>`,
+
+  gear: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.1 14.4a1.5 1.5 0 0 0 .3 1.7l.1.1a1.9 1.9 0 1 1-2.7 2.7l-.1-.1a1.5 1.5 0 0 0-2.6 1.1v.2a1.9 1.9 0 1 1-3.8 0v-.1a1.5 1.5 0 0 0-2.6-1.1l-.1.1a1.9 1.9 0 1 1-2.7-2.7l.1-.1a1.5 1.5 0 0 0-1.1-2.6h-.2a1.9 1.9 0 1 1 0-3.8h.1a1.5 1.5 0 0 0 1.1-2.6l-.1-.1a1.9 1.9 0 1 1 2.7-2.7l.1.1a1.5 1.5 0 0 0 1.7.3h.1a1.5 1.5 0 0 0 .9-1.4v-.2a1.9 1.9 0 1 1 3.8 0v.1a1.5 1.5 0 0 0 2.6 1.1l.1-.1a1.9 1.9 0 1 1 2.7 2.7l-.1.1a1.5 1.5 0 0 0 1.1 2.6h.2a1.9 1.9 0 1 1 0 3.8h-.1a1.5 1.5 0 0 0-1.4.9Z"/></svg>`,
+
+  repeat: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 1 1-2.6-5.9"/><path d="M20.2 4.4v4.2h-4.2"/></svg>`,
+
+  mic: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.6" width="6" height="10.6" rx="3"/><path d="M5.6 11a6.4 6.4 0 0 0 12.8 0"/><path d="M12 17.4v3.2"/></svg>`,
+
+  play: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px"><path d="M8 4.8c0-.9 1-1.5 1.8-1l9 6.4a1.7 1.7 0 0 1 0 2.8l-9 6.4c-.8.5-1.8-.1-1.8-1V4.8Z"/></svg>`,
+
+  camera: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.2 8.4h2.9l1.5-2.1h6.8l1.5 2.1h2.9a1.4 1.4 0 0 1 1.4 1.4v7.4a1.4 1.4 0 0 1-1.4 1.4H3.2a1.4 1.4 0 0 1-1.4-1.4V9.8a1.4 1.4 0 0 1 1.4-1.4Z"/>
+    <circle cx="12" cy="13.4" r="3.2"/>
+  </svg>`,
+
+  lock: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4.4" y="10.4" width="15.2" height="10.2" rx="1.2"/>
+    <path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/>
+  </svg>`,
+};
+
+
+const homebar = (dark) =>
+  `<div class="home-bar${dark ? " is-on-dark" : ""}"><span></span></div>`;
+
+function engineCapability(live, direction) {
+  const explicit = live?.capabilities?.[direction];
+  if (explicit) return explicit;
+  if (!live) return { live: false, vendor: null, provider: "none" };
+  return {
+    live: !live.isMock,
+    vendor: live.vendor || live.providerName || null,
+    provider: live.providerName || "unknown",
+  };
+}
+
+const tabbar = (active) => {
+  const tabs = [
+    ["home", "home", "Home"],
+    ["sign", "hand", "Sign"],
+    ["history", "clock", "History"],
+    ["settings", "gear", "Settings"],
+  ];
+  return `
+  <div class="tabbar">
+    ${tabs
+      .map(
+        ([key, icon, label]) => `
+      <button class="tab${key === active ? " is-active" : ""}" data-go="${key}" aria-label="${label}"${key === active ? ' aria-current="page"' : ""}>
+        ${ICONS[icon]}
+        <span class="tab-label">${label}</span>
+      </button>`
+      )
+      .join("")}
+  </div>`;
+};
+
+/* ------------------------------------------------------------
+   01 — HOME
+   ------------------------------------------------------------ */
+
+export const renderHome = (state = {}) => {
+  const recognition = engineCapability(state.live, "signToText");
+  const output = engineCapability(state.live, "textToSign");
+  let statusText = "No translation engines are configured; the two-way workflow is shown with scripted demo content.";
+
+  if (recognition.live && output.live) {
+    statusText = `${recognition.vendor || "A recognition engine"} is configured for patient ASL → English, and ${output.vendor || "an output engine"} for clinician English → ASL. This is still a prototype.`;
+  } else if (output.live) {
+    statusText = `${output.vendor || "Signa AI"} can sign clinician English in ASL. Patient ASL → English remains a scripted demo until a recognition engine is configured.`;
+  } else if (recognition.live) {
+    statusText = `${recognition.vendor || "A recognition engine"} can read patient ASL. Signed output is not configured in this build.`;
+  }
+
+  return `
+<div class="screen">
+
+  <div class="appbar">
+    <img src="assets/unmute-logo-trimmed.png" alt="Unmute" class="wordmark">
+    <span class="appbar-note"><b>Hallway 4</b>St. Mary's</span>
+  </div>
+
+  <div class="home-body">
+    <div class="hero">
+      <div class="kicker">ASL pilot · English ⇄ ASL</div>
+      <h1 class="hero-title">The conversation, both ways.</h1>
+      <p class="hero-sub">${statusText}</p>
+      <div class="hero-people">
+        <span class="pip pip--a"></span>
+        <span class="pip pip--b"></span>
+        <span class="pip pip--c">+9</span>
+      </div>
+    </div>
+
+    <button class="cta" data-go="sign">
+      ${ICONS.speech}
+      Speak to patient
+    </button>
+
+    <div class="section-head">
+      <span class="kicker">Recent</span>
+      <span class="section-link">See all</span>
+    </div>
+
+    <div class="recent">
+      <span class="thumb thumb--a"></span>
+      <span class="recent-text">
+        <span class="recent-title">Chest pain, two days</span>
+        <span class="recent-meta">Sample signed reply</span>
+      </span>
+      <span class="recent-tag">Sample</span>
+    </div>
+
+    <div class="recent">
+      <span class="thumb thumb--b"></span>
+      <span class="recent-text">
+        <span class="recent-title">Allergies</span>
+        <span class="recent-meta">198 phrases in library</span>
+      </span>
+    </div>
+  </div>
+
+  ${tabbar("home")}
+  ${homebar(false)}
+</div>`;
+};
+
+/* ------------------------------------------------------------
+   02 — SIGN
+   Two modes, one screen.
+
+   sign  — the patient is on camera; the caption is what they signed.
+   speak — the patient is NOT shown. The translator signs the clinician's
+           sentence, and the caption is the clinician's transcript.
+           A repeat control sits at the top of the sheet.
+   ------------------------------------------------------------ */
+
+/* ------------------------------------------------------------
+   The stage before the camera is up.
+
+   It used to show a stock photograph of a patient while the app waited —
+   which is exactly the wrong thing to show someone who is about to be
+   asked for permission to film. A held card is honest: the lens is not
+   open, and the screen says so.
+   ------------------------------------------------------------ */
+
+function standByMarkup(phase, live, ready) {
+  let icon = ICONS.camera;
+  let title = "Camera off";
+  let body = "Tap the hand to film the patient.";
+
+  if (!ready) {
+    title = "Starting the camera";
+    body = "One moment.";
+  } else if (phase === "consent") {
+    icon = ICONS.camera;
+    title = "Camera off";
+    body = "The patient agrees before the lens opens.";
+  } else if (phase === "blocked") {
+    icon = ICONS.lock;
+    title = "Capture declined";
+    body = "No recording without consent. The demo poses are still here.";
+  } else if (phase === "error") {
+    icon = ICONS.lock;
+    title = "Camera unavailable";
+    body = live?.error || "The camera could not be opened.";
+  } else if (phase === "sending") {
+    title = "Reading signs";
+    body = "This takes a moment.";
+  }
+
+  return `
+    <div class="cam-standby">
+      <span class="cam-standby-icon">${icon}</span>
+      <p class="cam-standby-title">${title}</p>
+      <p class="cam-standby-body">${body}</p>
+    </div>`;
+}
+
+/**
+ * Signa returns a video only after it receives translation text. Show the
+ * neutral Signa-avatar frame from the supplied demo as a clearly labelled
+ * waiting preview; never present it as a completed or animated translation.
+ */
+function signOutputStandbyMarkup(capability, live) {
+  const liveOutput = Boolean(capability?.live);
+  const providerName = capability?.vendor || (
+    capability?.provider && !["mock", "unknown", "none"].includes(capability.provider)
+      ? capability.provider
+      : ""
+  );
+  const name = providerName || "Signa AI";
+  const pending = Boolean(live?.signing?.pending);
+  const error = liveOutput ? String(live?.error || "") : "";
+
+  let status = "unavailable";
+  let title = "Preview only · no live output";
+
+  if (pending) {
+    status = "pending";
+    title = "Translating to ASL";
+  } else if (error) {
+    status = "error";
+    title = "Output needs attention";
+  } else if (liveOutput) {
+    status = "ready";
+    title = "Ready for a phrase";
+  }
+
+  return `
+    <div class="sign-output" data-avatar-status="${status}" role="status" aria-live="polite">
+      <div class="sign-output-content">
+        <img class="sign-output-avatar" src="media/signa-avatar-preview.png" alt="Signa AI avatar preview, awaiting translation instructions. No translation is being shown yet." decoding="async">
+        <p class="sign-output-vendor">Signa AI · Avatar preview</p>
+        <p class="sign-output-title">${escapeHtml(title)}${liveOutput && !pending && !error ? ` · ${escapeHtml(name)}` : ""}</p>
+      </div>
+    </div>`;
+}
+
+export const renderSign = (state = {}) => {
+  const mode = state.mode || "sign";
+  const entry = state.entry || {};
+  const speaking = mode === "speak";
+  const live = state.live || null;
+  const recognitionCapability = engineCapability(live, "signToText");
+  const outputCapability = engineCapability(live, "textToSign");
+  const activeCapability = speaking ? outputCapability : recognitionCapability;
+
+  const phase = live?.phase || "idle";
+  const consenting = !speaking && phase === "consent";
+  const confirming = !speaking && phase === "confirm";
+  const recording = !speaking && phase === "recording";
+  const sending = !speaking && phase === "sending";
+
+  // The camera only occupies the stage while we are genuinely capturing. Once
+  // the patient confirms, the stage returns to the pose so nobody is staring at
+  // themselves for the rest of the conversation.
+  // Whenever the camera is open it is also visible. A lens that is on while the
+  // screen shows something else is exactly the thing patients do not trust.
+  const camUp =
+    !speaking &&
+    Boolean(live) &&
+    live.consent === "granted" &&
+    ["ready", "recording", "sending", "confirm", "spoken"].includes(phase);
+
+  // Scripted poses are only the patient-side fallback when capture was
+  // declined or a live session could not be built. The clinician Speak side
+  // never uses canned patient/translator imagery.
+  const scriptedPatientFallback = !speaking && (
+    live?.consent === "declined" || Boolean(state.bootFailed)
+  );
+
+  const signed = speaking && state.lastSignedChunk?.videoUrl
+    ? { videoUrl: state.lastSignedChunk.videoUrl, pending: Boolean(live?.signing?.pending) }
+    : null;
+
+  const kicker = speaking
+    ? `Clinician <b>speaking</b>`
+    : consenting
+    ? `Before we capture`
+    : confirming
+    ? `Patient <b>confirm</b>`
+    : recording
+    ? `Recording`
+    : sending
+    ? `Reading signs`
+    : phase === "ready"
+    ? `Camera <b>on</b>`
+    : `Patient <b>signs</b>`;
+
+  const caption = confirming
+    ? live?.transcript || ""
+    : speaking
+    ? state.caption || ""
+    : state.caption || entry.text || "";
+  const safeCaption = escapeHtml(caption);
+
+  const confidence =
+    confirming && live ? Math.round((live.confidence || 0) * 100) : state.confidence || 98;
+
+  const stageMarkup = signed?.videoUrl
+    ? `<video class="stage-media" src="${signed.videoUrl}" autoplay muted loop playsinline data-sign-video></video>`
+    : camUp
+    ? `<video class="stage-media stage-media--cam" data-cam autoplay muted playsinline></video>`
+    : speaking
+    ? signOutputStandbyMarkup(outputCapability, live)
+    : scriptedPatientFallback
+    ? mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")
+    : standByMarkup(phase, live, state.ready);
+
+  const isLive = Boolean(activeCapability.live);
+  const chip = isLive ? "Live" : "Demo";
+  const activeVendor = activeCapability.vendor || activeCapability.provider;
+  const chipTitle = isLive
+    ? `${activeVendor || "Translation"} · ${speaking ? "English to ASL output" : "ASL recognition"}`
+    : speaking
+    ? "Scripted — no sign-output engine configured"
+    : "Scripted — no sign-recognition engine configured";
+
+  const note = escapeHtml(live?.error || state.note || live?.note || "");
+  const safeChipTitle = escapeHtml(chipTitle);
+  const hasRepeatableSign = Boolean(state.lastSignedChunk?.videoUrl);
+
+  return `
+<div class="screen screen--media${recording ? " is-recording" : ""}">
+
+  <div class="stage" data-stage${confirming ? ' data-dim="on"' : ""}>
+    ${stageMarkup}
+  </div>
+
+  <div class="scrim" aria-hidden="true"></div>
+
+  ${speaking || consenting || confirming ? "" : `
+  <div class="track" aria-hidden="true">
+    <i></i><i></i><i></i><i></i>
+    <span class="track-chip">${confidence}%</span>
+  </div>`}
+
+  <span class="demo-chip${isLive ? " is-live" : ""}" title="${safeChipTitle}">${chip}</span>
+
+  <div class="sheet">
+    <div class="sheet-head">
+      <span class="sheet-kicker" data-kicker>${kicker}</span>
+      ${speaking
+        ? `<button class="repeat" data-repeat aria-label="Repeat the most recent signed segment"${hasRepeatableSign ? "" : ' disabled title="Complete a speech segment before repeating."'}>
+             ${ICONS.repeat}<span>Repeat</span>
+           </button>`
+        : ""}
+    </div>
+
+    ${consenting ? `
+    <div class="consent" data-consent>
+      <p class="consent-body">
+        The patient is filmed so an engine can attempt to read their signs.
+        ${recognitionCapability.live
+          ? `That video is sent to <b>${recognitionCapability.vendor || "the sign-recognition provider"}</b>
+             for recognition. This app does not store it.`
+          : `No sign-recognition engine is configured, so the clip stays on this
+             device and is never uploaded. The response is <b>scripted for the demo</b> —
+             the filming is real, the reading is not.`}
+      </p>
+      <div class="consent-actions">
+        <button class="btn-quiet" data-consent-no>Not now</button>
+        <button class="btn-solid" data-consent-yes>Patient agrees</button>
+      </div>
+    </div>` : ""}
+
+    ${confirming ? `
+    <div class="confirm" data-confirm>
+      <p class="caption" data-caption>${safeCaption}</p>
+      <p class="confirm-meta">
+        <span class="conf-pill${live?.uncertain ? " is-low" : ""}">${confidence}% match</span>
+        <span>${live?.uncertain ? "Low confidence — check with the patient." : "Read from signing."}</span>
+      </p>
+      <div class="confirm-actions">
+        <button class="btn-quiet" data-confirm-no>No — sign again</button>
+        <button class="btn-solid" data-confirm-yes>Yes, that's right</button>
+      </div>
+    </div>` : ""}
+
+    ${consenting || confirming ? "" : `<p class="caption" data-caption>${safeCaption}</p>`}
+    <p class="caption-note" data-note>${note}</p>
+
+    <div class="controls">
+      <div class="dir${speaking ? "" : " is-on"}" data-dir="sign">
+        <button class="dir-btn${recording ? " is-live" : ""}" data-mode="sign" aria-label="${recording ? "Stop recording" : "Patient signs"}">${ICONS.hand}</button>
+        <span class="dir-label">${recording ? "Stop" : "Sign"}</span>
+      </div>
+      <div class="dir${speaking ? " is-on" : ""}" data-dir="speak">
+        <button class="dir-btn${state.conversationActive ? " is-live" : ""}" data-mode="speak" aria-pressed="${Boolean(state.conversationActive)}" aria-label="${state.conversationActive ? "End conversation" : "Start conversation"}">${ICONS.speech}</button>
+        <span class="dir-label">${state.conversationActive ? "Stop" : "Speak"}</span>
+      </div>
+    </div>
+  </div>
+
+  ${tabbar("sign")}
+  ${homebar(false)}
+</div>`;
+};
+
+/* ------------------------------------------------------------
+   03 — HISTORY
+   ------------------------------------------------------------ */
+
+const ENCOUNTERS = [
+  {
+    group: "Today",
+    rows: [
+      ["Chest pain, two days", "09:38", "4 min", "Live"],
+      ["Allergies — penicillin", "09:12", "1 min", ""],
+      ["Discharge instructions", "08:54", "6 min", ""],
+    ],
+  },
+  {
+    group: "Yesterday",
+    rows: [
+      ["Where does it hurt?", "17:20", "3 min", ""],
+      ["Medication review", "14:05", "5 min", ""],
+      ["Consent for procedure", "11:47", "8 min", "Flagged"],
+    ],
+  },
+  {
+    group: "Earlier this week",
+    rows: [["Follow-up: dizziness", "Mon 16:30", "4 min", ""]],
+  },
+];
+
+export const renderHistory = () => `
+<div class="screen">
+
+  <div class="page-head">
+    <h1 class="page-title">History</h1>
+    <p class="page-sub">Every conversation is kept on device. Nothing leaves without consent.</p>
+  </div>
+
+  <div class="list">
+    ${ENCOUNTERS.map(
+      (g) => `
+      <div class="list-group">${g.group}</div>
+      ${g.rows
+        .map(
+          ([title, time, dur, flag]) => `
+        <div class="row">
+          <span class="row-main">
+            <span class="row-title">${title}</span>
+            <span class="row-meta">${time}<i class="dot"></i>${dur}</span>
+          </span>
+          ${flag ? `<span class="row-flag${flag === "Live" ? " is-flag" : ""}">${flag}</span>` : ""}
+        </div>`
+        )
+        .join("")}`
+    ).join("")}
+  </div>
+
+  ${tabbar("history")}
+  ${homebar(false)}
+</div>`;
+
+/* ------------------------------------------------------------
+   04 — SETTINGS
+   ------------------------------------------------------------ */
+
+const toggle = (on) => `<span class="toggle${on ? " is-on" : ""}" data-toggle role="switch" aria-checked="${on}"></span>`;
+
+export const renderSettings = () => `
+<div class="screen">
+
+  <div class="page-head">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-sub">St. Mary's · Hallway 4</p>
+  </div>
+
+  <div class="settings">
+    <div class="group" style="padding-top:0">
+      <div class="group-label">Language</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Sign language</span>
+          <span class="item-note">ASL, United States</span>
+        </span>
+        <span class="item-value is-accent">Change</span>
+      </div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Spoken language</span>
+          <span class="item-note">English</span>
+        </span>
+        <span class="item-value is-accent">Change</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Capture</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Speak the reply aloud</span>
+          <span class="item-note">Patient's signs are read out for the clinician</span>
+        </span>
+        ${toggle(true)}
+      </div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Show confidence</span>
+          <span class="item-note">Display the match score on screen</span>
+        </span>
+        ${toggle(true)}
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Accessibility</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Larger text</span>
+          <span class="item-note">Increases caption size</span>
+        </span>
+        ${toggle(false)}
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-label">Data</div>
+      <div class="item">
+        <span class="item-main">
+          <span class="item-title">Recording consent</span>
+          <span class="item-note">Ask before any capture is stored</span>
+        </span>
+        ${toggle(true)}
+      </div>
+    </div>
+  </div>
+
+  ${tabbar("settings")}
+  ${homebar(false)}
+</div>`;
+
+export const SCREENS = {
+  home: renderHome,
+  sign: renderSign,
+  history: renderHistory,
+  settings: renderSettings,
+};
+
+export const device = (inner) => `<div class="device">${inner}</div>`;

@@ -1,0 +1,23 @@
+# The landing site — liveunmute.com
+#
+# This file only matters if the site is ever connected to Git. If you are
+# drag-and-dropping a folder onto Netlify instead, it is ignored and the
+# deploy settings in the Netlify UI apply.
+#
+# Publish the folder as-is: there is no build step. /demo works because
+# Netlify serves demo/index.html for the directory.
+
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/demo/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

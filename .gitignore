@@ -1,0 +1,8 @@
+
+# Local secrets and environment files — never commit vendor API keys
+.env
+.env.*
+!.env.example
+
+# Deploy bundles built for drag-and-drop
+*.zip

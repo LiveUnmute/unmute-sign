@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Unmute — IDICE pitch video</title>
+  <meta name="description" content="Watch the Unmute IDICE pitch video: two-way sign-language communication for healthcare.">
+  <meta name="theme-color" content="#0B0D10">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:title" content="Unmute — IDICE pitch video">
+  <meta property="og:description" content="Watch the Unmute IDICE pitch video: two-way sign-language communication for healthcare.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" sizes="32x32" href="/demo/assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/demo/assets/favicon-192.png">
+  <link rel="apple-touch-icon" href="/demo/assets/favicon-192.png">
+  <script id="vimeo-sdk" src="https://player.vimeo.com/api/player.js" defer></script>
+
+  <style>
+    /* Unmute's blue accent and type, presented in a dark palette. The official
+       font subsets are local so the page does not depend on a font CDN. */
+    @font-face {
+      font-family: Syncopate;
+      src: url('/demo/assets/syncopate-latin-400.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Pretendard;
+      src: url('/demo/assets/Pretendard-Regular.subset.91.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Pretendard;
+      src: url('/demo/assets/Pretendard-Medium.subset.91.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Pretendard;
+      src: url('/demo/assets/Pretendard-Bold.subset.91.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: dark;
+      --bone: #0B0D10;
+      --paper: #171A20;
+      --ink: #F3F4F6;
+      --blue: #006AFE;
+      --blue-light: #78ACFF;
+      --muted: #A7AEB8;
+      --rule: rgba(255, 255, 255, .16);
+      --display: Syncopate, 'Arial Narrow', sans-serif;
+      --body: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { background: var(--bone); -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bone);
+      color: var(--ink);
+      font: 400 16px/1.5 var(--body);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, a { font: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--blue-light); outline-offset: 4px; }
+
+    .topline { height: 5px; background: var(--blue); }
+    .shell { width: min(100%, 1200px); margin: auto; padding: 0 clamp(20px, 5vw, 60px); }
+    .header {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .brand { display: inline-flex; align-items: center; flex-shrink: 0; }
+    .brand img { width: auto; height: 30px; display: block; }
+    .header-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      align-items: start;
+      gap: clamp(40px, 7vw, 110px);
+      padding: clamp(48px, 7vw, 90px) 0 70px;
+    }
+    .intro { padding-top: clamp(6px, 3vw, 30px); }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 25px;
+      color: var(--blue-light);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ''; width: 23px; height: 2px; background: var(--blue); }
+    h1 {
+      margin: 0;
+      font: 400 clamp(32px, 5.1vw, 58px)/1.16 var(--display);
+      letter-spacing: -.04em;
+      text-transform: uppercase;
+    }
+    h1 span { display: block; }
+    h1 em { color: var(--blue-light); font-style: normal; }
+    .lede {
+      max-width: 29em;
+      margin: 27px 0 0;
+      color: #C4CAD2;
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+    }
+    .intro-rule { width: 100%; max-width: 480px; height: 1px; background: var(--rule); margin: 35px 0 22px; }
+    .intro-detail { max-width: 480px; display: flex; flex-wrap: wrap; gap: 11px 26px; }
+    .intro-detail span { color: var(--muted); font-size: 12px; font-weight: 500; }
+    .intro-detail strong { color: var(--ink); font-weight: 700; }
+    .intro-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 12px 20px;
+      margin-top: 28px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .intro-link:hover { background: var(--ink); color: var(--bone); }
+    .mobile-link { display: none; }
+
+    .watch { width: 100%; max-width: 340px; margin: 0 auto; }
+    .watch-bar, .watch-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .watch-bar { margin-bottom: 11px; }
+    .watch-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .watch-title::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+    .watch-meta { display: flex; align-items: center; gap: 12px; }
+    .fullscreen {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .fullscreen:hover { border-color: var(--ink); background: var(--paper); }
+    .fullscreen svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+    .fullscreen-status { margin: 8px 0; color: var(--muted); font-size: 12px; }
+
+    /* Vimeo provides the controls, captions and full-screen action in its
+       own player. Keep the portrait embed at the supplied 9:20 ratio. */
+    .watch-screen { width: 100%; }
+    .player {
+      position: relative;
+      width: 100%;
+      height: clamp(300px, 48vh, 420px);
+      overflow: hidden;
+      background: #000;
+      border-radius: 4px;
+    }
+    .player.is-ready {
+      height: auto;
+      aspect-ratio: 9 / 20;
+    }
+    .player iframe {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+    }
+    .vimeo-state {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      background: var(--paper);
+      color: var(--ink);
+      text-align: center;
+    }
+    .vimeo-state h2 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.25; }
+    .vimeo-state p { max-width: 24em; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .vimeo-open {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      margin-top: 4px;
+      padding: 9px 16px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--bone);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .vimeo-open:hover { background: var(--blue); border-color: var(--blue); color: white; }
+    .vimeo-contact { margin-top: 2px; color: var(--muted); font-size: 12px; text-underline-offset: 3px; }
+    .vimeo-contact:hover { color: var(--blue-light); }
+    .exit-fullscreen {
+      position: absolute;
+      z-index: 2;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      display: grid;
+      place-items: center;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 50%;
+      background: rgba(0,0,0,.72);
+      color: white;
+      font: 400 24px/1 var(--body);
+      cursor: pointer;
+    }
+    .exit-fullscreen:focus-visible { outline-color: white; }
+    .watch-screen:fullscreen,
+    .watch-screen:-webkit-full-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: none;
+      padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+        max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+      background: #000;
+      overflow: hidden;
+    }
+    .watch-screen:fullscreen .player,
+    .watch-screen:-webkit-full-screen .player {
+      flex: 0 1 auto;
+      width: min(100vw, 39vh);
+      max-height: calc(100dvh - 24px);
+      aspect-ratio: 9 / 20;
+      border-radius: 0;
+    }
+    .watch-screen:fullscreen .exit-fullscreen,
+    .watch-screen:-webkit-full-screen .exit-fullscreen {
+      position: absolute;
+    }
+    @media (orientation: landscape) {
+      .watch-screen:fullscreen .player,
+      .watch-screen:-webkit-full-screen .player { width: min(100vw, 35vh); }
+    }
+    @media (orientation: landscape) and (min-width: 700px) {
+      .watch-screen:fullscreen .player,
+      .watch-screen:-webkit-full-screen .player { width: min(100vw, 40vh); }
+    }
+
+    .accessibility {
+      max-width: 700px;
+      padding: 23px 0 36px;
+      border-top: 1px solid var(--rule);
+    }
+    .accessibility h2 {
+      margin: 0 0 8px;
+      color: var(--blue-light);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .accessibility p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px 20px;
+      padding: 20px 0 32px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    footer a { text-underline-offset: 3px; }
+    footer a:hover { color: var(--blue-light); }
+    @media (max-width: 700px) {
+      .header { min-height: 66px; }
+      .brand img { height: 26px; }
+      .header-label { font-size: 10px; }
+      .hero { grid-template-columns: minmax(0, 1fr); gap: 36px; padding: 38px 0 48px; }
+      .intro { padding: 0; }
+      .eyebrow { margin-bottom: 20px; }
+      h1 { font-size: clamp(29px, 7.3vw, 48px); }
+      .lede { margin-top: 20px; }
+      .intro-rule { margin: 22px 0 15px; }
+      .intro-link:not(.mobile-link) { display: none; }
+      .mobile-link { display: inline-flex; margin-top: 22px; }
+      .watch { max-width: min(340px, calc(72vh * 9 / 20)); }
+    }
+    @media (max-width: 350px) {
+      .header-label { font-size: 9px; letter-spacing: .1em; }
+      h1 { font-size: 27px; }
+      .watch { max-width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topline" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="header">
+      <a class="brand" href="/" aria-label="Unmute home">
+        <img src="/demo/assets/unmute-logo.png" width="377" height="131" alt="Unmute">
+      </a>
+      <span class="header-label">Pitch video · IDICE</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="demo-heading">
+        <div class="intro">
+          <p class="eyebrow">Sign-language communication for healthcare</p>
+          <h1 id="demo-heading"><span>Every voice</span><span>deserves</span><span><em>to be heard.</em></span></h1>
+          <p class="lede">See Unmute’s IDICE pitch for two-way sign-language communication in healthcare.</p>
+          <div class="intro-rule" aria-hidden="true"></div>
+          <div class="intro-detail">
+            <span><strong>Unmute</strong> pitch video</span>
+            <span><strong>IDICE</strong> · hosted on Vimeo</span>
+          </div>
+          <a class="intro-link" href="/">Try the Unmute demo <span aria-hidden="true">&nbsp;↗</span></a>
+        </div>
+
+        <div class="watch">
+          <div class="watch-bar">
+            <span class="watch-title">IDICE pitch video</span>
+            <div class="watch-meta">
+              <button class="fullscreen" id="fullscreen" type="button" aria-controls="watch-screen" hidden>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg>
+                <span>Full screen</span>
+              </button>
+            </div>
+          </div>
+          <p class="fullscreen-status" id="fullscreen-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="watch-screen" id="watch-screen">
+            <div class="player" id="player">
+              <iframe id="vimeo-player" tabindex="-1" aria-hidden="true"
+                src="https://player.vimeo.com/video/1239775906?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;muted=0"
+                title="Unmute Pitch Video —IDICE"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen></iframe>
+              <div class="vimeo-state" id="vimeo-state" role="status" aria-live="polite">
+                <h2 id="vimeo-state-title">Loading Vimeo video…</h2>
+                <p id="vimeo-state-copy">Connecting to the video player.</p>
+                <a class="vimeo-open" href="https://vimeo.com/1239775906" target="_blank" rel="noopener">Open on Vimeo ↗</a>
+                <a class="vimeo-contact" id="vimeo-contact" href="mailto:contact@liveunmute.com?subject=IDICE%20pitch%20video%20not%20playing" hidden>Report a playback problem</a>
+              </div>
+            </div>
+            <button class="exit-fullscreen" id="exit-fullscreen" type="button" aria-label="Exit full screen" aria-controls="watch-screen" hidden>×</button>
+          </div>
+          <a class="intro-link mobile-link" href="/">Try the Unmute demo <span aria-hidden="true">&nbsp;↗</span></a>
+        </div>
+      </section>
+
+      <section class="accessibility" aria-labelledby="accessibility-heading">
+        <h2 id="accessibility-heading">Accessibility</h2>
+        <p>Use Vimeo’s CC control if captions are available. A written transcript is not provided on this page.</p>
+      </section>
+    </main>
+
+    <footer>
+      <span>Unmute · Abuja, Nigeria</span>
+      <a href="https://liveunmute.com">liveunmute.com</a>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      const screen = document.getElementById('watch-screen');
+      const playerFrame = document.getElementById('player');
+      const iframe = document.getElementById('vimeo-player');
+      const state = document.getElementById('vimeo-state');
+      const stateTitle = document.getElementById('vimeo-state-title');
+      const stateCopy = document.getElementById('vimeo-state-copy');
+      const contact = document.getElementById('vimeo-contact');
+      const fullscreen = document.getElementById('fullscreen');
+      const fullscreenStatus = document.getElementById('fullscreen-status');
+      const exit = document.getElementById('exit-fullscreen');
+      const sdk = document.getElementById('vimeo-sdk');
+      const canFullscreen = typeof screen.requestFullscreen === 'function' ||
+        typeof screen.webkitRequestFullscreen === 'function';
+      let vimeoPlayer = null;
+
+      // Keep the embed covered until Vimeo confirms the video is available.
+      // If the embed is blocked or this SDK cannot connect, the compact fallback
+      // offers a direct Vimeo link instead of leaving a blank white frame.
+      fullscreen.hidden = true;
+
+      function showFallback() {
+        window.clearTimeout(loadTimer);
+        playerFrame.classList.remove('is-ready');
+        playerFrame.classList.add('has-error');
+        stateTitle.textContent = 'Vimeo can’t play this video';
+        stateCopy.textContent = 'Vimeo isn’t loading this video. If it also fails on Vimeo, its availability or privacy settings may need updating.';
+        contact.hidden = false;
+        iframe.setAttribute('tabindex', '-1');
+        iframe.setAttribute('aria-hidden', 'true');
+        state.hidden = false;
+        fullscreen.hidden = true;
+      }
+
+      function showPlayer() {
+        window.clearTimeout(loadTimer);
+        playerFrame.classList.remove('has-error');
+        playerFrame.classList.add('is-ready');
+        iframe.setAttribute('tabindex', '0');
+        iframe.removeAttribute('aria-hidden');
+        state.hidden = true;
+        fullscreen.hidden = !canFullscreen;
+      }
+
+      function connectVimeo() {
+        if (vimeoPlayer) return;
+        if (!window.Vimeo || typeof window.Vimeo.Player !== 'function') {
+          showFallback();
+          return;
+        }
+        try {
+          let apiReady = false;
+          let videoLoaded = false;
+          vimeoPlayer = new window.Vimeo.Player(iframe);
+          vimeoPlayer.on('error', showFallback);
+          vimeoPlayer.on('loaded', () => {
+            videoLoaded = true;
+            if (apiReady) showPlayer();
+          });
+          Promise.resolve(vimeoPlayer.ready())
+            .then(() => vimeoPlayer.getVideoId())
+            .then((videoId) => {
+              if (String(videoId) !== '1239775906') throw new Error('Unexpected Vimeo video ID');
+              apiReady = true;
+              if (videoLoaded) showPlayer();
+            })
+            .catch(showFallback);
+        } catch {
+          showFallback();
+        }
+      }
+
+      const loadTimer = window.setTimeout(() => {
+        if (!playerFrame.classList.contains('is-ready')) showFallback();
+      }, 12000);
+      sdk.addEventListener('load', connectVimeo, { once: true });
+      sdk.addEventListener('error', showFallback, { once: true });
+      if (window.Vimeo && window.Vimeo.Player) connectVimeo();
+
+      function isFullscreen() {
+        return (document.fullscreenElement || document.webkitFullscreenElement) === screen;
+      }
+
+      function showFullscreenFallback() {
+        fullscreenStatus.textContent = 'Full screen isn’t available here. Use the Vimeo player’s full-screen control.';
+        fullscreenStatus.hidden = false;
+      }
+
+      function onFullscreenChange() {
+        const entered = isFullscreen();
+        const exitHadFocus = document.activeElement === exit;
+        if (entered) fullscreenStatus.hidden = true;
+        exit.hidden = !entered;
+        if (entered && document.activeElement === fullscreen) {
+          exit.focus({ preventScroll: true });
+        } else if (!entered && exitHadFocus && !fullscreen.hidden) {
+          fullscreen.focus({ preventScroll: true });
+        }
+      }
+
+      document.addEventListener('fullscreenchange', onFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+      fullscreen.addEventListener('click', () => {
+        if (!playerFrame.classList.contains('is-ready')) return;
+        const request = screen.requestFullscreen || screen.webkitRequestFullscreen;
+        if (!request) return;
+        try {
+          const result = request.call(screen);
+          if (result && typeof result.catch === 'function') result.catch(showFullscreenFallback);
+        } catch {
+          showFullscreenFallback();
+        }
+      });
+      exit.addEventListener('click', () => {
+        const leave = document.exitFullscreen || document.webkitExitFullscreen;
+        if (!leave) return;
+        const result = leave.call(document);
+        if (result && typeof result.catch === 'function') result.catch(() => {});
+      });
+    })();
+  </script>
+</body>
+</html>
