@@ -57,6 +57,17 @@ Do **not** paste the key into chat, `index.html`, a meta tag, `UNMUTE_CONFIG`,
 or a committed file. For local testing, provide `SIGNA_KEY` in the process
 environment before starting `node app/server.mjs`.
 
+## Speak stage and the idle avatar
+
+The documented Signa flow used here takes English text at `/v1/sign` and returns
+an MP4 through `/v1/sign/video`. It does not provide this app with an idle
+avatar video before any text has been submitted. While waiting, the Speak stage
+shows a clearly labeled still avatar preview cropped from the supplied Signa
+demonstration; the app does not present it as a translation for the current
+conversation or fabricate a signing clip. A generated provider video replaces
+the preview after a real speech segment is translated. A standalone
+idle-avatar endpoint would need to be supplied and verified separately.
+
 ## Clinician conversation flow
 
 - Tap **Speak** once to start a continuous browser speech-recognition session.

@@ -71,16 +71,20 @@ screen for the same reason.
 If a particular clip is too bright at the bottom, darken `.scrim` rather than
 reintroducing a panel.
 
-## The two characters
+## Media and the Speak direction
 
-- **Patient** — `media/patient-01…05.jpg`. Same woman, same wardrobe, same
-  background, same framing; only the hands change.
-- **Translator** — `media/translator-01…05.jpg`. Same man throughout, distinct
-  from the patient, so a clinician never confuses who is on screen.
+- **Patient demo poses** — `media/patient-01…05.jpg` remain the scripted fallback
+  when patient capture is declined or cannot start.
+- **Legacy translator illustrations** — `media/translator-01…05.jpg` are not
+  rendered on the clinician **Speak** screen. While it listens, the stage shows
+  a still Signa-avatar preview cropped from the supplied demonstration, clearly
+  labeled as a preview; it is not presented as a translation for the current
+  conversation. A successfully generated provider video replaces it.
 
-New poses should be generated from the existing images (image-to-image,
-changing only the hands) so the character stays recognisable. Ten stills were
-made that way; the prompts are in the commit history.
+The Signa API integration returns an MP4 after it receives text; the app does
+not fabricate an idle signing clip or phrase while waiting for input. The
+legacy illustrations may still appear in non-Speak decorative UI and are not
+evidence of live signing.
 
 ## What is real and what is scripted
 
@@ -112,9 +116,10 @@ Signa avatar into patient-sign recognition.
 
 ## Known gaps
 
-- Without a live output provider, the signer is a still demo pose. Signa can
-  return an MP4 when configured, but that output is not clinically or
-  linguistically validated.
+- Without a live output provider, the Speak stage shows that live ASL output
+  is unavailable; it does not substitute a scripted signer. The patient-side
+  demo may still use its labeled still poses. Signa MP4 output is not
+  clinically or linguistically validated.
 - History and Settings are static.
 - Signa's server function now mints short-lived client tokens; the browser
   calls Signa directly for `.sgn` and MP4 rendering so video work avoids the

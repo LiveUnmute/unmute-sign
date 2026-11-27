@@ -17,11 +17,13 @@ below cover its separate recognition integration and key setup.
 |---|---|---|---|
 | Patient signs → clinician reads and hears | ASL → English | **Sign-Speak** | Provider path exists; awaiting key. Otherwise the response is scripted. |
 | Clinician speaks → patient sees it signed | English → ASL | **Signa AI** | Server-minted short-lived client token; browser calls Signa for `.sgn` and MP4. Deploy-context key status and a live sandbox test must be verified. |
-| Anything at all | both | scripted mock | Working now, labelled **Demo**. |
+| Patient fallback | ASL → English | scripted mock | Patient phrases stay labeled **Demo** until recognition is configured. |
+| Speak fallback | English → ASL | Signa avatar preview | A still preview is shown while waiting; no scripted sign video is substituted. |
 
-With no server-side keys configured, the app falls back to the scripted demo.
-Each direction has its own status, so a live avatar does not imply live patient-
-sign recognition.
+With no server-side keys configured, patient recognition remains scripted and
+Speak shows only the labeled Signa avatar preview until a live output provider
+returns a generated video. Each direction has its own status, so a live avatar
+does not imply live patient-sign recognition.
 
 ---
 

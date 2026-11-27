@@ -281,7 +281,7 @@ function nextPatient() {
 }
 
 /* ------------------------------------------------------------
-   Clinician direction — real mic, scripted fallback
+   Clinician direction — real mic, provider-generated ASL only
    ------------------------------------------------------------ */
 
 function showClinician(index, note = "") {

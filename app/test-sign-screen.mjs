@@ -33,6 +33,7 @@ const live = (patch) => ({ isMock: true, ...patch });
 // A patient photograph is what must NOT appear before consent. Any stock pose
 // path is media/patient-*.jpg.
 const hasPhoto = (html) => /media\/patient-\d+\.jpg/.test(html);
+const hasTranslatorMock = (html) => /media\/translator-\d+\.jpg/.test(html);
 const hasCam = (html) => html.includes("data-cam");
 const hasStandby = (html) => html.includes("cam-standby");
 
@@ -106,7 +107,7 @@ ok("consent declined: poses return", () => {
   assert.ok(hasPhoto(html), "the demo should still be usable after a decline");
 });
 
-ok("clinician side never shows the patient's camera", () => {
+ok("clinician side replaces the scripted translator with the Signa preview and never shows the patient camera", () => {
   const html = renderSign({
     mode: "speak",
     entry: { media: "media/translator-01.jpg" },
@@ -114,6 +115,63 @@ ok("clinician side never shows the patient's camera", () => {
     ready: true,
   });
   assert.ok(!hasCam(html), "the patient's camera was rendered on the clinician side");
+  assert.ok(!hasTranslatorMock(html), "a scripted translator image was rendered on the Speak page");
+  assert.match(html, /data-avatar-status="unavailable"/);
+  assert.match(html, /src="media\/signa-avatar-preview\.png"/);
+  assert.match(html, /No translation is being shown yet/);
+});
+
+ok("Speak opens with the Signa avatar preview while waiting for a real phrase", () => {
+  const html = renderSign({
+    mode: "speak",
+    entry: { text: "Canned text must not appear.", media: "media/translator-01.jpg" },
+    live: {
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+  });
+  assert.match(html, /data-avatar-status="ready"/);
+  assert.match(html, /src="media\/signa-avatar-preview\.png"/);
+  assert.match(html, /Ready for a phrase/);
+  assert.match(html, /Ready for a phrase · Signa AI/);
+  assert.match(html, /Signa AI avatar preview/);
+  assert.match(html, /No translation is being shown yet/);
+  assert.ok(!hasTranslatorMock(html), "the scripted translator image was still present");
+  assert.doesNotMatch(html, /Canned text must not appear/);
+});
+
+ok("the Signa preview remains visible while a real output video is pending", () => {
+  const html = renderSign({
+    mode: "speak",
+    live: {
+      signing: { pending: true },
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+  });
+  assert.match(html, /data-avatar-status="pending"/);
+  assert.match(html, /Translating to ASL/);
+  assert.match(html, /src="media\/signa-avatar-preview\.png"/);
+});
+
+ok("a completed Signa translation replaces the waiting state with its generated video", () => {
+  const html = renderSign({
+    mode: "speak",
+    live: {
+      capabilities: {
+        signToText: { live: false, provider: "mock", vendor: null },
+        textToSign: { live: true, provider: "signa", vendor: "Signa AI" },
+      },
+    },
+    lastSignedChunk: { id: 1, text: "Where does it hurt?", videoUrl: "blob:signa-output" },
+  });
+  assert.match(html, /<video class="stage-media" src="blob:signa-output"/);
+  assert.doesNotMatch(html, /data-avatar-status=/);
+  assert.ok(!hasTranslatorMock(html));
 });
 
 ok("camera blocked: says so, and does not pretend to be on", () => {

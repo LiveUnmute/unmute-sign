@@ -210,6 +210,46 @@ function standByMarkup(phase, live, ready) {
     </div>`;
 }
 
+/**
+ * Signa returns a video only after it receives translation text. Show the
+ * neutral Signa-avatar frame from the supplied demo as a clearly labelled
+ * waiting preview; never present it as a completed or animated translation.
+ */
+function signOutputStandbyMarkup(capability, live) {
+  const liveOutput = Boolean(capability?.live);
+  const providerName = capability?.vendor || (
+    capability?.provider && !["mock", "unknown", "none"].includes(capability.provider)
+      ? capability.provider
+      : ""
+  );
+  const name = providerName || "Signa AI";
+  const pending = Boolean(live?.signing?.pending);
+  const error = liveOutput ? String(live?.error || "") : "";
+
+  let status = "unavailable";
+  let title = "Preview only · no live output";
+
+  if (pending) {
+    status = "pending";
+    title = "Translating to ASL";
+  } else if (error) {
+    status = "error";
+    title = "Output needs attention";
+  } else if (liveOutput) {
+    status = "ready";
+    title = "Ready for a phrase";
+  }
+
+  return `
+    <div class="sign-output" data-avatar-status="${status}" role="status" aria-live="polite">
+      <div class="sign-output-content">
+        <img class="sign-output-avatar" src="media/signa-avatar-preview.png" alt="Signa AI avatar preview, awaiting translation instructions. No translation is being shown yet." decoding="async">
+        <p class="sign-output-vendor">Signa AI · Avatar preview</p>
+        <p class="sign-output-title">${escapeHtml(title)}${liveOutput && !pending && !error ? ` · ${escapeHtml(name)}` : ""}</p>
+      </div>
+    </div>`;
+}
+
 export const renderSign = (state = {}) => {
   const mode = state.mode || "sign";
   const entry = state.entry || {};
@@ -236,10 +276,12 @@ export const renderSign = (state = {}) => {
     live.consent === "granted" &&
     ["ready", "recording", "sending", "confirm", "spoken"].includes(phase);
 
-  // Scripted poses are a fallback, not the default. They appear only when the
-  // patient declined capture, when no session could be built, or on the
-  // clinician side where the patient is deliberately not shown.
-  const scripted = speaking || live?.consent === "declined" || Boolean(state.bootFailed);
+  // Scripted poses are only the patient-side fallback when capture was
+  // declined or a live session could not be built. The clinician Speak side
+  // never uses canned patient/translator imagery.
+  const scriptedPatientFallback = !speaking && (
+    live?.consent === "declined" || Boolean(state.bootFailed)
+  );
 
   const signed = speaking && state.lastSignedChunk?.videoUrl
     ? { videoUrl: state.lastSignedChunk.videoUrl, pending: Boolean(live?.signing?.pending) }
@@ -273,12 +315,10 @@ export const renderSign = (state = {}) => {
     ? `<video class="stage-media" src="${signed.videoUrl}" autoplay muted loop playsinline data-sign-video></video>`
     : camUp
     ? `<video class="stage-media stage-media--cam" data-cam autoplay muted playsinline></video>`
-    : scripted
-    ? mediaMarkup(
-        entry.media || "media/patient-01.jpg",
-        speaking ? "ASL output preview; no completed segment yet." : entry.text || "",
-        state.poster || ""
-      )
+    : speaking
+    ? signOutputStandbyMarkup(outputCapability, live)
+    : scriptedPatientFallback
+    ? mediaMarkup(entry.media || "media/patient-01.jpg", entry.text || "", state.poster || "")
     : standByMarkup(phase, live, state.ready);
 
   const isLive = Boolean(activeCapability.live);
