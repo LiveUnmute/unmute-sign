@@ -91,6 +91,6 @@ that rather than inventing a transcript.
 
 - Patient sign → English is scripted until a separate recognition provider is configured.
 - Signa's ASL output is not evidence of sign recognition and has not been validated by Deaf ASL users or qualified sign-language professionals.
-- Speak starts with a clearly labeled still Signa avatar preview; it is not a translation. Without a live output provider no ASL video is generated. With Signa configured, a successful output replaces the preview with a Signa-generated MP4.
+- The animated idle Signa avatar API is not yet wired into Speak, so no static image is shown while waiting. The current text-to-video path produces an MP4 only after a phrase is translated.
 - The history and settings screens are static mockups; nothing is saved and reloading resets the demo.
 - Do not use real patient data or rely on the output for clinical decisions.

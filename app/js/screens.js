@@ -211,9 +211,9 @@ function standByMarkup(phase, live, ready) {
 }
 
 /**
- * Signa returns a video only after it receives translation text. Show the
- * neutral Signa-avatar frame from the supplied demo as a clearly labelled
- * waiting preview; never present it as a completed or animated translation.
+ * Keep an explicit mount point for Signa's animated idle-avatar API. The
+ * current provider only implements text → .sgn → MP4; do not fake the missing
+ * idle session with a still or an unrelated scripted signer.
  */
 function signOutputStandbyMarkup(capability, live) {
   const liveOutput = Boolean(capability?.live);
@@ -227,25 +227,32 @@ function signOutputStandbyMarkup(capability, live) {
   const error = liveOutput ? String(live?.error || "") : "";
 
   let status = "unavailable";
-  let title = "Preview only · no live output";
+  let title = "Signa idle avatar not connected";
+  let body = "No static avatar is shown. The animated idle-avatar API still needs to be connected.";
 
   if (pending) {
     status = "pending";
     title = "Translating to ASL";
+    body = `${name} is preparing the signed video.`;
   } else if (error) {
     status = "error";
-    title = "Output needs attention";
+    title = "ASL output needs attention";
+    body = "Check the output status below. No placeholder image is used.";
   } else if (liveOutput) {
     status = "ready";
     title = "Ready for a phrase";
+    body = `${name} text-to-sign output is configured; the idle-avatar API is not wired yet.`;
   }
 
   return `
     <div class="sign-output" data-avatar-status="${status}" role="status" aria-live="polite">
       <div class="sign-output-content">
-        <img class="sign-output-avatar" src="media/signa-avatar-preview.png" alt="Signa AI avatar preview, awaiting translation instructions. No translation is being shown yet." decoding="async">
-        <p class="sign-output-vendor">Signa AI · Avatar preview</p>
-        <p class="sign-output-title">${escapeHtml(title)}${liveOutput && !pending && !error ? ` · ${escapeHtml(name)}` : ""}</p>
+        <div class="sign-output-avatar-mount" data-signa-avatar-mount>
+          <span class="sign-output-mark" aria-hidden="true">${ICONS.hand}</span>
+        </div>
+        <p class="sign-output-vendor">Signa AI</p>
+        <p class="sign-output-title">${escapeHtml(title)}</p>
+        <p class="sign-output-body">${escapeHtml(body)}</p>
       </div>
     </div>`;
 }

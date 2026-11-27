@@ -59,14 +59,13 @@ environment before starting `node app/server.mjs`.
 
 ## Speak stage and the idle avatar
 
-The documented Signa flow used here takes English text at `/v1/sign` and returns
-an MP4 through `/v1/sign/video`. It does not provide this app with an idle
-avatar video before any text has been submitted. While waiting, the Speak stage
-shows a clearly labeled still avatar preview cropped from the supplied Signa
-demonstration; the app does not present it as a translation for the current
-conversation or fabricate a signing clip. A generated provider video replaces
-the preview after a real speech segment is translated. A standalone
-idle-avatar endpoint would need to be supplied and verified separately.
+The current implementation calls `/v1/sign` with English text, then
+`/v1/sign/video` to get a generated MP4. It does not yet initialize the
+animated idle-avatar session shown in the Signa demonstration. Speak now has a
+dedicated API mount and deliberately shows no static image or scripted signer.
+The idle-avatar API/SDK initialization must be added before an animated avatar
+can appear while waiting; the current generated-video flow remains available
+after a phrase is translated.
 
 ## Clinician conversation flow
 

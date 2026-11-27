@@ -76,15 +76,14 @@ reintroducing a panel.
 - **Patient demo poses** — `media/patient-01…05.jpg` remain the scripted fallback
   when patient capture is declined or cannot start.
 - **Legacy translator illustrations** — `media/translator-01…05.jpg` are not
-  rendered on the clinician **Speak** screen. While it listens, the stage shows
-  a still Signa-avatar preview cropped from the supplied demonstration, clearly
-  labeled as a preview; it is not presented as a translation for the current
-  conversation. A successfully generated provider video replaces it.
+  rendered on the clinician **Speak** screen. Speak has a dedicated mount for
+  the animated Signa idle-avatar API and does not substitute a static portrait
+  or scripted signer. That idle-avatar API is not wired into the app yet.
 
-The Signa API integration returns an MP4 after it receives text; the app does
-not fabricate an idle signing clip or phrase while waiting for input. The
-legacy illustrations may still appear in non-Speak decorative UI and are not
-evidence of live signing.
+The existing Signa integration accepts text and returns an MP4 after a phrase;
+it is separate from the animated idle-avatar session shown in the Signa demo.
+The legacy illustrations may still appear in non-Speak decorative UI and are
+not evidence of live signing.
 
 ## What is real and what is scripted
 
@@ -116,10 +115,10 @@ Signa avatar into patient-sign recognition.
 
 ## Known gaps
 
-- Without a live output provider, the Speak stage shows that live ASL output
-  is unavailable; it does not substitute a scripted signer. The patient-side
-  demo may still use its labeled still poses. Signa MP4 output is not
-  clinically or linguistically validated.
+- The animated idle-avatar API is not yet wired into Speak. No static image is
+  shown there. The existing Signa text-to-video path produces an MP4 only after
+  it receives a completed phrase, and that output is not clinically or
+  linguistically validated.
 - History and Settings are static.
 - Signa's server function now mints short-lived client tokens; the browser
   calls Signa directly for `.sgn` and MP4 rendering so video work avoids the
